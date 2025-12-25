@@ -13,7 +13,7 @@ spring:
   # 1. Database (MySQL)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    # ???(Asia/Seoul)? ???(utf8mb4) ?? ???
+    # ???(Asia/Seoul)? ???(utf8mb4) ?? ??
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/poti_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useUnicode=true
     username: ${DB_USER}
     password: ${DB_PASSWORD}
