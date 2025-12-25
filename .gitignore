@@ -1,0 +1,61 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### 1. Standard Gradle & Java ###
+*.log
+*.log.*
+
+### 2. OS & System (협업 필수) ###
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### 4. QueryDSL (QClass 중복 방지) ###
+# 설정에 따라 src/main/generated에 생길 수 있음
+src/main/generated
+/generated/
+
+### 5. Security & Sensitive Data ###
+# DB 비밀번호, AWS 키 등 민감 정보가 든 파일은 절대 커밋 금지
+application-secret.yml
+application-prod.yml
+application-real.yml
+application-local.yml
+.env
+secrets.properties
