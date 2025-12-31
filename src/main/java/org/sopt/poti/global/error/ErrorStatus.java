@@ -13,7 +13,6 @@ public enum ErrorStatus {
    * 400 Bad Request
    */
   BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
-  PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
   /**
    * 401 Unauthorized
