@@ -21,7 +21,6 @@ public enum SuccessStatus {
   // 공통
   CREATED(HttpStatus.CREATED, "생성이 완료되었습니다.");
 
-
   private final HttpStatus httpStatus;
   private final String message;
 }
