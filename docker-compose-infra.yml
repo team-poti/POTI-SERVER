@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: >
+      redis-server 
+      --maxmemory 100mb 
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data  # 껐다 켜도 데이터 유지
+    networks:
+      - poti-net            # 네트워크
+    restart: always
+
+# 네트워크 정의
+networks:
+  poti-net:
+    name: poti-net
+    driver: bridge

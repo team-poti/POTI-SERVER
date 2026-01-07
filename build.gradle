@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.9'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.google.cloud.tools.jib' version '3.4.5'       // Jib 플러그인
 }
 
 group = 'org.sopt'
@@ -54,6 +55,25 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+}
+
+jib {
+    from {
+        image = 'eclipse-temurin:21-jre-alpine'
+    }
+    to {
+        image = 'dlacofbs/poti-server'
+        tags = ['latest']
+        auth {
+            username = System.getenv('DOCKER_USERNAME') ?: 'default'
+            password = System.getenv('DOCKER_PASSWORD') ?: 'default'
+        }
+    }
+    container {
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+        ports = ['8080']
+        jvmFlags = ['-Dspring.threads.virtual.enabled=true', '-Duser.timezone=Asia/Seoul']
+    }
 }
 
 tasks.named('test') {
