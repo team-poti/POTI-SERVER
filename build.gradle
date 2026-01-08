@@ -42,7 +42,7 @@ dependencies {
 
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1'
 
-    // SQL 파라미터가 '?' 대신 진짜 값으로 보이게 해주는 라이브러리 (디버깅용)
+    // SQL 파라미터가 '?' 대신 진짜 값으로 보이게 해주는 라이브러리 - 디버깅용
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
 
     // jwt
