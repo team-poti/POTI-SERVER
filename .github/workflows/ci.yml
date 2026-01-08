@@ -6,6 +6,8 @@ on:
     paths:
       - 'src/**'
       - 'build.gradle'
+      - '.github/workflows/**'
+      - 'docker-compose*.yml'
 
 jobs:
   build:
