@@ -8,7 +8,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: JDK 21 설정
         uses: actions/setup-java@v3
@@ -32,6 +32,18 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           source: "deploy.sh, docker-compose.yml"
           target: "/home/ubuntu/app"
+          
+      - name: 배포 파일 검증
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            if [ ! -f ~/app/deploy.sh ] || [ ! -f ~/app/docker-compose.yml ]; then
+              echo "배포 파일 전송 실패"
+              exit 1
+            fi
 
       - name: 배포 스크립트 실행 (SSH)
         uses: appleboy/ssh-action@master
@@ -43,3 +55,22 @@ jobs:
             cd ~/app
             chmod +x deploy.sh
             ./deploy.sh
+
+      - name: 배포 검증 (헬스체크)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            # 헬스체크 엔드포인트 확인 (최대 60초 대기)
+            for i in {1..12}; do
+              if curl -f http://localhost/actuator/health > /dev/null 2>&1; then
+                echo "배포 성공! 서비스가 정상 응답합니다."
+                exit 0
+              fi
+              echo "헬스체크 대기 중... ($i/12)"
+              sleep 5
+            done
+            echo "헬스체크 실패! 서비스가 응답하지 않습니다."
+            exit 1

@@ -18,22 +18,31 @@ fi
 
 # 2. 이미지 받기 및 실행
 echo "### 1. 이미지 Pull..."
-docker-compose pull $TARGET_CONTAINER
+docker compose pull $TARGET_CONTAINER
 echo "### 2. 컨테이너 실행..."
-docker-compose up -d $TARGET_CONTAINER
+docker compose up -d $TARGET_CONTAINER
 
 # 3. 헬스 체크
 echo "### 3. Health Check (서버 뜰 때까지 대기)..."
+HEALTH_CHECK_PASSED=false
 for i in {1..10}; do
   response=$(curl -s http://127.0.0.1:$TARGET_PORT/health) # /health 없으면 메인(/)으로
   if [ "$response" == "OK" ] || [ "$response" == '{"status":"UP"}' ]; then
     echo "### ✅ 서버 정상 구동"
+    HEALTH_CHECK_PASSED=true
     break
   else
     echo "### ⏳ 대기 중... ($i/10)"
     sleep 10
   fi
 done
+
+if [ "$HEALTH_CHECK_PASSED" = false ]; then
+  echo "### ❌ 헬스 체크 실패! 배포를 중단합니다."
+  docker compose stop $TARGET_CONTAINER
+  docker compose rm -f $TARGET_CONTAINER
+  exit 1
+fi
 
 # 4. Nginx 스위칭
 echo "### 4. Nginx 포트 변경 ($TARGET_PORT) 및 Reload..."
@@ -44,7 +53,9 @@ sudo nginx -s reload
 echo "### ⏳ 기존 요청 처리 대기 (5초)..."
 sleep 5
 echo "### 5. 기존 컨테이너 중단..."
-docker-compose stop $STOP_CONTAINER
-docker-compose rm -f $STOP_CONTAINER
+docker compose stop $STOP_CONTAINER
+docker compose rm -f $STOP_CONTAINER
+
+docker image prune -f
 
 echo "### 🎉 배포 완료!"
