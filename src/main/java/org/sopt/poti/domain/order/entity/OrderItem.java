@@ -37,6 +37,7 @@ public class OrderItem {
         OrderItem oi = new OrderItem();
         oi.count = count;
         oi.unitPrice = unitPrice;
+        oi.order = order;
         oi.itemAmount = count * unitPrice;
         oi.groupBuyOption = option;
         return oi;

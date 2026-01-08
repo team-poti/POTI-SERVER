@@ -37,10 +37,11 @@ public class Payment {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    public static Payment create(String depositor, int amount, LocalDateTime depositedAt) {
+    public static Payment create(String depositor, int amount, Order order, LocalDateTime depositedAt) {
         Payment p = new Payment();
         p.depositor = depositor;
         p.amount = amount;
+        p.order = order;
         p.depositedAt = depositedAt;
         p.status = PaymentStatus.PENDING;
         return p;
