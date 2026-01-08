@@ -33,9 +33,8 @@ public class OrderItem {
     @JoinColumn(name = "group_buy_option_id", nullable = false)
     private GroupBuyOption groupBuyOption;
 
-    public static OrderItem create(Long id, int count, int unitPrice, GroupBuyOption option) {
+    public static OrderItem create(int count, int unitPrice, Order order, GroupBuyOption option) {
         OrderItem oi = new OrderItem();
-        oi.id = id;
         oi.count = count;
         oi.unitPrice = unitPrice;
         oi.itemAmount = count * unitPrice;

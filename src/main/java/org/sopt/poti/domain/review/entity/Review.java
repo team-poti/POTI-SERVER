@@ -33,9 +33,8 @@ public class Review extends BaseTimeEntity {
     @JoinColumn(name = "seller_user_id", nullable = false)
     private User seller;
 
-    public static Review create(Long id, int score, Order order, User writer, User seller) {
+    public static Review create(int score, Order order, User writer, User seller) {
         Review r = new Review();
-        r.id = id;
         r.score = score;
         r.order = order;
         r.writer = writer;

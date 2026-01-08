@@ -25,9 +25,8 @@ public class ItemImage {
     @JoinColumn(name = "group_buy_post_id", nullable = false)
     private GroupBuyPost groupBuyPost;
 
-    public static ItemImage create(Long id, String imageUrl, Integer sortOrder, GroupBuyPost post) {
+    public static ItemImage create(String imageUrl, Integer sortOrder, GroupBuyPost post) {
         ItemImage img = new ItemImage();
-        img.id = id;
         img.imageUrl = imageUrl;
         img.sortOrder = sortOrder;
         img.groupBuyPost = post;

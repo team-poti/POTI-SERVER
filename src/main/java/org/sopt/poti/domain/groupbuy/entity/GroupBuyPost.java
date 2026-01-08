@@ -50,7 +50,6 @@ public class GroupBuyPost extends BaseTimeEntity {
     private Artist artist;
 
     public static GroupBuyPost create(
-            Long id,
             String title,
             String content,
             LocalDate recruitDeadline,
@@ -61,7 +60,6 @@ public class GroupBuyPost extends BaseTimeEntity {
             Artist artist
     ) {
         GroupBuyPost post = new GroupBuyPost();
-        post.id = id;
         post.title = title;
         post.content = content;
         post.recruitDeadline = recruitDeadline;

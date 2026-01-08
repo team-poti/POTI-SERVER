@@ -31,9 +31,8 @@ public class Delivery {
     @JoinColumn(name = "order_id", nullable = false, unique = true)
     private Order order;
 
-    public static Delivery create(Long id, Order order) {
+    public static Delivery create(Order order) {
         Delivery d = new Delivery();
-        d.id = id;
         d.order = order;
         d.status = DeliveryStatus.READY;
         return d;

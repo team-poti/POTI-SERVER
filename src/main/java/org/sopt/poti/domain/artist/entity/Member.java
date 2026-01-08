@@ -25,9 +25,8 @@ public class Member {
     @JoinColumn(name = "artist_id", nullable = false)
     private Artist artist;
 
-    public static Member create(Long id, String name, String memberImageUrl, Artist artist) {
+    public static Member create(String name, String memberImageUrl, Artist artist) {
         Member member = new Member();
-        member.id = id;
         member.name = name;
         member.memberImageUrl = memberImageUrl;
         member.artist = artist;

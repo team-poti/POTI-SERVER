@@ -69,9 +69,8 @@ public class Order extends BaseTimeEntity {
     @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
     private Review review;
 
-    public static Order create(Long id, GroupBuyPost post, User user, DeliveryMethod method, int totalAmount) {
+    public static Order create(GroupBuyPost post, User user, DeliveryMethod method, int totalAmount) {
         Order order = new Order();
-        order.id = id;
         order.groupBuyPost = post;
         order.user = user;
         order.deliveryMethod = method;

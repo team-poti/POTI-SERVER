@@ -30,9 +30,8 @@ public class GroupBuyOption {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    public static GroupBuyOption create(Long id, String optionName, int price, GroupBuyPost post, Member member) {
+    public static GroupBuyOption create(String optionName, int price, GroupBuyPost post, Member member) {
         GroupBuyOption opt = new GroupBuyOption();
-        opt.id = id;
         opt.optionName = optionName;
         opt.price = price;
         opt.groupBuyPost = post;
