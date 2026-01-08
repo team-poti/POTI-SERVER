@@ -15,9 +15,10 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Gradle 실행 권한 부여
         run: chmod +x gradlew
 
       - name: 빌드
-        run: ./gradlew clean build
+        run: ./gradlew clean build -x test

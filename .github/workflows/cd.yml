@@ -15,6 +15,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'gradle'
 
       - name: Jib으로 이미지 빌드 및 푸시
         run: |
@@ -32,7 +33,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           source: "deploy.sh, docker-compose.yml"
           target: "/home/ubuntu/app"
-          
+
       - name: 배포 파일 검증
         uses: appleboy/ssh-action@master
         with:
@@ -55,22 +56,3 @@ jobs:
             cd ~/app
             chmod +x deploy.sh
             ./deploy.sh
-
-      - name: 배포 검증 (헬스체크)
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
-          script: |
-            # 헬스체크 엔드포인트 확인 (최대 60초 대기)
-            for i in {1..12}; do
-              if curl -f http://localhost/actuator/health > /dev/null 2>&1; then
-                echo "배포 성공! 서비스가 정상 응답합니다."
-                exit 0
-              fi
-              echo "헬스체크 대기 중... ($i/12)"
-              sleep 5
-            done
-            echo "헬스체크 실패! 서비스가 응답하지 않습니다."
-            exit 1

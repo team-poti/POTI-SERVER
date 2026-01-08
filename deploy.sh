@@ -26,7 +26,7 @@ docker compose up -d $TARGET_CONTAINER
 echo "### 3. Health Check (서버 뜰 때까지 대기)..."
 HEALTH_CHECK_PASSED=false
 for i in {1..10}; do
-  response=$(curl -s http://127.0.0.1:$TARGET_PORT/health) # /health 없으면 메인(/)으로
+  response=$(curl -s http://127.0.0.1:$TARGET_PORT/actuator/health)
   if [ "$response" == "OK" ] || [ "$response" == '{"status":"UP"}' ]; then
     echo "### ✅ 서버 정상 구동"
     HEALTH_CHECK_PASSED=true
