@@ -63,7 +63,10 @@ jib {
     }
     to {
         image = 'dlacofbs/poti-server'
-        tags = ['latest']
+        tags = ['latest',
+                System.getenv('GITHUB_SHA')?.take(7) ?: 'dev',
+                System.getenv('GITHUB_RUN_NUMBER') ?: 'local'
+        ]
         auth {
             username = System.getenv('DOCKER_USERNAME') ?: 'default'
             password = System.getenv('DOCKER_PASSWORD') ?: 'default'
