@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.order.entity.Order;
+import org.sopt.poti.domain.order.entity.OrderStatus;
 
 @Getter
 @Entity
@@ -22,7 +23,7 @@ public class Delivery {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private DeliveryStatus status;
+    private OrderStatus status;
 
     @Column(name = "shipped_at")
     private LocalDateTime shippedAt;
@@ -34,7 +35,7 @@ public class Delivery {
     public static Delivery create(Order order) {
         Delivery d = new Delivery();
         d.order = order;
-        d.status = DeliveryStatus.READY;
+        d.status = OrderStatus.READY;
         return d;
     }
 }
