@@ -85,8 +85,7 @@ public class JwtTokenProvider {
     }
   }
 
-  public boolean validateToken(String token) {
+  public void validateToken(String token) {
     getClaimsFromToken(token); // 예외가 발생하면 throw 됨
-    return true;
   }
 }
