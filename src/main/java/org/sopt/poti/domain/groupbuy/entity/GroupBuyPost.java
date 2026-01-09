@@ -1,8 +1,11 @@
 package org.sopt.poti.domain.groupbuy.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
+
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
@@ -49,6 +52,28 @@ public class GroupBuyPost extends BaseTimeEntity {
     @JoinColumn(name = "artist_id", nullable = false)
     private Artist artist;
 
+    @Builder
+    private GroupBuyPost(
+            String title,
+            String content,
+            LocalDate recruitDeadline,
+            String bankName,
+            String accountNumber,
+            String accountHolder,
+            User leader,
+            Artist artist
+    ) {
+        this.title = title;
+        this.content = content;
+        this.recruitDeadline = recruitDeadline;
+        this.bankName = bankName;
+        this.accountNumber = accountNumber;
+        this.accountHolder = accountHolder;
+        this.leader = leader;
+        this.artist = artist;
+        this.status = GroupBuyPostStatus.RECRUITING;
+    }
+
     public static GroupBuyPost create(
             String title,
             String content,
@@ -59,16 +84,15 @@ public class GroupBuyPost extends BaseTimeEntity {
             User leader,
             Artist artist
     ) {
-        GroupBuyPost post = new GroupBuyPost();
-        post.title = title;
-        post.content = content;
-        post.recruitDeadline = recruitDeadline;
-        post.bankName = bankName;
-        post.accountNumber = accountNumber;
-        post.accountHolder = accountHolder;
-        post.leader = leader;
-        post.artist = artist;
-        post.status = GroupBuyPostStatus.RECRUITING;
-        return post;
+        return GroupBuyPost.builder()
+                .title(title)
+                .content(content)
+                .recruitDeadline(recruitDeadline)
+                .bankName(bankName)
+                .accountNumber(accountNumber)
+                .accountHolder(accountHolder)
+                .leader(leader)
+                .artist(artist)
+                .build();
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
@@ -69,13 +70,39 @@ public class Order extends BaseTimeEntity {
     @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
     private Review review;
 
-    public static Order create(GroupBuyPost post, User user, DeliveryMethod method, int totalAmount) {
-        Order order = new Order();
-        order.groupBuyPost = post;
-        order.user = user;
-        order.deliveryMethod = method;
-        order.totalAmount = totalAmount;
-        order.status = OrderStatus.WAIT_PAY;
-        return order;
+    @Builder
+    private Order(
+            GroupBuyPost groupBuyPost,
+            User user,
+            DeliveryMethod deliveryMethod,
+            int totalAmount,
+            DeliveryInfo deliveryInfo,
+            String requestInfo
+    ) {
+        this.groupBuyPost = groupBuyPost;
+        this.user = user;
+        this.deliveryMethod = deliveryMethod;
+        this.totalAmount = totalAmount;
+        this.deliveryInfo = deliveryInfo;
+        this.requestInfo = requestInfo;
+        this.status = OrderStatus.WAIT_PAY;
+    }
+
+    public static Order create(
+            GroupBuyPost post,
+            User user,
+            DeliveryMethod method,
+            int totalAmount,
+            DeliveryInfo deliveryInfo,
+            String requestInfo
+    ) {
+        return Order.builder()
+                .groupBuyPost(post)
+                .user(user)
+                .deliveryMethod(method)
+                .totalAmount(totalAmount)
+                .deliveryInfo(deliveryInfo)
+                .requestInfo(requestInfo)
+                .build();
     }
 }
