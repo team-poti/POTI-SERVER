@@ -5,12 +5,16 @@ server:
       force: true
       charset: UTF-8
       enabled: true
+    # File Upload (Multipart)
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 spring:
   application:
     name: poti-server
 
-  # 1. Database (MySQL)
+  # Database (MySQL)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     # ???(Asia/Seoul)? ???(utf8mb4) ?? ??
@@ -18,7 +22,7 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 
-  # 2. JPA
+  # JPA
   jpa:
     open-in-view: true
     hibernate:
@@ -30,14 +34,14 @@ spring:
         default_batch_fetch_size: 100 # N+1 ?? ??
         dialect: org.hibernate.dialect.MySQL8Dialect
 
-  # 3. Redis
+  # Redis
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
       # password: ${REDIS_PASSWORD} # ??? ?? ??
 
-  # 4. OAuth2 (Kakao)
+  # OAuth2 (Kakao)
   security:
     oauth2:
       client:
@@ -59,13 +63,7 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-  # 5. File Upload (Multipart)
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-
-  # 6. AWS S3 (Spring Cloud AWS)
+  # AWS S3 (Spring Cloud AWS)
   cloud:
     aws:
       credentials:
@@ -76,20 +74,20 @@ spring:
       s3:
         bucket: ${S3_BUCKET_NAME}
 
-# 7. Actuator (Health Check)
+# Actuator (Health Check)
 management:
   endpoints:
     web:
       exposure:
         include: health
 
-# 8. Custom JWT Config
+# Custom JWT Config
 jwt:
   secret: ${JWT_SECRET}
-  access-token-validity: 3600000 # 1?? (ms)
-  refresh-token-validity: 1209600000 # 14? (ms)
+  access-token-validity: 3600000 # ms
+  refresh-token-validity: 1209600000 # ms
 
-# 9. Logging
+# Logging
 logging:
   level:
     root: INFO
