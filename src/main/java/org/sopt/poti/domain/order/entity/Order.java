@@ -31,20 +31,8 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false)
     private int totalAmount;
 
-    @Column(name = "receiver_name", length = 50)
-    private String receiverName;
-
-    @Column(length = 10)
-    private String zipcode;
-
-    @Column(name = "address_line1", length = 255)
-    private String addressLine1;
-
-    @Column(name = "address_line2", length = 255)
-    private String addressLine2;
-
-    @Column(length = 20)
-    private String phone;
+    @Embedded
+    private DeliveryInfo deliveryInfo;
 
     @Column(name = "request_info", columnDefinition = "TEXT")
     private String requestInfo;
