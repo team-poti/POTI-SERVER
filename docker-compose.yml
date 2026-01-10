@@ -9,6 +9,7 @@ services:
     environment:
       - JAVA_OPTS=-Xms512m -Xmx512m
       - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=dev
     env_file:
       - .env  # DB 비밀번호 등은 여기서 가져옴
     networks:
@@ -23,6 +24,7 @@ services:
     environment:
       - JAVA_OPTS=-Xms512m -Xmx512m
       - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=dev
     env_file:
       - .env
     networks:

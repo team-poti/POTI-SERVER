@@ -1,0 +1,38 @@
+spring:
+  # 테스트용 애플리케이션 이름
+  application:
+    name: poti-server-test
+
+  # H2 In-Memory DB 설정
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+  # JPA 설정 (테스트용)
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # 테스트 시작 시 생성, 종료 시 삭제
+    show-sql: true # 쿼리 확인용 (필요 없다면 false)
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # Redis 설정 (CI의 Service 컨테이너와 연결)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # 테스트 환경에서는 JWT 설정값들을 임의로 지정 (환경변수 의존 제거)
+jwt:
+  secret: dGVzdC1zZWNyZXQta2V5LWZvci1qcGEtdGVzdGluZy1wdXJwb3Nlcy1vbmx5LWRvLW5vdC11c2Ut
+  access-token-validity: 3600000
+  refresh-token-validity: 1209600000
+
+# 로깅 레벨 조정
+logging:
+  level:
+    root: INFO
