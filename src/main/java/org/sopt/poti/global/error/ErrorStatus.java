@@ -9,10 +9,13 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public enum ErrorStatus {
 
-  /**
-   * 400 Bad Request
-   */
-  BAD_REQUEST(40000, HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+    /**
+     * 400 Bad Request
+     */
+    BAD_REQUEST(40000, HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+    INVALID_NICKNAME(40001, HttpStatus.BAD_REQUEST, "닉네임 형식이 올바르지 않습니다."), // 특수문자랑 길이 검사
+    PROFANITY_DETECTED(40002, HttpStatus.BAD_REQUEST, "비속어가 포함되어 있습니다."),
+    NICKNAME_DUPLICATED(40003, HttpStatus.BAD_REQUEST, "이미 사용 중인 닉네임입니다."),
 
   /**
    * 401 Unauthorized
