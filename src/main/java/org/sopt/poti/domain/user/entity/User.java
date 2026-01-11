@@ -49,7 +49,7 @@ public class User extends BaseTimeEntity {
     private Double ratingAvg;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "favorite_artist_id", nullable = false)
+    @JoinColumn(name = "favorite_artist_id", nullable = true)
     private Artist favoriteArtist;
 
     // 소셜 로그인으로 사용자 생성 시 사용하는 빌더 메서드
@@ -65,5 +65,12 @@ public class User extends BaseTimeEntity {
                 .ratingAvg(0.0)
                 .lastActiveAt(LocalDateTime.now())
                 .build();
+    }
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateFavoriteArtist(Artist artist) {
+        this.favoriteArtist = artist;
     }
 }
