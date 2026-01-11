@@ -26,6 +26,17 @@ spring:
       host: localhost
       port: 6379
 
+  # AWS S3 (테스트 환경용 더미 설정)
+  cloud:
+    aws:
+      credentials:
+        access-key: test-access-key
+        secret-key: test-secret-key
+      region:
+        static: ap-northeast-2 # S3Config에 설정된 리전과 일치
+      s3:
+        bucket: test-bucket
+
   # 테스트 환경에서는 JWT 설정값들을 임의로 지정 (환경변수 의존 제거)
 jwt:
   secret: dGVzdC1zZWNyZXQta2V5LWZvci1qcGEtdGVzdGluZy1wdXJwb3Nlcy1vbmx5LWRvLW5vdC11c2Ut

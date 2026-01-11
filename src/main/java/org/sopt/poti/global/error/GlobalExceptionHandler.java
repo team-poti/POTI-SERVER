@@ -18,9 +18,10 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e) {
-    log.error("유효성 검증 실패: {}", e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+    String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+    log.error("유효성 검증 실패: {}", errorMessage);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-        ApiResponse.fail(ErrorStatus.BAD_REQUEST)
+        ApiResponse.fail(ErrorStatus.BAD_REQUEST, errorMessage)
     );
   }
 
