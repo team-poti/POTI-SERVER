@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import org.sopt.poti.domain.image.entity.ImageDirectory;
 
 public record PresignedUrlRequest(
@@ -15,6 +16,7 @@ public record PresignedUrlRequest(
     int count,
     
     @NotBlank(message = "파일 확장자는 필수입니다.")
+    @Pattern(regexp = "^(jpg|jpeg|png|heic|webp)$", message = "지원하지 않는 확장자입니다.")
     String extension
 ) {
 }
