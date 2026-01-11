@@ -14,7 +14,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop # 테스트 시작 시 생성, 종료 시 삭제
-    show-sql: true # 쿼리 확인용 (필요 없다면 false)
+    show-sql: true # 쿼리 확인용
     properties:
       hibernate:
         format_sql: true

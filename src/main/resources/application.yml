@@ -11,8 +11,6 @@ server:
       max-request-size: 10MB
 
 spring:
-  profiles:
-    active: local
   application:
     name: poti-server
 
