@@ -17,8 +17,17 @@ public class GlobalExceptionHandler {
     );
   }
 
-  @ExceptionHandler(BusinessException.class)
-  public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidation(
+            MethodArgumentNotValidException e
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(ErrorStatus.INVALID_NICKNAME));
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
 
     return ResponseEntity.status(e.getErrorStatus().getHttpStatus()).body(
         ApiResponse.fail(e.getErrorStatus())
