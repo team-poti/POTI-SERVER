@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
     );
   }
 
-  @ExceptionHandler(NoResourceFoundException.class) // 추가
+  @ExceptionHandler(NoResourceFoundException.class)
   public ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException(
       NoResourceFoundException e) {
     log.error("존재하지 않는 리소스 요청: {}", e.getResourcePath());
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
-    log.error("예상치 못한 예외 발생: ", e); // 스택 트레이스 포함
+    log.error("예상치 못한 예외 발생: ", e);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
         ApiResponse.fail(ErrorStatus.INTERNAL_SERVER_ERROR)
     );
