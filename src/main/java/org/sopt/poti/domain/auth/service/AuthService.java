@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.auth.service;
 
+import feign.FeignException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,9 @@ public class AuthService {
 
   @Transactional
   public AuthResponse socialLogin(AuthRequest request) {
-    SocialType socialType = SocialType.valueOf(request.socialType().toUpperCase());
+    if (request.socialType() != SocialType.KAKAO) {
+      throw new BusinessException(ErrorStatus.INVALID_SOCIAL_TYPE);
+    }
 
     KakaoUserResponse kakaoUserResponse = getKakaoUserResponse(request.token());
     String socialId = String.valueOf(kakaoUserResponse.getId());
@@ -43,12 +46,13 @@ public class AuthService {
     boolean isNewUser;
     User user;
 
-    Optional<User> existingUser = userRepository.findBySocialIdAndSocialType(socialId, socialType);
+    Optional<User> existingUser = userRepository.findBySocialIdAndSocialType(socialId,
+        request.socialType());
 
     if (existingUser.isPresent()) {
       user = existingUser.get();
-      isNewUser = false;
-      
+      // 기존 유저이지만, 닉네임이 없으면 온보딩이 필요함
+      isNewUser = (user.getNickname() == null);
     } else {
       KakaoUserResponse.KakaoAccount kakaoAccount = kakaoUserResponse.getKakaoAccount();
       String email = null;
@@ -67,10 +71,10 @@ public class AuthService {
       // 회원가입 (신규 유저)
       user = User.createSocialUser(
           socialId,
-          socialType,
+          request.socialType(),
           email,
           nickname,
-          profileImageUrl,  // 있으면 쓰고 없으면 안쓰기
+          profileImageUrl,
           null // favoriteArtist는 신규 가입 시점에 null
       );
       userRepository.save(user);
@@ -100,10 +104,15 @@ public class AuthService {
   private KakaoUserResponse getKakaoUserResponse(String kakaoAccessToken) {
     try {
       return kakaoFeignClient.getUserInfo("Bearer " + kakaoAccessToken);
-    } catch (Exception e) { // FeignClient 호출 중 발생하는 모든 예외 처리
-
-      log.error("Kakao Login 실패: {}", e.getMessage());
-      throw new BusinessException(ErrorStatus.INVALID_TOKEN); // 카카오 토큰 에러 시
+    } catch (FeignException.Unauthorized | FeignException.Forbidden e) {
+      log.warn("Kakao 토큰 인증 실패: {}", e.getMessage());
+      throw new BusinessException(ErrorStatus.INVALID_TOKEN);
+    } catch (FeignException e) {
+      log.error("Kakao API 호출 실패 (status={}): {}", e.status(), e.getMessage());
+      throw new BusinessException(ErrorStatus.EXTERNAL_API_ERROR);
+    } catch (Exception e) {
+      log.error("Kakao Login 내부 오류: {}", e.getMessage());
+      throw new BusinessException(ErrorStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

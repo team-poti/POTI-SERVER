@@ -14,6 +14,12 @@ spring:
   application:
     name: poti-server
 
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
   # Database (MySQL)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
