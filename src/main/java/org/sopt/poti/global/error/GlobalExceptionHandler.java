@@ -1,5 +1,6 @@
 package org.sopt.poti.global.error;
 
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.global.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,14 +9,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e) {
-    // 유효성 검증 실패
+    log.error("유효성 검증 실패: {}", e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         ApiResponse.fail(ErrorStatus.BAD_REQUEST)
     );
@@ -24,7 +27,16 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(NoHandlerFoundException.class)
   public ResponseEntity<ApiResponse<Void>> handleNoHandlerFoundException(
       NoHandlerFoundException e) {
-    // 없는 API URL 요청
+    log.error("존재하지 않는 경로 요청: {}", e.getRequestURL());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+        ApiResponse.fail(ErrorStatus.NOT_FOUND_HANDLER)
+    );
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class) // 추가
+  public ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException(
+      NoResourceFoundException e) {
+    log.error("존재하지 않는 리소스 요청: {}", e.getResourcePath());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
         ApiResponse.fail(ErrorStatus.NOT_FOUND_HANDLER)
     );
@@ -33,7 +45,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(
       HttpMessageNotReadableException e) {
-    // JSON 파싱 오류 등
+    log.error("잘못된 요청 형식: {}", e.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         ApiResponse.fail(ErrorStatus.BAD_REQUEST)
     );
@@ -41,7 +53,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
-    // 예외처리 못한 모든 Exception
+    log.error("예상치 못한 예외 발생: ", e); // 스택 트레이스 포함
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
         ApiResponse.fail(ErrorStatus.INTERNAL_SERVER_ERROR)
     );
@@ -49,7 +61,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
-    // 커스텀 예외
+    log.error("비즈니스 예외 발생: {}", e.getErrorStatus().getMessage());
     return ResponseEntity.status(e.getErrorStatus().getHttpStatus()).body(
         ApiResponse.fail(e.getErrorStatus())
     );
