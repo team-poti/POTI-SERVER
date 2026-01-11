@@ -37,6 +37,9 @@ public enum ErrorStatus {
   USER_NOT_FOUND(40400, HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
   ITEM_NOT_FOUND(40401, HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다."),
   NOT_FOUND_HANDLER(40402, HttpStatus.NOT_FOUND, "존재하지 않는 API 경로입니다."),
+  ARTIST_NOT_FOUND(40403, HttpStatus.NOT_FOUND, "존재하지 않는 아티스트입니다."),
+  MEMBER_NOT_FOUND(40404, HttpStatus.NOT_FOUND, "존재하지 않는 멤버입니다."),
+  DELIVERY_METHOD_NOT_FOUND(40405, HttpStatus.NOT_FOUND, "존재하지 않는 배송 방법입니다."),
 
   /**
    * 500 Internal Server Error
