@@ -12,6 +12,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+
     steps:
       - uses: actions/checkout@v4
 
@@ -25,5 +32,10 @@ jobs:
       - name: Gradle 실행 권한 부여
         run: chmod +x gradlew
 
+      - name: 테스트(스모크)
+        run: ./gradlew clean test
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
       - name: 빌드
-        run: ./gradlew clean build -x test
+        run: ./gradlew clean assemble
