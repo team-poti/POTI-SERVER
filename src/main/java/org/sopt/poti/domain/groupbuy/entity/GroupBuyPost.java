@@ -24,9 +24,13 @@ import org.sopt.poti.domain.artist.entity.Artist;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.global.entity.BaseTimeEntity;
 
+import jakarta.persistence.Index; // Import Index
+
 @Getter
 @Entity
-@Table(name = "group_buy_posts")
+@Table(name = "group_buy_posts", indexes = { // 인덱스 추가
+    @Index(name = "idx_group_buy_post_title", columnList = "title")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupBuyPost extends BaseTimeEntity {
 
