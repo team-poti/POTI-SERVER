@@ -59,6 +59,22 @@ dependencies {
 
     //한국어 특화 비속어 검사 라이브러리
     implementation 'io.github.vaneproject:badwordfiltering:1.0.0'
+
+    // OpenFeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    // Swagger (SpringDoc)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3'
+}
+
+ext {
+    set('springCloudVersion', "2025.0.0")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 jib {

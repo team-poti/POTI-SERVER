@@ -37,4 +37,12 @@ public record ApiResponse<T>(int code, String msg, T data) {
         null
     );
   }
+
+  public static <T> ApiResponse<T> fail(ErrorStatus status, String message) {
+    return new ApiResponse<>(
+        status.getCode(),
+        message,
+        null
+    );
+  }
 }

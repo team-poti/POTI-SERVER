@@ -1,9 +1,20 @@
 package org.sopt.poti.domain.user.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
+
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,15 +25,13 @@ import org.sopt.poti.global.entity.BaseTimeEntity;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE) // @Builder 사용을 위한 추가
-@Builder // 빌더 패턴 사용을 위한 추가
 public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 255) // unique = true 제거 (socialId로 유니크 보장)
+    @Column(length = 255)
     private String email;
 
     @Column(name = "social_id", length = 255, unique = true, nullable = false)
@@ -52,8 +61,22 @@ public class User extends BaseTimeEntity {
     @JoinColumn(name = "favorite_artist_id", nullable = true)
     private Artist favoriteArtist;
 
-    // 소셜 로그인으로 사용자 생성 시 사용하는 빌더 메서드
-    public static User createSocialUser(String socialId, SocialType socialType, String email, String nickname, String profileImageUrl, Artist favoriteArtist) {
+    @Builder
+    private User(String socialId, SocialType socialType, String email, String nickname,
+                 String profileImageUrl, Artist favoriteArtist, Role role) {
+        this.socialId = socialId;
+        this.socialType = socialType;
+        this.email = email;
+        this.nickname = nickname;
+        this.profileImageUrl = profileImageUrl;
+        this.favoriteArtist = favoriteArtist;
+        this.role = role;
+        this.ratingAvg = 0.0;
+        this.lastActiveAt = LocalDateTime.now();
+    }
+
+    public static User createSocialUser(String socialId, SocialType socialType, String email,
+                                        String nickname, String profileImageUrl, Artist favoriteArtist) {
         return User.builder()
                 .socialId(socialId)
                 .socialType(socialType)
@@ -61,11 +84,14 @@ public class User extends BaseTimeEntity {
                 .nickname(nickname)
                 .profileImageUrl(profileImageUrl)
                 .favoriteArtist(favoriteArtist)
-                .role(Role.USER) // 기본값으로 USER 설정
-                .ratingAvg(0.0)
-                .lastActiveAt(LocalDateTime.now())
+                .role(Role.USER)
                 .build();
     }
+
+    public void updateLastActiveAt() {
+        this.lastActiveAt = LocalDateTime.now();
+    }
+
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }

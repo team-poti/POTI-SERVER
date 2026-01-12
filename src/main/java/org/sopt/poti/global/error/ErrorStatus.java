@@ -16,6 +16,7 @@ public enum ErrorStatus {
     INVALID_NICKNAME(40001, HttpStatus.BAD_REQUEST, "닉네임 형식이 올바르지 않습니다."), // 특수문자랑 길이 검사
     PROFANITY_DETECTED(40002, HttpStatus.BAD_REQUEST, "비속어가 포함되어 있습니다."),
     NICKNAME_DUPLICATED(40003, HttpStatus.BAD_REQUEST, "이미 사용 중인 닉네임입니다."),
+    INVALID_SOCIAL_TYPE(40001, HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인 타입입니다."),
 
     /**
      * 401 Unauthorized
@@ -39,11 +40,13 @@ public enum ErrorStatus {
     USER_NOT_FOUND(40400, HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
     ITEM_NOT_FOUND(40401, HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다."),
     ARTIST_NOT_FOUND(40402, HttpStatus.NOT_FOUND, "존재하지 않는 아티스트입니다."),
+    NOT_FOUND_HANDLER(40402, HttpStatus.NOT_FOUND, "존재하지 않는 API 경로입니다."),
 
     /**
      * 500 Internal Server Error
      */
-    INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다.");
+    INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
+    EXTERNAL_API_ERROR(50001, HttpStatus.INTERNAL_SERVER_ERROR, "외부 API 호출 중 오류가 발생했습니다.");
 
     private final int code;
     private final HttpStatus httpStatus;
