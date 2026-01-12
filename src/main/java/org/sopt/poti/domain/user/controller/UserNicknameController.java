@@ -29,8 +29,8 @@ public class UserNicknameController {
     ) {
         NicknameDuplicateResponse data = userNicknameService.checkDuplicate(request);
 
-        return ResponseEntity
-                .status(SuccessStatus.OK.getHttpStatus())
-                .body(ApiResponse.success(SuccessStatus.OK, data));
+        return ResponseEntity.ok(
+                ApiResponse.success(SuccessStatus.OK, data)
+        );
     }
 }
