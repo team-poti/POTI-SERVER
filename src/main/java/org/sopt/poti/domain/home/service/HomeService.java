@@ -38,7 +38,7 @@ public class HomeService {
     // 최애 아티스트가 있는 경우
     if (user.getFavoriteArtist() != null) {
       Long favoriteArtistId = user.getFavoriteArtist().getId();
-      mainArtistName = artistService.getArtistById(favoriteArtistId).getName(); // 최애 아티스트 이름
+      mainArtistName = user.getFavoriteArtist().getName(); // user.getFavoriteArtist()에서 직접 이름 가져옴
 
       myGroupItems = groupBuyRepository.findPopularTitlesByArtist(userId, favoriteArtistId,
           ITEM_LIMIT);
@@ -54,7 +54,7 @@ public class HomeService {
           ITEM_LIMIT); // 전체 인기 상품으로 대체
     }
 
-    // 배너 로직 구현 필요 (현재는 더미)
+    // 배너 로직 구현 필요 (현재는 더미 추후에 기획에 물어보고 변경할 예정)
     List<HomeBanner> banners = List.of(
         HomeBanner.builder().postId(1L)
             .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner1.jpg").build(),

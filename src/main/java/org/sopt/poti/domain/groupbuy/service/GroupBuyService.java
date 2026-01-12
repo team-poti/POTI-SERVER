@@ -39,7 +39,6 @@ public class GroupBuyService {
 
     Artist artist = artistService.getArtistById(request.artistId());
 
-    // GroupBuyPost 엔티티 생성
     GroupBuyPost groupBuyPost = GroupBuyPost.create(
         request.title(),
         request.content(),
@@ -50,14 +49,12 @@ public class GroupBuyService {
         artist
     );
 
-    // 옵션 (GroupBuyOption) 연결
     request.options().forEach(optionRequest -> {
       Member member = memberService.getMemberById(optionRequest.memberId());
       GroupBuyOption option = GroupBuyOption.create(optionRequest.price(), member);
       groupBuyPost.addOption(option);
     });
 
-    // 배송 방법 (GroupBuyShipping) 연결
     request.shippings().forEach(shippingRequest -> {
       DeliveryMethod deliveryMethod = deliveryService.getDeliveryMethodById(
           shippingRequest.deliveryMethodId());
@@ -65,14 +62,12 @@ public class GroupBuyService {
       groupBuyPost.addShipping(shipping);
     });
 
-    // 이미지 (ItemImage) 연결
     List<String> imageUrls = request.imageUrls();
     for (int i = 0; i < imageUrls.size(); i++) {
       ItemImage image = ItemImage.create(imageUrls.get(i), i);
       groupBuyPost.addImage(image);
     }
 
-    // 최종 저장 (CascadeType.ALL 덕분에 한 번에 다 저장됨)
     groupBuyRepository.save(groupBuyPost);
 
     return GroupBuyCreateResponse.of(groupBuyPost.getId());
