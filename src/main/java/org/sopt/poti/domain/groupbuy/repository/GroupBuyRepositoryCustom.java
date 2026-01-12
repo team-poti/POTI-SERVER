@@ -5,11 +5,12 @@ import org.sopt.poti.domain.home.dto.response.HomeGroupBuyItem;
 
 public interface GroupBuyRepositoryCustom {
 
-  List<String> findTitlesByKeyword(Long artistId, String keyword, int limit);
+    List<String> findTitlesByKeyword(Long artistId, String keyword, int limit);
 
-  List<HomeGroupBuyItem> findPopularTitlesByArtist(Long userId, Long artistId,
-      int limit); // userId도 필요 (nickname 등)
 
-  List<HomeGroupBuyItem> findPopularTitlesExcludingArtist(Long userId, Long artistId,
-      int limit); // userId도 필요
+
+    List<HomeGroupBuyItem> findPopularTitlesByArtist(Long artistId, int limit);
+
+    List<HomeGroupBuyItem> findPopularTitlesExcludingArtist(Long artistId, int limit);
+
 }

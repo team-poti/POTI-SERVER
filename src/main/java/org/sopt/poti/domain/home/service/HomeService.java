@@ -40,17 +40,17 @@ public class HomeService {
       Long favoriteArtistId = user.getFavoriteArtist().getId();
       mainArtistName = user.getFavoriteArtist().getName(); // user.getFavoriteArtist()에서 직접 이름 가져옴
 
-      myGroupItems = groupBuyRepository.findPopularTitlesByArtist(userId, favoriteArtistId,
+      myGroupItems = groupBuyRepository.findPopularTitlesByArtist(favoriteArtistId,
           ITEM_LIMIT);
-      otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(userId,
-          favoriteArtistId, ITEM_LIMIT);
+      otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(favoriteArtistId,
+          ITEM_LIMIT);
     } else {
       // 최애 아티스트가 없는 경우 (랜덤 또는 전체 인기 상품)
       log.info("유저 ID {}의 최애 아티스트가 설정되지 않아 전체 인기 상품을 조회합니다.", userId);
       // 전체 인기 상품을 조회하는 로직 (현재는 ExcludingArtist로 빈 artistId를 넘기면 전체가 되도록 하거나, 별도 쿼리 필요)
       // 임시로 다른 그룹 인기 상품 조회 로직을 그대로 사용 (필터링 없음)
       myGroupItems = Collections.emptyList(); // 최애 아티스트 없으니 비워둠
-      otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(userId, null,
+      otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(null,
           ITEM_LIMIT); // 전체 인기 상품으로 대체
     }
 

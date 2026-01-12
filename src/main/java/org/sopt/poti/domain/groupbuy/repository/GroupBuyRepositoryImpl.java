@@ -32,7 +32,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
   }
 
   @Override
-  public List<HomeGroupBuyItem> findPopularTitlesByArtist(Long userId, Long artistId, int limit) {
+  public List<HomeGroupBuyItem> findPopularTitlesByArtist(Long artistId, int limit) {
     QGroupBuyPost subGroupBuyPost = new QGroupBuyPost("subGroupBuyPost");
     QGroupBuyPost subGroupBuyPostForImage = new QGroupBuyPost("subGroupBuyPostForImage");
     QItemImage subItemImage = new QItemImage("subItemImage");
@@ -51,8 +51,8 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
                             .and(subGroupBuyPost.artist.id.eq(artistId))
                             .and(subGroupBuyPost.artist.id.eq(groupBuyPost.artist.id)))
                 ))
-                .limit(1),
-            groupBuyPost.id.count(),
+                .orderBy(subItemImage.sortOrder.asc()) // sortOrder 정렬 추가
+                .limit(1), groupBuyPost.id.count(),
             groupBuyPost.id.count().when(0L).then("")
                 .otherwise("인기").as("tag")
         ))
@@ -66,8 +66,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
   }
 
   @Override
-  public List<HomeGroupBuyItem> findPopularTitlesExcludingArtist(Long userId, Long artistId,
-      int limit) {
+  public List<HomeGroupBuyItem> findPopularTitlesExcludingArtist(Long artistId, int limit) {
     QGroupBuyPost subGroupBuyPost = new QGroupBuyPost("subGroupBuyPost");
     QGroupBuyPost subGroupBuyPostForImage = new QGroupBuyPost("subGroupBuyPostForImage");
     QItemImage subItemImage = new QItemImage("subItemImage");
@@ -86,6 +85,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
                             .and(artistIdNe(artistId, subGroupBuyPost))
                             .and(subGroupBuyPost.artist.id.eq(groupBuyPost.artist.id)))
                 ))
+                .orderBy(subItemImage.sortOrder.asc())
                 .limit(1),
             groupBuyPost.id.count(),
             groupBuyPost.id.count().when(0L).then("")
