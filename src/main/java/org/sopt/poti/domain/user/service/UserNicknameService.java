@@ -8,6 +8,10 @@ import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
+
+import java.util.Locale;
+
 @Service
 @RequiredArgsConstructor
 public class UserNicknameService {
@@ -18,17 +22,25 @@ public class UserNicknameService {
     private final ProfanityFilterService profanityFilterService;
 
     public NicknameDuplicateResponse checkDuplicate(NicknameDuplicateRequest req) {
-        String nickname = req.nickname();
+        String nickname = normalizeNickname(req.nickname());
 
         if (nickname == null || !nickname.matches(NICKNAME_PATTERN)) {
             throw new BusinessException(ErrorStatus.INVALID_NICKNAME);
         }
 
-        // 비속어 검사 필터
+        // 비속어 검사
         profanityFilterService.validateNoProfanity(nickname);
 
         boolean duplicated = userRepository.existsByNickname(nickname);
 
         return new NicknameDuplicateResponse(duplicated);
+    }
+
+    private String normalizeNickname(String nickname) {
+        if (nickname == null) return null;
+
+        return Normalizer.normalize(nickname, Normalizer.Form.NFKC)
+                .trim()
+                .toLowerCase(Locale.KOREAN);
     }
 }
