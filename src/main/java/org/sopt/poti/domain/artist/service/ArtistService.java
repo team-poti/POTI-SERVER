@@ -15,7 +15,7 @@ public class ArtistService {
 
     private final ArtistRepository artistRepository;
 
-    public Artist getArtistById(Long artistId) {
+    public Artist getById(Long artistId) {
         return artistRepository.findById(artistId)
                 .orElseThrow(() -> new BusinessException(ErrorStatus.ARTIST_NOT_FOUND));
     }
