@@ -65,7 +65,7 @@ public class GroupBuyService {
       groupBuyPost.addShipping(shipping);
     });
 
-    // 4. 이미지 (ItemImage) 연결
+    // 이미지 (ItemImage) 연결
     List<String> imageUrls = request.imageUrls();
     for (int i = 0; i < imageUrls.size(); i++) {
       ItemImage image = ItemImage.create(imageUrls.get(i), i);

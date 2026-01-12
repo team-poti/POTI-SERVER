@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/dev")
 @RequiredArgsConstructor
-@Profile({"local", "dev", "default"})
+@Profile({"local", "dev"})
 @Tag(name = "Dev", description = "개발자 테스트용 API")
 public class DevController {
 
