@@ -3,7 +3,8 @@ package org.sopt.poti.domain.user.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
-import org.sopt.poti.domain.artist.repository.ArtistRepository;
+
+import org.sopt.poti.domain.artist.service.ArtistService;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.user.entity.User;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ArtistRepository artistRepository;
+    private final ArtistService artistService;
 
     @Transactional
     public UserOnboardingResponse saveOnboarding(Long userId, UserOnboardingRequest req) {
@@ -27,11 +28,10 @@ public class UserService {
 
         user.updateNickname(req.nickname());
 
-        Artist favorite = null;
-        if (req.favoriteArtistId() != null) {
-            favorite = artistRepository.findById(req.favoriteArtistId())
-                    .orElseThrow(() -> new BusinessException(ErrorStatus.ARTIST_NOT_FOUND));
-        }
+        Artist favorite = (req.favoriteArtistId() == null)
+                ? null
+                : artistService.getById(req.favoriteArtistId());
+
         user.updateFavoriteArtist(favorite);
 
         return new UserOnboardingResponse(
@@ -39,5 +39,4 @@ public class UserService {
                 user.getFavoriteArtist() == null ? null : user.getFavoriteArtist().getId()
         );
     }
-
 }
