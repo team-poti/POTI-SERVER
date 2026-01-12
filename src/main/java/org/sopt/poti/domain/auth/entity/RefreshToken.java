@@ -13,16 +13,16 @@ import org.springframework.data.redis.core.TimeToLive;
 @Builder
 public class RefreshToken {
 
-    @Id
-    private Long userId; // Redis Key: refreshToken:{userId}
+  @Id
+  private Long userId; // Redis Key => refreshToken:{userId}
 
-    private String refreshToken;
+  private String refreshToken;
 
-    @TimeToLive
-    private Long ttl; // 만료 시간 (초 단위)
+  @TimeToLive
+  private Long ttl; // 만료 시간 (초 단위)
 
-    public void updateRefreshToken(String refreshToken, Long ttl) {
-        this.refreshToken = refreshToken;
-        this.ttl = ttl;
-    }
+  public void updateRefreshToken(String refreshToken, Long ttl) {
+    this.refreshToken = refreshToken;
+    this.ttl = ttl;
+  }
 }
