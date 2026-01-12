@@ -37,7 +37,7 @@ public class GroupBuyService {
   public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
     User leader = userService.getUserById(userId);
 
-    Artist artist = artistService.getArtistById(request.artistId());
+    Artist artist = artistService.getById(request.artistId());
 
     // GroupBuyPost 엔티티 생성
     GroupBuyPost groupBuyPost = GroupBuyPost.create(
