@@ -52,72 +52,84 @@ public class GroupBuyPost extends BaseTimeEntity {
   @Column(name = "account_number", length = 50, nullable = false) // 계좌번호 필수
   private String accountNumber;
 
-  @Column(name = "account_holder", length = 50)
-  private String accountHolder;
+      @Column(name = "representative_image_url") // 대표 이미지 URL (성능 최적화용)
+    private String representativeImageUrl;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 30)
-  private GroupBuyPostStatus status;
+    @Column(name = "goal_quantity", nullable = false)
+    private int goalQuantity;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  private User leader; // 총대
+    @Column(name = "current_quantity", nullable = false)
+    private int currentQuantity;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "artist_id", nullable = false)
-  private Artist artist;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private GroupBuyPostStatus status;
 
-  @OneToMany(mappedBy = "groupBuyPost", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<GroupBuyOption> options = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User leader; // 총대
 
-  @OneToMany(mappedBy = "groupBuyPost", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ItemImage> images = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "artist_id", nullable = false)
+    private Artist artist;
 
-  @OneToMany(mappedBy = "groupBuyPost", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<GroupBuyShipping> shippings = new ArrayList<>();
+    @OneToMany(mappedBy = "groupBuyPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroupBuyOption> options = new ArrayList<>();
 
-  @Builder
-  private GroupBuyPost(
-      String title,
-      String content,
-      LocalDate recruitDeadline,
-      String bankName,
-      String accountNumber,
-      User leader,
-      Artist artist
-  ) {
-    this.title = title;
-    this.content = content;
-    this.recruitDeadline = recruitDeadline;
-    this.bankName = bankName;
-    this.accountNumber = accountNumber;
-    // this.accountHolder = accountHolder;
-    this.leader = leader;
-    this.artist = artist;
-    this.status = GroupBuyPostStatus.RECRUITING; // 초기 상태: 모집 중
-  }
+    @OneToMany(mappedBy = "groupBuyPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemImage> images = new ArrayList<>();
 
-  public static GroupBuyPost create(
-      String title,
-      String content,
-      LocalDate recruitDeadline,
-      String bankName,
-      String accountNumber,
-      User leader,
-      Artist artist
-  ) {
-    return GroupBuyPost.builder()
-        .title(title)
-        .content(content)
-        .recruitDeadline(recruitDeadline)
-        .bankName(bankName)
-        .accountNumber(accountNumber)
-        // .accountHolder(accountHolder)
-        .leader(leader)
-        .artist(artist)
-        .build();
-  }
+    @OneToMany(mappedBy = "groupBuyPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroupBuyShipping> shippings = new ArrayList<>();
 
+    @Builder
+    private GroupBuyPost(
+            String title,
+            String content,
+            LocalDate recruitDeadline,
+            String bankName,
+            String accountNumber,
+            int goalQuantity,
+            String representativeImageUrl,
+            User leader,
+            Artist artist
+    ) {
+        this.title = title;
+        this.content = content;
+        this.recruitDeadline = recruitDeadline;
+        this.bankName = bankName;
+        this.accountNumber = accountNumber;
+        this.goalQuantity = goalQuantity;
+        this.currentQuantity = 0;
+        this.representativeImageUrl = representativeImageUrl;
+        this.leader = leader;
+        this.artist = artist;
+        this.status = GroupBuyPostStatus.RECRUITING;
+    }
+
+    public static GroupBuyPost create(
+            String title,
+            String content,
+            LocalDate recruitDeadline,
+            String bankName,
+            String accountNumber,
+            int goalQuantity,
+            String representativeImageUrl,
+            User leader,
+            Artist artist
+    ) {
+        return GroupBuyPost.builder()
+                .title(title)
+                .content(content)
+                .recruitDeadline(recruitDeadline)
+                .bankName(bankName)
+                .accountNumber(accountNumber)
+                .goalQuantity(goalQuantity)
+                .representativeImageUrl(representativeImageUrl)
+                .leader(leader)
+                .artist(artist)
+                .build();
+    }
   // 연관관계 편의 메서드
   public void addOption(GroupBuyOption option) {
     this.options.add(option);

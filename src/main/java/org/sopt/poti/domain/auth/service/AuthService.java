@@ -53,7 +53,7 @@ public class AuthService {
       user = existingUser.get();
       // 기존 유저이지만, 닉네임이 없으면 온보딩이 필요함
       isNewUser = (user.getNickname() == null);
-      // TODO: 기존 유저의 정보(닉네임, 프로필 이미지 등)가 변경되었다면 업데이트 로직 추가
+      
     } else {
       KakaoUserResponse.KakaoAccount kakaoAccount = kakaoUserResponse.getKakaoAccount();
       String email = null;

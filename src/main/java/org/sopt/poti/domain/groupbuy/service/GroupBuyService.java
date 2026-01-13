@@ -39,12 +39,19 @@ public class GroupBuyService {
 
     Artist artist = artistService.getById(request.artistId());
 
+    // 대표 이미지 URL (첫 번째 이미지)
+    String representativeImageUrl = request.imageUrls().isEmpty() ? null : request.imageUrls().get(0);
+    // 목표 수량 = 옵션 개수
+    int goalQuantity = request.options().size();
+
     GroupBuyPost groupBuyPost = GroupBuyPost.create(
         request.title(),
         request.content(),
         request.deadline(),
         request.bankName(),
         request.accountNumber(),
+        goalQuantity,
+        representativeImageUrl,
         leader,
         artist
     );
