@@ -1,5 +1,7 @@
 package org.sopt.poti.domain.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.user.dto.response.OthersProfileResponse;
 import org.sopt.poti.domain.user.service.OthersProfileService;
@@ -14,11 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
+@Tag(name = "Profile", description = "타인 프로필 관련 API")
 public class OthersProfileController {
 
     private final OthersProfileService othersProfileService;
 
     @GetMapping("/{userId}/profile")
+    @Operation(summary = "타인 프로필을 조회하는 API입니다.", description = "해당 userId의 프로필을 조회합니다.")
     public ResponseEntity<ApiResponse<OthersProfileResponse>> getProfile(
             @PathVariable Long userId
     ) {
