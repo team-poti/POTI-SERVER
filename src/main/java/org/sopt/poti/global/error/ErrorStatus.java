@@ -34,6 +34,7 @@ public enum ErrorStatus {
      * 403 Forbidden
      */
     FORBIDDEN_USER(40300, HttpStatus.FORBIDDEN, "권한이 없는 요청입니다."),
+    REVIEW_FORBIDDEN(40301, HttpStatus.FORBIDDEN, "리뷰 작성 권한이 없습니다."),
 
     /**
      * 404 Not Found
