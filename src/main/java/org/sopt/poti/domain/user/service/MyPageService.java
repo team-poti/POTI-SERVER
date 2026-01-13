@@ -1,8 +1,6 @@
 package org.sopt.poti.domain.user.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
@@ -24,13 +22,14 @@ public class MyPageService {
     private final UserRepository userRepository;
     private final OrderService orderService;
     private final GroupBuyService groupBuyService;
+    private final ActivityMessageResolver activityMessageResolver;
 
     @Transactional(readOnly = true)
     public MyPageResponse getMyPage(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
 
-        String activityMessage = resolveActivityMessage(user.getLastActiveAt());
+        String activityMessage = activityMessageResolver.resolve(user.getLastActiveAt());
         LocalDate joinedAt = user.getCreatedAt().toLocalDate();
         boolean hasFavoriteArtist = (user.getFavoriteArtist() != null);
 
@@ -80,18 +79,5 @@ public class MyPageService {
                 participation,
                 recruit
         );
-    }
-
-    private String resolveActivityMessage(LocalDateTime lastActiveAt) {
-        if (lastActiveAt == null) return "최근 한 달 이내 활동하지 않음";
-
-        long days = ChronoUnit.DAYS.between(lastActiveAt.toLocalDate(), LocalDate.now());
-
-        if (days <= 3) return "최근 3일 이내 활동";
-        if (days <= 7) return "최근 일주일 이내 활동";
-        if (days <= 14) return "최근 2주 이내 활동";
-        if (days <= 21) return "최근 3주 이내 활동";
-        if (days <= 30) return "최근 한 달 이내 활동";
-        return "최근 한 달 이내 활동하지 않음";
     }
 }
