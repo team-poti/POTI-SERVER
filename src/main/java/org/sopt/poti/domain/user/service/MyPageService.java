@@ -2,6 +2,7 @@ package org.sopt.poti.domain.user.service;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
@@ -32,6 +33,10 @@ public class MyPageService {
         String activityMessage = activityMessageResolver.resolve(user.getLastActiveAt());
         LocalDate joinedAt = user.getCreatedAt().toLocalDate();
         boolean hasFavoriteArtist = (user.getFavoriteArtist() != null);
+
+        String favoriteArtistName = hasFavoriteArtist
+                ? user.getFavoriteArtist().getName()
+                : null;
 
         int pTotal = orderService.countByUser_Id(userId);
 
@@ -76,6 +81,7 @@ public class MyPageService {
                 activityMessage,
                 joinedAt,
                 hasFavoriteArtist,
+                favoriteArtistName,
                 participation,
                 recruit
         );
