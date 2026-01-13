@@ -46,17 +46,15 @@ public class GroupBuyController {
 
   @GetMapping("/titles")
   @Operation(summary = "상품명 자동완성/추천", description = "입력 키워드를 기반으로 공동구매 상품명 리스트를 추천합니다.")
-  public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitles(
-      @RequestParam Long artistId,
-      @RequestParam String keyword
-  ) {
-    if (!StringUtils.hasText(keyword)) {
-      // 키워드가 없거나 공백이면 빈 리스트 반환
-      return ResponseEntity.status(HttpStatus.OK)
-          .body(ApiResponse.success(SuccessStatus.OK,
-              GroupBuyTitlesResponse.of(Collections.emptyList())));
-    }
-    List<String> titles = groupBuyService.searchTitles(artistId, keyword);
+      public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitles(
+              @RequestParam Long artistId,
+              @RequestParam String keyword
+      ) {
+          if (!StringUtils.hasText(keyword)) {
+              return ResponseEntity.status(HttpStatus.OK)
+                      .body(ApiResponse.success(SuccessStatus.OK,
+                              GroupBuyTitlesResponse.of(Collections.emptyList())));
+          }    List<String> titles = groupBuyService.searchTitles(artistId, keyword);
     return ResponseEntity.status(HttpStatus.OK)
         .body(ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles)));
   }

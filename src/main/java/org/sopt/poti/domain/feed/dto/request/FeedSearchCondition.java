@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 @Builder
 public record FeedSearchCondition(
     Long artistId,
-    String sort, // LATEST, HOT
+    String sort,
     Pageable pageable
 ) {
 }

@@ -24,7 +24,7 @@ public class FeedService {
     User user = userService.getUserById(userId);
 
     FeedSearchCondition condition = FeedSearchCondition.builder()
-        .artistId(artistId) // 파라미터가 없으면 null
+        .artistId(artistId)
         .sort(sort)
         .pageable(pageable)
         .build();

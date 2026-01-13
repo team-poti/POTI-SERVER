@@ -33,56 +33,53 @@ public class GroupBuyService {
   private final MemberService memberService;
   private final DeliveryService deliveryService;
 
-  @Transactional
-  public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
-    User leader = userService.getUserById(userId);
-
-    Artist artist = artistService.getById(request.artistId());
-
-    // 대표 이미지 URL (첫 번째 이미지)
-    String representativeImageUrl = request.imageUrls().isEmpty() ? null : request.imageUrls().get(0);
-    // 목표 수량 = 옵션 개수
-    int goalQuantity = request.options().size();
-
-    GroupBuyPost groupBuyPost = GroupBuyPost.create(
-        request.title(),
-        request.content(),
-        request.deadline(),
-        request.bankName(),
-        request.accountNumber(),
-        goalQuantity,
-        representativeImageUrl,
-        leader,
-        artist
-    );
-
-    request.options().forEach(optionRequest -> {
-      Member member = memberService.getMemberById(optionRequest.memberId());
-      GroupBuyOption option = GroupBuyOption.create(optionRequest.price(), member);
-      groupBuyPost.addOption(option);
-    });
-
-    request.shippings().forEach(shippingRequest -> {
-      DeliveryMethod deliveryMethod = deliveryService.getDeliveryMethodById(
-          shippingRequest.deliveryMethodId());
-      GroupBuyShipping shipping = GroupBuyShipping.create(shippingRequest.price(), deliveryMethod);
-      groupBuyPost.addShipping(shipping);
-    });
-
-    List<String> imageUrls = request.imageUrls();
-    for (int i = 0; i < imageUrls.size(); i++) {
-      ItemImage image = ItemImage.create(imageUrls.get(i), i);
-      groupBuyPost.addImage(image);
-    }
-
-    groupBuyRepository.save(groupBuyPost);
-
-    return GroupBuyCreateResponse.of(groupBuyPost.getId());
+      @Transactional
+      public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
+          User leader = userService.getUserById(userId);
+  
+          Artist artist = artistService.getById(request.artistId());
+  
+          String representativeImageUrl = request.imageUrls().isEmpty() ? null : request.imageUrls().get(0);
+          int goalQuantity = request.options().size();
+  
+          GroupBuyPost groupBuyPost = GroupBuyPost.create(
+                  request.title(),
+                  request.content(),
+                  request.deadline(),
+                  request.bankName(),
+                  request.accountNumber(),
+                  goalQuantity,
+                  representativeImageUrl,
+                  leader,
+                  artist
+          );
+  
+          request.options().forEach(optionRequest -> {
+              Member member = memberService.getMemberById(optionRequest.memberId());
+              GroupBuyOption option = GroupBuyOption.create(optionRequest.price(), member);
+              groupBuyPost.addOption(option);
+          });
+  
+          request.shippings().forEach(shippingRequest -> {
+              DeliveryMethod deliveryMethod = deliveryService.getDeliveryMethodById(
+                      shippingRequest.deliveryMethodId());
+              GroupBuyShipping shipping = GroupBuyShipping.create(shippingRequest.price(), deliveryMethod);
+              groupBuyPost.addShipping(shipping);
+          });
+  
+          List<String> imageUrls = request.imageUrls();
+          for (int i = 0; i < imageUrls.size(); i++) {
+              ItemImage image = ItemImage.create(imageUrls.get(i), i);
+              groupBuyPost.addImage(image);
+          }
+  
+          groupBuyRepository.save(groupBuyPost);
+  
+          return GroupBuyCreateResponse.of(groupBuyPost.getId());
+      }
+  
+      public List<String> searchTitles(Long artistId, String keyword) {
+          Pageable pageable = PageRequest.of(0, 5);
+          return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
+      }
   }
-
-  // 상품명 자동완성
-  public List<String> searchTitles(Long artistId, String keyword) {
-    Pageable pageable = PageRequest.of(0, 5); // 최대 5개만 조회
-    return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
-  }
-}
