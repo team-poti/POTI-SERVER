@@ -17,7 +17,7 @@ public enum ErrorStatus {
     PROFANITY_DETECTED(40002, HttpStatus.BAD_REQUEST, "비속어가 포함되어 있습니다."),
     NICKNAME_DUPLICATED(40003, HttpStatus.BAD_REQUEST, "이미 사용 중인 닉네임입니다."),
     INVALID_SOCIAL_TYPE(40004, HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인 타입입니다."),
-
+    ORDER_NOT_COMPLETED(40005, HttpStatus.BAD_REQUEST, "거래 완료(배송 완료) 후에만 리뷰를 작성할 수 있습니다."),
 
     /**
      * 401 Unauthorized
@@ -42,8 +42,14 @@ public enum ErrorStatus {
     ITEM_NOT_FOUND(40401, HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다."),
     ARTIST_NOT_FOUND(40402, HttpStatus.NOT_FOUND, "존재하지 않는 아티스트입니다."),
     NOT_FOUND_HANDLER(40403, HttpStatus.NOT_FOUND, "존재하지 않는 API 경로입니다."),
-  MEMBER_NOT_FOUND(40404, HttpStatus.NOT_FOUND, "존재하지 않는 멤버입니다."),
-  DELIVERY_METHOD_NOT_FOUND(40405, HttpStatus.NOT_FOUND, "존재하지 않는 배송 방법입니다."),
+    MEMBER_NOT_FOUND(40404, HttpStatus.NOT_FOUND, "존재하지 않는 멤버입니다."),
+    DELIVERY_METHOD_NOT_FOUND(40405, HttpStatus.NOT_FOUND, "존재하지 않는 배송 방법입니다."),
+    ORDER_NOT_FOUND(40406, HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
+
+    /**
+     * 409 Conflict
+     */
+    REVIEW_ALREADY_EXISTS(40900, HttpStatus.CONFLICT, "이미 리뷰가 작성된 주문입니다."),
 
     /**
      * 500 Internal Server Error
