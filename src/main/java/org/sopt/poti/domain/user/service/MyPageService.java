@@ -6,9 +6,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
-import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
+import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
 import org.sopt.poti.domain.order.entity.OrderStatus;
-import org.sopt.poti.domain.order.repository.OrderRepository;
+import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.user.dto.response.MyPageResponse;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.repository.UserRepository;
@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyPageService {
 
     private final UserRepository userRepository;
-    private final OrderRepository orderRepository;
-    private final GroupBuyRepository groupBuyRepository;
+    private final OrderService orderService;
+    private final GroupBuyService groupBuyService;
 
     @Transactional(readOnly = true)
     public MyPageResponse getMyPage(Long userId) {
@@ -34,7 +34,7 @@ public class MyPageService {
         LocalDate joinedAt = user.getCreatedAt().toLocalDate();
         boolean hasFavoriteArtist = (user.getFavoriteArtist() != null);
 
-        int pTotal = orderRepository.countByUser_Id(userId);
+        int pTotal = orderService.countByUser_Id(userId);
 
         List<OrderStatus> pInProgressStatuses = List.of(
                 OrderStatus.WAIT_PAY,
@@ -43,28 +43,28 @@ public class MyPageService {
                 OrderStatus.READY,
                 OrderStatus.SHIPPED
         );
-        int pInProgress = orderRepository.countByUser_IdAndStatusIn(userId, pInProgressStatuses);
+        int pInProgress = orderService.countByUser_IdAndStatusIn(userId, pInProgressStatuses);
 
         List<OrderStatus> pCompletedStatuses = List.of(OrderStatus.DELIVERED);
-        int pCompleted = orderRepository.countByUser_IdAndStatusIn(userId, pCompletedStatuses);
+        int pCompleted = orderService.countByUser_IdAndStatusIn(userId, pCompletedStatuses);
 
         MyPageResponse.Summary participation = new MyPageResponse.Summary(pTotal, pInProgress, pCompleted);
 
-        int rTotal = groupBuyRepository.countByLeader_Id(userId);
+        int rTotal = groupBuyService.countByLeader_Id(userId);
 
         List<GroupBuyPostStatus> rInProgressStatuses = List.of(
                 GroupBuyPostStatus.RECRUITING,
                 GroupBuyPostStatus.PAYMENT_DONE,
                 GroupBuyPostStatus.SHIPPING
         );
-        int rInProgress = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rInProgressStatuses);
+        int rInProgress = groupBuyService.countByLeader_IdAndStatusIn(userId, rInProgressStatuses);
 
         List<GroupBuyPostStatus> rCompletedStatuses = List.of(
                 GroupBuyPostStatus.CLOSED,
                 GroupBuyPostStatus.DELIVERED,
                 GroupBuyPostStatus.COMPLETED
         );
-        int rCompleted = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
+        int rCompleted = groupBuyService.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
 
         MyPageResponse.Summary recruit = new MyPageResponse.Summary(rTotal, rInProgress, rCompleted);
 
