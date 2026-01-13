@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MyPageService {
 
@@ -25,7 +26,6 @@ public class MyPageService {
     private final GroupBuyService groupBuyService;
     private final ActivityMessageResolver activityMessageResolver;
 
-    @Transactional(readOnly = true)
     public MyPageResponse getMyPage(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
