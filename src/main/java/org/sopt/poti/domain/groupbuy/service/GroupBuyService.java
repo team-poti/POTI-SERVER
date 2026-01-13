@@ -1,7 +1,6 @@
 package org.sopt.poti.domain.groupbuy.service;
 
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
 import org.sopt.poti.domain.artist.entity.Member;
@@ -37,41 +36,36 @@ public class GroupBuyService {
 
         Artist artist = artistService.getById(request.artistId());
 
-        // GroupBuyPost 엔티티 생성
-        GroupBuyPost groupBuyPost = GroupBuyPost.create(
-                request.title(),
-                request.content(),
-                request.deadline(),
-                request.bankName(),
-                request.accountNumber(),
-                leader,
-                artist
-        );
+    GroupBuyPost groupBuyPost = GroupBuyPost.create(
+        request.title(),
+        request.content(),
+        request.deadline(),
+        request.bankName(),
+        request.accountNumber(),
+        leader,
+        artist
+    );
 
-        // 옵션 (GroupBuyOption) 연결
-        request.options().forEach(optionRequest -> {
-            Member member = memberService.getMemberById(optionRequest.memberId());
-            GroupBuyOption option = GroupBuyOption.create(optionRequest.price(), member);
-            groupBuyPost.addOption(option);
-        });
+    request.options().forEach(optionRequest -> {
+      Member member = memberService.getMemberById(optionRequest.memberId());
+      GroupBuyOption option = GroupBuyOption.create(optionRequest.price(), member);
+      groupBuyPost.addOption(option);
+    });
 
-        // 배송 방법 (GroupBuyShipping) 연결
-        request.shippings().forEach(shippingRequest -> {
-            DeliveryMethod deliveryMethod = deliveryService.getDeliveryMethodById(
-                    shippingRequest.deliveryMethodId());
-            GroupBuyShipping shipping = GroupBuyShipping.create(shippingRequest.price(), deliveryMethod);
-            groupBuyPost.addShipping(shipping);
-        });
+    request.shippings().forEach(shippingRequest -> {
+      DeliveryMethod deliveryMethod = deliveryService.getDeliveryMethodById(
+          shippingRequest.deliveryMethodId());
+      GroupBuyShipping shipping = GroupBuyShipping.create(shippingRequest.price(), deliveryMethod);
+      groupBuyPost.addShipping(shipping);
+    });
 
-        // 이미지 (ItemImage) 연결
-        List<String> imageUrls = request.imageUrls();
-        for (int i = 0; i < imageUrls.size(); i++) {
-            ItemImage image = ItemImage.create(imageUrls.get(i), i);
-            groupBuyPost.addImage(image);
-        }
+    List<String> imageUrls = request.imageUrls();
+    for (int i = 0; i < imageUrls.size(); i++) {
+      ItemImage image = ItemImage.create(imageUrls.get(i), i);
+      groupBuyPost.addImage(image);
+    }
 
-        // 최종 저장 (CascadeType.ALL 덕분에 한 번에 다 저장됨)
-        groupBuyRepository.save(groupBuyPost);
+    groupBuyRepository.save(groupBuyPost);
 
         return GroupBuyCreateResponse.of(groupBuyPost.getId());
     }

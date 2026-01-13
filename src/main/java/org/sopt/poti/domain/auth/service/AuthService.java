@@ -28,7 +28,7 @@ public class AuthService {
 
   private final UserRepository userRepository;
   private final JwtTokenProvider jwtTokenProvider;
-  private final KakaoFeignClient kakaoFeignClient; // FeignClient 주입
+  private final KakaoFeignClient kakaoFeignClient;
   private final RefreshTokenRepository refreshTokenRepository;
 
   @Value("${jwt.refresh-token-validity}")
@@ -53,6 +53,7 @@ public class AuthService {
       user = existingUser.get();
       // 기존 유저이지만, 닉네임이 없으면 온보딩이 필요함
       isNewUser = (user.getNickname() == null);
+      // TODO: 기존 유저의 정보(닉네임, 프로필 이미지 등)가 변경되었다면 업데이트 로직 추가
     } else {
       KakaoUserResponse.KakaoAccount kakaoAccount = kakaoUserResponse.getKakaoAccount();
       String email = null;
@@ -75,7 +76,7 @@ public class AuthService {
           email,
           nickname,
           profileImageUrl,
-          null // favoriteArtist는 신규 가입 시점에 null
+          null
       );
       userRepository.save(user);
       isNewUser = true;
@@ -90,7 +91,7 @@ public class AuthService {
     refreshTokenRepository.save(RefreshToken.builder()
         .userId(user.getId())
         .refreshToken(refreshToken)
-        .ttl(refreshTokenValidity / 1000) // ms -> s 변환
+        .ttl(refreshTokenValidity / 1000)
         .build());
 
     return AuthResponse.builder()

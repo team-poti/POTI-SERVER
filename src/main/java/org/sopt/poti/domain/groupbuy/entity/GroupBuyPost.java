@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -26,7 +27,9 @@ import org.sopt.poti.global.entity.BaseTimeEntity;
 
 @Getter
 @Entity
-@Table(name = "group_buy_posts")
+@Table(name = "group_buy_posts", indexes = { // 인덱스 추가
+    @Index(name = "idx_group_buy_post_title", columnList = "title")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupBuyPost extends BaseTimeEntity {
 
