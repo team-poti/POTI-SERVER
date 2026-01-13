@@ -10,10 +10,7 @@ import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 import org.sopt.poti.domain.delivery.service.DeliveryService;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
-import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
-import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
-import org.sopt.poti.domain.groupbuy.entity.GroupBuyShipping;
-import org.sopt.poti.domain.groupbuy.entity.ItemImage;
+import org.sopt.poti.domain.groupbuy.entity.*;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.service.UserService;
@@ -27,17 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class GroupBuyService {
 
-  private final GroupBuyRepository groupBuyRepository;
-  private final UserService userService;
-  private final ArtistService artistService;
-  private final MemberService memberService;
-  private final DeliveryService deliveryService;
+    private final GroupBuyRepository groupBuyRepository;
+    private final UserService userService;
+    private final ArtistService artistService;
+    private final MemberService memberService;
+    private final DeliveryService deliveryService;
 
-  @Transactional
-  public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
-    User leader = userService.getUserById(userId);
+    @Transactional
+    public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
+        User leader = userService.getUserById(userId);
 
-    Artist artist = artistService.getById(request.artistId());
+        Artist artist = artistService.getById(request.artistId());
 
     GroupBuyPost groupBuyPost = GroupBuyPost.create(
         request.title(),
@@ -70,12 +67,20 @@ public class GroupBuyService {
 
     groupBuyRepository.save(groupBuyPost);
 
-    return GroupBuyCreateResponse.of(groupBuyPost.getId());
-  }
+        return GroupBuyCreateResponse.of(groupBuyPost.getId());
+    }
 
-  // 상품명 자동완성
-  public List<String> searchTitles(Long artistId, String keyword) {
-    Pageable pageable = PageRequest.of(0, 5); // 최대 5개만 조회
-    return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
-  }
+    // 상품명 자동완성
+    public List<String> searchTitles(Long artistId, String keyword) {
+        Pageable pageable = PageRequest.of(0, 5); // 최대 5개만 조회
+        return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
+    }
+
+    public int countByLeader_Id(Long userId) {
+        return groupBuyRepository.countByLeader_Id(userId);
+    }
+
+    public int countByLeader_IdAndStatusIn(Long userId, List<GroupBuyPostStatus> statuses) {
+        return groupBuyRepository.countByLeader_IdAndStatusIn(userId, statuses);
+    }
 }

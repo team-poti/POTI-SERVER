@@ -5,8 +5,6 @@ import org.sopt.poti.domain.artist.service.ArtistService;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.artist.entity.Artist;
-import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
-import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.repository.UserRepository;
 import org.sopt.poti.global.error.BusinessException;
