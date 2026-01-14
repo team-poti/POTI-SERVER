@@ -2,6 +2,7 @@ package org.sopt.poti.domain.auth.service;
 
 import feign.FeignException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.domain.auth.dto.request.AuthRequest;
@@ -12,6 +13,7 @@ import org.sopt.poti.domain.auth.entity.RefreshToken;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
 import org.sopt.poti.domain.user.entity.SocialType;
 import org.sopt.poti.domain.user.entity.User;
+import org.sopt.poti.domain.user.entity.UserStatus;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
@@ -19,6 +21,7 @@ import org.sopt.poti.global.external.kakao.KakaoFeignClient;
 import org.sopt.poti.global.external.kakao.dto.KakaoUserResponse;
 import org.sopt.poti.global.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,7 @@ public class AuthService {
   private final JwtTokenProvider jwtTokenProvider;
   private final KakaoFeignClient kakaoFeignClient;
   private final RefreshTokenRepository refreshTokenRepository;
+  private final RedisTemplate<String, String> redisTemplate; // RedisTemplate 주입
 
   @Value("${jwt.refresh-token-validity}")
   private long refreshTokenValidity;
@@ -53,6 +57,10 @@ public class AuthService {
 
     if (existingUser.isPresent()) {
       user = existingUser.get();
+      // 탈퇴한 유저인지 확인
+      if (user.getStatus() == UserStatus.WITHDRAWN) {
+        throw new BusinessException(ErrorStatus.USER_NOT_FOUND);
+      }
       isNewUser = (user.getNickname() == null);
       // TODO: 기존 유저의 정보(닉네임, 프로필 이미지 등)가 변경되었다면 업데이트 로직 추가
     } else {
@@ -103,27 +111,22 @@ public class AuthService {
 
   @Transactional
   public TokenReissueResponse reissue(TokenReissueRequest request) {
-    // Refresh Token 유효성 검증
     String oldRefreshToken = request.refreshToken();
     jwtTokenProvider.validateToken(oldRefreshToken);
 
-    // Refresh Token에서 userId 추출
     Long userId = jwtTokenProvider.getUserIdFromToken(oldRefreshToken);
 
-    // Redis에서 저장된 Refresh Token 조회 및 일치 여부 확인
     RefreshToken storedRefreshToken = refreshTokenRepository.findById(userId)
-        .orElseThrow(() -> new BusinessException(ErrorStatus.INVALID_TOKEN)); // Redis에 토큰 없음
+        .orElseThrow(() -> new BusinessException(ErrorStatus.INVALID_TOKEN));
 
     if (!storedRefreshToken.getRefreshToken().equals(oldRefreshToken)) {
-      throw new BusinessException(ErrorStatus.INVALID_TOKEN); // 토큰 불일치
+      throw new BusinessException(ErrorStatus.INVALID_TOKEN);
     }
 
-    // 새로운 Access Token 및 Refresh Token 발급
     String newAccessToken = jwtTokenProvider.createAccessToken(userId);
     String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
 
-    // Redis 업데이트 (기존 토큰 삭제 후 새 토큰 저장)
-    refreshTokenRepository.delete(storedRefreshToken); // 기존 토큰 삭제
+    refreshTokenRepository.delete(storedRefreshToken);
     refreshTokenRepository.save(RefreshToken.builder()
         .userId(userId)
         .refreshToken(newRefreshToken)
@@ -134,6 +137,24 @@ public class AuthService {
         .accessToken(newAccessToken)
         .refreshToken(newRefreshToken)
         .build();
+  }
+
+  @Transactional
+  public void logout(String accessToken, Long userId) {
+    Long expiration = jwtTokenProvider.getExpiration(accessToken);
+    if (expiration > 0) {
+      redisTemplate.opsForValue().set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
+    }
+    refreshTokenRepository.deleteById(userId);
+  }
+
+  @Transactional
+  public void withdraw(String accessToken, Long userId) {
+    User user = userService.getUserById(userId);
+    user.withdraw(); // 유저 상태 변경, 개인 정보 마스킹, deletedAt 설정
+
+    // 로그아웃 처리 (refresh token 삭제, access token 블랙리스트 추가)
+    logout(accessToken, userId);
   }
 
   private KakaoUserResponse getKakaoUserResponse(String kakaoAccessToken) {

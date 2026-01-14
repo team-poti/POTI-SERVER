@@ -19,4 +19,8 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuyPost, Long>, G
 
     @Query("SELECT g FROM GroupBuyPost g JOIN FETCH g.leader JOIN FETCH g.artist WHERE g.id = :id")
     Optional<GroupBuyPost> findByIdWithUserAndArtist(@Param("id") Long id);
+
+    void deleteByLeaderId(Long leaderId);
+
+    List<GroupBuyPost> findAllByLeaderId(Long leaderId);
 }
