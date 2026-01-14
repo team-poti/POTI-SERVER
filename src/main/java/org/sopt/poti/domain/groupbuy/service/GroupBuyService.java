@@ -1,6 +1,9 @@
 package org.sopt.poti.domain.groupbuy.service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
 import org.sopt.poti.domain.artist.entity.Member;
@@ -10,10 +13,24 @@ import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 import org.sopt.poti.domain.delivery.service.DeliveryService;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
-import org.sopt.poti.domain.groupbuy.entity.*;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.ImageResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.ParticipantResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.ShippingResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.UploaderResponse;
+import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
+import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
+import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
+import org.sopt.poti.domain.groupbuy.entity.GroupBuyShipping;
+import org.sopt.poti.domain.groupbuy.entity.ItemImage;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
+import org.sopt.poti.domain.order.entity.OrderItem;
+import org.sopt.poti.domain.order.service.OrderService;
+import org.sopt.poti.domain.review.service.ReviewService;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.service.UserService;
+import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,11 +41,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class GroupBuyService {
 
-    private final GroupBuyRepository groupBuyRepository;
-    private final UserService userService;
-    private final ArtistService artistService;
-    private final MemberService memberService;
-    private final DeliveryService deliveryService;
+  private final GroupBuyRepository groupBuyRepository;
+  private final UserService userService;
+  private final ArtistService artistService;
+  private final MemberService memberService;
+  private final DeliveryService deliveryService;
+  private final ReviewService reviewService;
+  private final OrderService orderService;
 
   @Transactional
   public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
@@ -36,7 +55,8 @@ public class GroupBuyService {
 
     Artist artist = artistService.getById(request.artistId());
 
-    String representativeImageUrl = request.imageUrls().isEmpty() ? null : request.imageUrls().get(0);
+    String representativeImageUrl =
+        request.imageUrls().isEmpty() ? null : request.imageUrls().get(0);
     int goalQuantity = request.options().size();
 
     GroupBuyPost groupBuyPost = GroupBuyPost.create(
@@ -80,11 +100,121 @@ public class GroupBuyService {
     return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
   }
 
-    public int countByLeader_Id(Long userId) {
-        return groupBuyRepository.countByLeader_Id(userId);
+  public GroupBuyDetailResponse getGroupBuyDetail(Long userId, Long groupBuyId) {
+    // 2번의 추가 쿼리를 방지하기 위한 조회
+    GroupBuyPost groupBuyPost = groupBuyRepository.findByIdWithUserAndArtist(groupBuyId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+
+    /**
+     * 분철글 이미지 리스트
+     */
+    List<ImageResponse> imageResponseList = groupBuyPost.getImages().stream()
+        .map(
+            itemImage ->
+                ImageResponse.builder()
+                    .sortOrder(itemImage.getSortOrder())
+                    .imageUrl(itemImage.getImageUrl())
+                    .build()
+        ).toList();
+
+    /**
+     * 해당 분철글 배송 옵션 리스트
+     */
+    List<ShippingResponse> shippingResponseList = groupBuyPost.getShippings().stream()
+        .map(
+            groupBuyShipping ->
+                ShippingResponse.builder()
+                    .shippingId(groupBuyShipping.getId())
+                    .name(groupBuyShipping.getDeliveryMethod().getName())
+                    .price(groupBuyShipping.getPrice())
+                    .build()
+        ).toList();
+
+    /**
+     * 총대 정보 가져오기
+     */
+    // 리뷰 개수 가져오기
+    Integer reviewCount = reviewService.countReviewsForSeller(groupBuyPost.getLeader().getId());
+    UploaderResponse uploaderResponse = UploaderResponse.builder()
+        .userId(groupBuyPost.getLeader().getId())
+        .nickName(groupBuyPost.getLeader().getNickname())
+        .profileImage(groupBuyPost.getLeader().getProfileImageUrl())
+        .rating(groupBuyPost.getLeader().getRatingAvg())
+        .reviewCount(reviewCount)
+        .build();
+
+    /**
+     * 참여자 리스트
+     */
+    // 구매한 order 참여자들 리스트
+    List<GroupBuyOption> options = groupBuyPost.getOptions();
+    List<Long> optionIds = options.stream().map(GroupBuyOption::getId).toList();
+
+    List<ParticipantResponse> participantResponseList = Collections.emptyList();
+
+    // 이 분철글에 옵션이 하나라도 있어야 주문이 가능
+    if (!optionIds.isEmpty()) {
+      List<OrderItem> orderItemsByOrderId = orderService.getOrderItemsByOptionIds(optionIds);
+
+      // 참여자 기준으로 OrderItem 묶기
+      Map<User, List<OrderItem>> itemsByUser = orderItemsByOrderId.stream()
+          .collect(Collectors.groupingBy(item -> item.getOrder().getUser()));
+
+      // 참여자 리스트 반환
+      participantResponseList = itemsByUser.entrySet().stream()
+          .map(entry -> {
+            User user = entry.getKey();
+            List<OrderItem> items = entry.getValue();
+
+            // 해당 유저가 선택한 멤버옵션 이름 추출
+            List<String> memberList = items.stream()
+                .map(item -> item.getGroupBuyOption().getMember().getName())
+                .toList();
+
+            return ParticipantResponse.builder()
+                .userId(user.getId())
+                .nickName(user.getNickname())
+                .profileImage(user.getProfileImageUrl())
+                .rating(user.getRatingAvg())
+                .selectedMembers(memberList)
+                .build();
+          })
+          .toList();
     }
 
-    public int countByLeader_IdAndStatusIn(Long userId, List<GroupBuyPostStatus> statuses) {
-        return groupBuyRepository.countByLeader_IdAndStatusIn(userId, statuses);
-    }
+    /**
+     * 해당 분철글 최저가 계산
+     */
+    int minCost = groupBuyPost.getOptions().stream()
+        .mapToInt(GroupBuyOption::getPrice)
+        .min()
+        .orElse(0);
+
+    return GroupBuyDetailResponse.builder()
+        .postId(groupBuyPost.getId())
+        .title(groupBuyPost.getTitle())
+        .content(groupBuyPost.getContent())
+        .deadline(groupBuyPost.getRecruitDeadline())
+        .uploadTime(groupBuyPost.getUpdatedAt())
+        .totalCount(groupBuyPost.getGoalQuantity())
+        .currentCount(groupBuyPost.getCurrentQuantity())
+        .artist(groupBuyPost.getArtist().getName())
+        .artistId(groupBuyPost.getArtist().getId())
+        .images(imageResponseList)
+        .isMyPost(groupBuyPost.getLeader().getId().equals(userId))
+        .status(groupBuyPost.getStatus().name())
+        .shippingOptions(shippingResponseList)
+        .uploader(uploaderResponse)
+        .participants(participantResponseList)
+        .price(minCost)
+        .build();
+  }
+
+  public int countByLeader_Id(Long userId) {
+    return groupBuyRepository.countByLeader_Id(userId);
+  }
+
+  public int countByLeader_IdAndStatusIn(Long userId, List<GroupBuyPostStatus> statuses) {
+    return groupBuyRepository.countByLeader_IdAndStatusIn(userId, statuses);
+  }
 }

@@ -56,10 +56,10 @@ public class GroupBuyPost extends BaseTimeEntity {
   private String representativeImageUrl;
 
   @Column(name = "goal_quantity", nullable = false)
-  private int goalQuantity;
+  private int goalQuantity;  // 최대 모집 인원
 
   @Column(name = "current_quantity", nullable = false)
-  private int currentQuantity;
+  private int currentQuantity;  // 현재 인원
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 30)
