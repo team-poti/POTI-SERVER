@@ -30,11 +30,14 @@ public class GroupBuyService {
     private final MemberService memberService;
     private final DeliveryService deliveryService;
 
-    @Transactional
-    public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
-        User leader = userService.getUserById(userId);
+  @Transactional
+  public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
+    User leader = userService.getUserById(userId);
 
-        Artist artist = artistService.getById(request.artistId());
+    Artist artist = artistService.getById(request.artistId());
+
+    String representativeImageUrl = request.imageUrls().isEmpty() ? null : request.imageUrls().get(0);
+    int goalQuantity = request.options().size();
 
     GroupBuyPost groupBuyPost = GroupBuyPost.create(
         request.title(),
@@ -42,6 +45,8 @@ public class GroupBuyService {
         request.deadline(),
         request.bankName(),
         request.accountNumber(),
+        goalQuantity,
+        representativeImageUrl,
         leader,
         artist
     );
@@ -67,14 +72,13 @@ public class GroupBuyService {
 
     groupBuyRepository.save(groupBuyPost);
 
-        return GroupBuyCreateResponse.of(groupBuyPost.getId());
-    }
+    return GroupBuyCreateResponse.of(groupBuyPost.getId());
+  }
 
-    // 상품명 자동완성
-    public List<String> searchTitles(Long artistId, String keyword) {
-        Pageable pageable = PageRequest.of(0, 5); // 최대 5개만 조회
-        return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
-    }
+  public List<String> searchTitles(Long artistId, String keyword) {
+    Pageable pageable = PageRequest.of(0, 5);
+    return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
+  }
 
     public int countByLeader_Id(Long userId) {
         return groupBuyRepository.countByLeader_Id(userId);

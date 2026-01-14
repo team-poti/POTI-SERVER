@@ -10,7 +10,7 @@ import org.sopt.poti.domain.auth.entity.RefreshToken;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
 import org.sopt.poti.domain.user.entity.SocialType;
 import org.sopt.poti.domain.user.entity.User;
-import org.sopt.poti.domain.user.repository.UserRepository;
+import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.sopt.poti.global.external.kakao.KakaoFeignClient;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AuthService {
 
-  private final UserRepository userRepository;
+  private final UserService userService;
   private final JwtTokenProvider jwtTokenProvider;
   private final KakaoFeignClient kakaoFeignClient;
   private final RefreshTokenRepository refreshTokenRepository;
@@ -46,12 +46,11 @@ public class AuthService {
     boolean isNewUser;
     User user;
 
-    Optional<User> existingUser = userRepository.findBySocialIdAndSocialType(socialId,
+    Optional<User> existingUser = userService.findUserBySocialIdAndSocialType(socialId,
         request.socialType());
 
     if (existingUser.isPresent()) {
       user = existingUser.get();
-      // 기존 유저이지만, 닉네임이 없으면 온보딩이 필요함
       isNewUser = (user.getNickname() == null);
       // TODO: 기존 유저의 정보(닉네임, 프로필 이미지 등)가 변경되었다면 업데이트 로직 추가
     } else {
@@ -69,7 +68,6 @@ public class AuthService {
         }
       }
 
-      // 회원가입 (신규 유저)
       user = User.createSocialUser(
           socialId,
           request.socialType(),
@@ -78,16 +76,15 @@ public class AuthService {
           profileImageUrl,
           null
       );
-      userRepository.save(user);
+      userService.registerUser(user);
       isNewUser = true;
     }
 
-    user.updateLastActiveAt(); // 최종 로그인 시각 업데이트
+    user.updateLastActiveAt();
 
     String accessToken = jwtTokenProvider.createAccessToken(user.getId());
     String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
-    // Redis에 Refresh Token 저장
     refreshTokenRepository.save(RefreshToken.builder()
         .userId(user.getId())
         .refreshToken(refreshToken)
