@@ -142,7 +142,9 @@ public class AuthService {
   @Transactional
   public void logout(String accessToken, Long userId) {
     Long expiration = jwtTokenProvider.getExpiration(accessToken);
-    redisTemplate.opsForValue().set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
+    if (expiration > 0) {
+      redisTemplate.opsForValue().set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
+    }
     refreshTokenRepository.deleteById(userId);
   }
 
