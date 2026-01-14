@@ -99,4 +99,8 @@ public class User extends BaseTimeEntity {
     public void updateFavoriteArtist(Artist artist) {
         this.favoriteArtist = artist;
     }
+
+    public void updateRatingAvg(double avg) {
+        this.ratingAvg = avg;
+    }
 }
