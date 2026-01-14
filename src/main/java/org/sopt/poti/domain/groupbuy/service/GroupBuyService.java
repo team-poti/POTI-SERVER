@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.groupbuy.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -100,7 +101,8 @@ public class GroupBuyService {
   }
 
   public GroupBuyDetailResponse getGroupBuyDetail(Long userId, Long groupBuyId) {
-    GroupBuyPost groupBuyPost = groupBuyRepository.findById(groupBuyId)
+    // 2번의 추가 쿼리를 방지하기 위한 조회
+    GroupBuyPost groupBuyPost = groupBuyRepository.findByIdWithUserAndArtist(groupBuyId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
 
     /**
@@ -147,32 +149,38 @@ public class GroupBuyService {
     // 구매한 order 참여자들 리스트
     List<GroupBuyOption> options = groupBuyPost.getOptions();
     List<Long> optionIds = options.stream().map(GroupBuyOption::getId).toList();
-    List<OrderItem> orderItemsByOrderId = orderService.getOrderItemsByOrderId(optionIds);
 
-    // 참여자 기준으로 OrderItem 묶기
-    Map<User, List<OrderItem>> itemsByUser = orderItemsByOrderId.stream()
-        .collect(Collectors.groupingBy(item -> item.getOrder().getUser()));
+    List<ParticipantResponse> participantResponseList = Collections.emptyList();
 
-    // 참여자 리스트 반환
-    List<ParticipantResponse> participantResponseList = itemsByUser.entrySet().stream()
-        .map(entry -> {
-          User user = entry.getKey();
-          List<OrderItem> items = entry.getValue();
+    // 이 분철글에 옵션이 하나라도 있어야 주문이 가능
+    if (!optionIds.isEmpty()) {
+      List<OrderItem> orderItemsByOrderId = orderService.getOrderItemsByOptionIds(optionIds);
 
-          // 해당 유저가 선택한 멤버옵션 이름 추출
-          List<String> memberList = items.stream()
-              .map(item -> item.getGroupBuyOption().getMember().getName())
-              .toList();
+      // 참여자 기준으로 OrderItem 묶기
+      Map<User, List<OrderItem>> itemsByUser = orderItemsByOrderId.stream()
+          .collect(Collectors.groupingBy(item -> item.getOrder().getUser()));
 
-          return ParticipantResponse.builder()
-              .userId(user.getId())
-              .nickName(user.getNickname())
-              .profileImage(user.getProfileImageUrl())
-              .rating(user.getRatingAvg())
-              .selectedMembers(memberList)
-              .build();
-        })
-        .toList();
+      // 참여자 리스트 반환
+      participantResponseList = itemsByUser.entrySet().stream()
+          .map(entry -> {
+            User user = entry.getKey();
+            List<OrderItem> items = entry.getValue();
+
+            // 해당 유저가 선택한 멤버옵션 이름 추출
+            List<String> memberList = items.stream()
+                .map(item -> item.getGroupBuyOption().getMember().getName())
+                .toList();
+
+            return ParticipantResponse.builder()
+                .userId(user.getId())
+                .nickName(user.getNickname())
+                .profileImage(user.getProfileImageUrl())
+                .rating(user.getRatingAvg())
+                .selectedMembers(memberList)
+                .build();
+          })
+          .toList();
+    }
 
     /**
      * 해당 분철글 최저가 계산

@@ -45,7 +45,7 @@ public class OrderService {
     }
   }
 
-  public List<OrderItem> getOrderItemsByOrderId(List<Long> optionIds) {
+  public List<OrderItem> getOrderItemsByOptionIds(List<Long> optionIds) {
     return orderItemRepository.findAllByGroupBuyOptionIdIn(optionIds);
   }
 }
