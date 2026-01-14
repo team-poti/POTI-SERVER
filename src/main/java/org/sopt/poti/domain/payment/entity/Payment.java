@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.order.entity.Order;
+import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.error.ErrorStatus;
 
 @Getter
 @Entity
@@ -20,8 +22,8 @@ public class Payment {
     @Column(name = "depositor", length = 50)
     private String depositor;
 
-    @Column(name = "deposited_at")
-    private LocalDateTime depositedAt;
+    @Column(name = "deposited_at", length = 30)
+    private String depositedAt;
 
     @Column(nullable = false)
     private int amount;
@@ -37,7 +39,7 @@ public class Payment {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    public static Payment create(String depositor, int amount, Order order, LocalDateTime depositedAt) {
+    public static Payment create(String depositor, int amount, Order order, String depositedAt) {
         Payment p = new Payment();
         p.depositor = depositor;
         p.amount = amount;
@@ -45,5 +47,22 @@ public class Payment {
         p.depositedAt = depositedAt;
         p.status = PaymentStatus.PENDING;
         return p;
+    }
+
+    public void submitDepositForm(String depositorName, String depositedAt) {
+        if (this.status != PaymentStatus.PENDING) {
+            throw new BusinessException(ErrorStatus.PAYMENT_NOT_PENDING);
+        }
+        this.depositor = depositorName;
+        this.depositedAt = depositedAt;
+        this.status = PaymentStatus.REQUESTED;
+    }
+
+    public void confirm(LocalDateTime confirmedAt) {
+        if (this.status != PaymentStatus.REQUESTED) {
+            throw new BusinessException(ErrorStatus.PAYMENT_NOT_REQUESTED);
+        }
+        this.status = PaymentStatus.CONFIRMED;
+        this.confirmedAt = confirmedAt;
     }
 }
