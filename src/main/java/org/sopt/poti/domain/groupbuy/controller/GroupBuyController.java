@@ -49,13 +49,13 @@ public class GroupBuyController {
       public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitles(
               @RequestParam Long artistId,
               @RequestParam String keyword
-      ) {
-          if (!StringUtils.hasText(keyword)) {
-              return ResponseEntity.status(HttpStatus.OK)
-                      .body(ApiResponse.success(SuccessStatus.OK,
-                              GroupBuyTitlesResponse.of(Collections.emptyList())));
-          }    List<String> titles = groupBuyService.searchTitles(artistId, keyword);
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles)));
-  }
-}
+                  ) {
+                      if (!StringUtils.hasText(keyword)) {
+                          return ResponseEntity.status(HttpStatus.OK)
+                                  .body(ApiResponse.success(SuccessStatus.OK,
+                                          GroupBuyTitlesResponse.of(Collections.emptyList())));
+                      }
+                      List<String> titles = groupBuyService.searchTitles(artistId, keyword);
+                      return ResponseEntity.status(HttpStatus.OK)
+                              .body(ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles)));
+                  }}

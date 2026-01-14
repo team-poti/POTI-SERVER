@@ -114,7 +114,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
                                 .where(subGroupBuyPost.id.eq(
                                         JPAExpressions.select(subGroupBuyPost.id.max())
                                                 .from(subGroupBuyPost)
-                                                .where(groupBuyPost.title.eq(groupBuyPost.title) // 중복 조건 제거
+                                                .where(subGroupBuyPost.title.eq(groupBuyPost.title)
                                                         .and(artistIdEq(condition.artistId(), subGroupBuyPost))
                                                         .and(subGroupBuyPost.artist.id.eq(groupBuyPost.artist.id)))
                                 )),
