@@ -59,7 +59,7 @@ public class AuthService {
       user = existingUser.get();
       // 탈퇴한 유저인지 확인
       if (user.getStatus() == UserStatus.WITHDRAWN) {
-        throw new BusinessException(ErrorStatus.USER_NOT_FOUND); // 또는 새로운 에러 코드 (탈퇴 유저)
+        throw new BusinessException(ErrorStatus.USER_NOT_FOUND);
       }
       isNewUser = (user.getNickname() == null);
       // TODO: 기존 유저의 정보(닉네임, 프로필 이미지 등)가 변경되었다면 업데이트 로직 추가
