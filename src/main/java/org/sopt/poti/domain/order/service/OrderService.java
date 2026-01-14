@@ -42,4 +42,8 @@ public class OrderService {
             throw new BusinessException(ErrorStatus.REVIEW_FORBIDDEN);
         }
     }
+
+    public List<Order> getOrdersByUser(Long userId) {
+        return orderRepository.findByUser_IdOrderByCreatedAtDesc(userId);
+    }
 }
