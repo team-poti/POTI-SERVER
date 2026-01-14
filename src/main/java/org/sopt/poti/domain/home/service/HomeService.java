@@ -1,6 +1,5 @@
 package org.sopt.poti.domain.home.service;
 
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,12 +40,16 @@ public class HomeService {
 
       myGroupItems = groupBuyRepository.findPopularTitlesByArtist(favoriteArtistId,
           ITEM_LIMIT);
+
       otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(favoriteArtistId,
-          ITEM_LIMIT);
+          "RANDOM", ITEM_LIMIT);
     } else {
       log.info("유저 ID {}의 최애 아티스트가 설정되지 않아 전체 인기 상품을 조회합니다.", userId);
-      myGroupItems = Collections.emptyList();
-      otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(null, ITEM_LIMIT);
+
+      myGroupItems = groupBuyRepository.findPopularTitlesByArtist(null,
+          ITEM_LIMIT); // 전체 인기 상품 (최애 없을 때 상단)
+      otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(null, "RANDOM",
+          ITEM_LIMIT);
     }
 
     // TODO: 배너 로직 구현 필요 (현재는 더미 추후에 기획에 물어보고 변경할 예정)

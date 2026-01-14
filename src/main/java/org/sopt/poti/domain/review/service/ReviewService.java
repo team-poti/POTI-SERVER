@@ -18,35 +18,37 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ReviewService {
 
-    private final ReviewRepository reviewRepository;
-    private final OrderService orderService;
-    private final UserService userService;
+  private final ReviewRepository reviewRepository;
+  private final OrderService orderService;
+  private final UserService userService;
 
-    public Long createReview(Long writerUserId, ReviewRequest request) {
-        Long orderId = request.transactionId();
+  public Long createReview(Long writerUserId, ReviewRequest request) {
+    Long orderId = request.transactionId();
 
-        Order order = orderService.getOrderById(orderId);
+    Order order = orderService.getOrderById(orderId);
 
-        orderService.validateDelivered(order);
-        orderService.validateOrderOwner(order, writerUserId);
+    orderService.validateDelivered(order);
+    orderService.validateOrderOwner(order, writerUserId);
 
-
-        if (reviewRepository.existsByOrder_Id(orderId)) {
-            throw new BusinessException(ErrorStatus.REVIEW_ALREADY_EXISTS);
-        }
-
-        User writer = userService.getUserById(writerUserId);
-
-        User seller = order.getGroupBuyPost().getLeader();
-
-        Review review = Review.create(request.star(), order, writer, seller);
-        Review saved = reviewRepository.save(review);
-
-        double rawAvg = reviewRepository.avgScoreBySellerId(seller.getId());
-        double roundAvg = Math.round(rawAvg * 10) / 10.0;
-        seller.updateRatingAvg(roundAvg);
-
-        return saved.getId();
+    if (reviewRepository.existsByOrder_Id(orderId)) {
+      throw new BusinessException(ErrorStatus.REVIEW_ALREADY_EXISTS);
     }
 
+    User writer = userService.getUserById(writerUserId);
+
+    User seller = order.getGroupBuyPost().getLeader();
+
+    Review review = Review.create(request.star(), order, writer, seller);
+    Review saved = reviewRepository.save(review);
+
+    double rawAvg = reviewRepository.avgScoreBySellerId(seller.getId());
+    double roundAvg = Math.round(rawAvg * 10) / 10.0;
+    seller.updateRatingAvg(roundAvg);
+
+    return saved.getId();
+  }
+
+  public Integer countReviewsForSeller(Long sellerId) {
+    return (int) reviewRepository.countBySeller_Id(sellerId);
+  }
 }
