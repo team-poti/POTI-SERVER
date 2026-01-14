@@ -5,9 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.auth.dto.request.AuthRequest;
-import org.sopt.poti.domain.auth.dto.request.TokenReissueRequest;
 import org.sopt.poti.domain.auth.dto.response.AuthResponse;
-import org.sopt.poti.domain.auth.dto.response.TokenReissueResponse;
 import org.sopt.poti.domain.auth.service.AuthService;
 import org.sopt.poti.global.common.ApiResponse;
 import org.sopt.poti.global.common.SuccessStatus;
@@ -30,17 +28,6 @@ public class AuthController {
   public ResponseEntity<ApiResponse<AuthResponse>> socialLogin(
       @RequestBody @Valid AuthRequest request) {
     AuthResponse response = authService.socialLogin(request);
-    return ResponseEntity.ok(
-        ApiResponse.success(SuccessStatus.OK, response)
-    );
-  }
-
-  @PostMapping("/reissue")
-  @Operation(summary = "토큰 재발급", description = "Refresh Token을 사용하여 Access Token 및 Refresh Token을 재발급합니다.")
-  public ResponseEntity<ApiResponse<TokenReissueResponse>> reissue(
-      @RequestBody @Valid TokenReissueRequest request
-  ) {
-    TokenReissueResponse response = authService.reissue(request);
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK, response)
     );

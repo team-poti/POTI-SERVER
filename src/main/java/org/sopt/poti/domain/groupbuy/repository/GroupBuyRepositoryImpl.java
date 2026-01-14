@@ -48,13 +48,13 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
                 .select(Projections.constructor(HomeGroupBuyItem.class,
                         groupBuyPost.title,
                         artist.name,
-                        JPAExpressions.select(subGroupBuyPost.representativeImageUrl)
+                        JPAExpressions.select(subGroupBuyPost.representativeImageUrl) // 최신 게시글의 대표 이미지 (역정규화)
                                 .from(subGroupBuyPost)
                                 .where(subGroupBuyPost.id.eq(
                                         JPAExpressions.select(subGroupBuyPost.id.max())
                                                 .from(subGroupBuyPost)
                                                 .where(subGroupBuyPost.title.eq(groupBuyPost.title)
-                                                        .and(artistIdEq(artistId, subGroupBuyPost)) // artistId null 처리 적용
+                                                        .and(subGroupBuyPost.artist.id.eq(artistId))
                                                         .and(subGroupBuyPost.artist.id.eq(groupBuyPost.artist.id)))
                                 )),
                         groupBuyPost.id.count(),
@@ -64,7 +64,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
                 ))
                 .from(groupBuyPost)
                 .join(groupBuyPost.artist, artist)
-                .where(artistIdEq(artistId, groupBuyPost)) // artistId null 처리 적용
+                .where(groupBuyPost.artist.id.eq(artistId))
                 .groupBy(groupBuyPost.title, artist.name, groupBuyPost.artist.id)
                 .orderBy(groupBuyPost.id.count().desc())
                 .limit(limit)
@@ -72,20 +72,20 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
     }
 
     @Override
-    public List<HomeGroupBuyItem> findPopularTitlesExcludingArtist(Long artistId, String sort, int limit) {
+    public List<HomeGroupBuyItem> findPopularTitlesExcludingArtist(Long artistId, int limit) {
         QGroupBuyPost subGroupBuyPost = new QGroupBuyPost("subGroupBuyPost");
 
         return queryFactory
                 .select(Projections.constructor(HomeGroupBuyItem.class,
                         groupBuyPost.title,
                         artist.name,
-                        JPAExpressions.select(subGroupBuyPost.representativeImageUrl)
+                        JPAExpressions.select(subGroupBuyPost.representativeImageUrl) // 최신 게시글의 대표 이미지 (역정규화)
                                 .from(subGroupBuyPost)
                                 .where(subGroupBuyPost.id.eq(
                                         JPAExpressions.select(subGroupBuyPost.id.max())
                                                 .from(subGroupBuyPost)
                                                 .where(subGroupBuyPost.title.eq(groupBuyPost.title)
-                                                        .and(artistIdNe(artistId, subGroupBuyPost)) // artistId null 처리 적용
+                                                        .and(artistIdNe(artistId, subGroupBuyPost))
                                                         .and(subGroupBuyPost.artist.id.eq(groupBuyPost.artist.id)))
                                 )),
                         groupBuyPost.id.count(),
@@ -95,9 +95,9 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
                 ))
                 .from(groupBuyPost)
                 .join(groupBuyPost.artist, artist)
-                .where(artistIdNe(artistId, groupBuyPost)) // artistId null 처리 적용
+                .where(artistIdNe(artistId, groupBuyPost))
                 .groupBy(groupBuyPost.title, artist.name, groupBuyPost.artist.id)
-                .orderBy(sortCondition(sort)) // 정렬 조건 적용
+                .orderBy(groupBuyPost.id.count().desc())
                 .limit(limit)
                 .fetch();
     }
@@ -109,7 +109,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
         List<FeedGroupItem> content = queryFactory
                 .select(Projections.constructor(FeedGroupItem.class,
                         artist.name,
-                        JPAExpressions.select(subGroupBuyPost.representativeImageUrl)
+                        JPAExpressions.select(subGroupBuyPost.representativeImageUrl) // 최신 게시글의 대표 이미지 (역정규화)
                                 .from(subGroupBuyPost)
                                 .where(subGroupBuyPost.id.eq(
                                         JPAExpressions.select(subGroupBuyPost.id.max())
@@ -152,14 +152,16 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
 
     private OrderSpecifier<?> sortCondition(String sort) {
         if ("HOT".equalsIgnoreCase(sort)) {
+            // 인기순: 게시글 많은 순
             return groupBuyPost.id.count().desc();
         }
         if ("RANDOM".equalsIgnoreCase(sort)) {
+            // MySQL RAND()
             LocalDate today = LocalDate.now();
             int seed = Integer.parseInt(today.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
             return Expressions.numberTemplate(Double.class, "function('rand', {0})", seed).asc();
         }
-        // 기본값: 최신순
+        // 기본값: 최신순 (그룹 내 가장 최신 글 기준)
         return groupBuyPost.createdAt.max().desc();
     }
 }
