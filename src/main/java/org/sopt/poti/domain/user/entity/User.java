@@ -74,6 +74,7 @@ public class User extends BaseSoftDeleteEntity {
     this.favoriteArtist = favoriteArtist;
     this.role = role;
     this.ratingAvg = 0.0;
+    this.status = UserStatus.ACTIVE;
     this.lastActiveAt = LocalDateTime.now();
   }
 

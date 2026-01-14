@@ -11,6 +11,8 @@ import org.sopt.poti.domain.auth.dto.response.TokenReissueResponse;
 import org.sopt.poti.domain.auth.service.AuthService;
 import org.sopt.poti.global.common.ApiResponse;
 import org.sopt.poti.global.common.SuccessStatus;
+import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.error.ErrorStatus;
 import org.sopt.poti.global.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -56,8 +58,8 @@ public class AuthController {
       @RequestHeader("Authorization") String accessToken, // Access Token을 헤더에서 받음
       @AuthenticationPrincipal UserPrincipal userPrincipal
   ) {
-    authService.logout(accessToken.substring("Bearer ".length()),
-        userPrincipal.getUserId()); // "Bearer " 제거 후 전달
+    authService.logout(extractToken(accessToken),
+        userPrincipal.getUserId());
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK)
     );
@@ -69,10 +71,17 @@ public class AuthController {
       @RequestHeader("Authorization") String accessToken,
       @AuthenticationPrincipal UserPrincipal userPrincipal
   ) {
-    authService.withdraw(accessToken.substring("Bearer ".length()),
-        userPrincipal.getUserId()); // "Bearer " 제거 후 전달
+    authService.withdraw(extractToken(accessToken),
+        userPrincipal.getUserId());
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK)
     );
+  }
+
+  private String extractToken(String authorizationHeader) {
+    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+      throw new BusinessException(ErrorStatus.INVALID_TOKEN);
+    }
+    return authorizationHeader.substring("Bearer ".length());
   }
 }
