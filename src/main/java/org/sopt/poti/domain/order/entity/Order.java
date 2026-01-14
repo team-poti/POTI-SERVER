@@ -13,6 +13,8 @@ import org.sopt.poti.domain.payment.entity.Payment;
 import org.sopt.poti.domain.review.entity.Review;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.global.entity.BaseTimeEntity;
+import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.error.ErrorStatus;
 
 @Getter
 @Entity
@@ -92,5 +94,18 @@ public class Order extends BaseTimeEntity {
                 .deliveryInfo(deliveryInfo)
                 .requestInfo(requestInfo)
                 .build();
+    }
+    public void requestPayCheck() {
+        if (this.status != OrderStatus.WAIT_PAY) {
+            throw new BusinessException(ErrorStatus.ORDER_NOT_WAIT_PAY);
+        }
+        this.status = OrderStatus.WAIT_PAY_CHECK;
+    }
+
+    public void confirmPayment() {
+        if (this.status != OrderStatus.WAIT_PAY_CHECK) {
+            throw new BusinessException(ErrorStatus.ORDER_NOT_WAIT_PAY_CHECK);
+        }
+        this.status = OrderStatus.PAID;
     }
 }
