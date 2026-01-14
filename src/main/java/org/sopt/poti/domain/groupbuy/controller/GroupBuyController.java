@@ -7,18 +7,23 @@ import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
+import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyListRequest;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyTitlesResponse;
 import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
 import org.sopt.poti.global.common.ApiResponse;
 import org.sopt.poti.global.common.SuccessStatus;
 import org.sopt.poti.global.security.UserPrincipal;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -73,5 +78,17 @@ public class GroupBuyController {
         userPrincipal.getUserId(), postId);
 
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyDetail));
+  }
+
+  @GetMapping("/pots")
+  @Operation(summary = "상품별 분철 팟 목록 조회", description = "특정 아티스트의 특정 상품명에 해당하는 분철 팟(게시글) 목록을 필터링 및 정렬하여 조회합니다. (남아있는 멤버 필터링, 평점순, 마감임박순 정렬)")
+  public ResponseEntity<ApiResponse<GroupBuyListResponse>> getGroupBuyPotList(
+      @ModelAttribute @Valid GroupBuyListRequest request,
+      @PageableDefault(size = 10) Pageable pageable
+  ) {
+    GroupBuyListResponse response = groupBuyService.getGroupBuyListByPostTitle(request, pageable);
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK, response)
+    );
   }
 }

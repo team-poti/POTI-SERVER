@@ -45,7 +45,7 @@ public record GroupBuyDetailResponse(
   @Builder
   public record UploaderResponse(
       Long userId,
-      String nickName,
+      String nickname,
       String profileImage,
       Double rating,
       Integer reviewCount
@@ -56,7 +56,7 @@ public record GroupBuyDetailResponse(
   @Builder
   public record ParticipantResponse(
       Long userId,
-      String nickName,
+      String nickname,
       String profileImage,
       Double rating,
       List<String> selectedMembers
