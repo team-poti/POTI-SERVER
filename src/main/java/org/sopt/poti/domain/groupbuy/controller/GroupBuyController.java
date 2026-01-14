@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/groupbuys")
+@RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
 @Tag(name = "GroupBuy", description = "공동구매 관련 API")
 public class GroupBuyController {
@@ -46,16 +46,17 @@ public class GroupBuyController {
 
   @GetMapping("/titles")
   @Operation(summary = "상품명 자동완성/추천", description = "입력 키워드를 기반으로 공동구매 상품명 리스트를 추천합니다.")
-      public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitles(
-              @RequestParam Long artistId,
-              @RequestParam String keyword
-                  ) {
-                      if (!StringUtils.hasText(keyword)) {
-                          return ResponseEntity.status(HttpStatus.OK)
-                                  .body(ApiResponse.success(SuccessStatus.OK,
-                                          GroupBuyTitlesResponse.of(Collections.emptyList())));
-                      }
-                      List<String> titles = groupBuyService.searchTitles(artistId, keyword);
-                      return ResponseEntity.status(HttpStatus.OK)
-                              .body(ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles)));
-                  }}
+  public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitles(
+      @RequestParam Long artistId,
+      @RequestParam String keyword
+  ) {
+    if (!StringUtils.hasText(keyword)) {
+      return ResponseEntity.status(HttpStatus.OK)
+          .body(ApiResponse.success(SuccessStatus.OK,
+              GroupBuyTitlesResponse.of(Collections.emptyList())));
+    }
+    List<String> titles = groupBuyService.searchTitles(artistId, keyword);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles)));
+  }
+}
