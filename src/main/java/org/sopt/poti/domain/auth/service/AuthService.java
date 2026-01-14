@@ -5,7 +5,9 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.domain.auth.dto.request.AuthRequest;
+import org.sopt.poti.domain.auth.dto.request.TokenReissueRequest;
 import org.sopt.poti.domain.auth.dto.response.AuthResponse;
+import org.sopt.poti.domain.auth.dto.response.TokenReissueResponse;
 import org.sopt.poti.domain.auth.entity.RefreshToken;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
 import org.sopt.poti.domain.user.entity.SocialType;
@@ -96,6 +98,41 @@ public class AuthService {
         .refreshToken(refreshToken)
         .isNewUser(isNewUser)
         .userId(user.getId())
+        .build();
+  }
+
+  @Transactional
+  public TokenReissueResponse reissue(TokenReissueRequest request) {
+    // Refresh Token 유효성 검증
+    String oldRefreshToken = request.refreshToken();
+    jwtTokenProvider.validateToken(oldRefreshToken);
+
+    // Refresh Token에서 userId 추출
+    Long userId = jwtTokenProvider.getUserIdFromToken(oldRefreshToken);
+
+    // Redis에서 저장된 Refresh Token 조회 및 일치 여부 확인
+    RefreshToken storedRefreshToken = refreshTokenRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.INVALID_TOKEN)); // Redis에 토큰 없음
+
+    if (!storedRefreshToken.getRefreshToken().equals(oldRefreshToken)) {
+      throw new BusinessException(ErrorStatus.INVALID_TOKEN); // 토큰 불일치
+    }
+
+    // 새로운 Access Token 및 Refresh Token 발급
+    String newAccessToken = jwtTokenProvider.createAccessToken(userId);
+    String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
+
+    // Redis 업데이트 (기존 토큰 삭제 후 새 토큰 저장)
+    refreshTokenRepository.delete(storedRefreshToken); // 기존 토큰 삭제
+    refreshTokenRepository.save(RefreshToken.builder()
+        .userId(userId)
+        .refreshToken(newRefreshToken)
+        .ttl(refreshTokenValidity / 1000)
+        .build());
+
+    return TokenReissueResponse.builder()
+        .accessToken(newAccessToken)
+        .refreshToken(newRefreshToken)
         .build();
   }
 
