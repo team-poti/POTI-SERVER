@@ -3,7 +3,6 @@ package org.sopt.poti.domain.groupbuy.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
-import org.springframework.data.domain.Pageable;
 
 public record GroupBuyListRequest(
     @NotBlank(message = "상품명(title)은 필수입니다.")
@@ -16,10 +15,10 @@ public record GroupBuyListRequest(
 
     String sort // LATEST, DEADLINE, RATING
 ) {
-    // Compact Constructor
-    public GroupBuyListRequest {
-        if (title != null) {
-            title = title.trim(); // 여기서 앞뒤 공백 제거
-        }
+
+  public GroupBuyListRequest {
+    if (title != null) {
+      title = title.trim(); // 여기서 앞뒤 공백 제거
     }
+  }
 }
