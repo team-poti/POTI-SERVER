@@ -10,11 +10,13 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
+import java.util.concurrent.TimeUnit; // TimeUnit import
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate; // RedisTemplate import
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -32,6 +34,7 @@ public class JwtTokenProvider {
   private long refreshTokenValidity;
 
   private Key key;
+  private final RedisTemplate<String, String> redisTemplate; // RedisTemplate 주입
 
   @PostConstruct
   protected void init() {
@@ -85,7 +88,18 @@ public class JwtTokenProvider {
     }
   }
 
+  // Access Token 남은 만료 시간 (ms)
+  public long getExpiration(String token) {
+    Date expiration = getClaimsFromToken(token).getExpiration();
+    return expiration.getTime() - new Date().getTime();
+  }
+
   public void validateToken(String token) {
     getClaimsFromToken(token); // 예외가 발생하면 throw 됨
+
+    // Redis 블랙리스트에 있는 토큰인지 확인
+    if (redisTemplate.opsForValue().get(token) != null) {
+      throw new BusinessException(ErrorStatus.INVALID_TOKEN); // 블랙리스트 토큰은 유효하지 않음
+    }
   }
 }

@@ -11,96 +11,107 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import java.time.LocalDateTime;
-
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
-import org.sopt.poti.global.entity.BaseTimeEntity;
+import org.sopt.poti.global.entity.BaseSoftDeleteEntity;
 
 @Getter
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseTimeEntity {
+public class User extends BaseSoftDeleteEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(length = 255)
-    private String email;
+  @Column(length = 255)
+  private String email;
 
-    @Column(name = "social_id", length = 255, unique = true, nullable = false)
-    private String socialId;
+  @Column(name = "social_id", length = 255, unique = true, nullable = false)
+  private String socialId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "social_type", nullable = false)
-    private SocialType socialType;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "social_type", nullable = false)
+  private SocialType socialType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private Role role;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "role", nullable = false)
+  private Role role;
 
-    @Column(length = 30)
-    private String nickname;
+  @Column(length = 30)
+  private String nickname;
 
-    @Column(name = "profile_image_url", length = 255)
-    private String profileImageUrl;
+  @Column(name = "profile_image_url", length = 255)
+  private String profileImageUrl;
 
-    @Column(name = "last_active_at")
-    private LocalDateTime lastActiveAt;
+  @Column(name = "last_active_at")
+  private LocalDateTime lastActiveAt;
 
-    @Column(name = "rating_avg")
-    private Double ratingAvg;
+  @Column(name = "rating_avg")
+  private Double ratingAvg;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "favorite_artist_id", nullable = true)
-    private Artist favoriteArtist;
+  @Enumerated(EnumType.STRING)
+  private UserStatus status;
 
-    @Builder
-    private User(String socialId, SocialType socialType, String email, String nickname,
-                 String profileImageUrl, Artist favoriteArtist, Role role) {
-        this.socialId = socialId;
-        this.socialType = socialType;
-        this.email = email;
-        this.nickname = nickname;
-        this.profileImageUrl = profileImageUrl;
-        this.favoriteArtist = favoriteArtist;
-        this.role = role;
-        this.ratingAvg = 0.0;
-        this.lastActiveAt = LocalDateTime.now();
-    }
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "favorite_artist_id", nullable = true)
+  private Artist favoriteArtist;
 
-    public static User createSocialUser(String socialId, SocialType socialType, String email,
-                                        String nickname, String profileImageUrl, Artist favoriteArtist) {
-        return User.builder()
-                .socialId(socialId)
-                .socialType(socialType)
-                .email(email)
-                .nickname(nickname)
-                .profileImageUrl(profileImageUrl)
-                .favoriteArtist(favoriteArtist)
-                .role(Role.USER)
-                .build();
-    }
+  @Builder
+  private User(String socialId, SocialType socialType, String email, String nickname,
+      String profileImageUrl, Artist favoriteArtist, Role role) {
+    this.socialId = socialId;
+    this.socialType = socialType;
+    this.email = email;
+    this.nickname = nickname;
+    this.profileImageUrl = profileImageUrl;
+    this.favoriteArtist = favoriteArtist;
+    this.role = role;
+    this.ratingAvg = 0.0;
+    this.lastActiveAt = LocalDateTime.now();
+  }
 
-    public void updateLastActiveAt() {
-        this.lastActiveAt = LocalDateTime.now();
-    }
+  public static User createSocialUser(String socialId, SocialType socialType, String email,
+      String nickname, String profileImageUrl, Artist favoriteArtist) {
+    return User.builder()
+        .socialId(socialId)
+        .socialType(socialType)
+        .email(email)
+        .nickname(nickname)
+        .profileImageUrl(profileImageUrl)
+        .favoriteArtist(favoriteArtist)
+        .role(Role.USER)
+        .build();
+  }
 
-    public void updateNickname(String nickname) {
-        this.nickname = nickname;
-    }
+  public void updateLastActiveAt() {
+    this.lastActiveAt = LocalDateTime.now();
+  }
 
-    public void updateFavoriteArtist(Artist artist) {
-        this.favoriteArtist = artist;
-    }
+  public void updateNickname(String nickname) {
+    this.nickname = nickname;
+  }
 
-    public void updateRatingAvg(double avg) {
-        this.ratingAvg = avg;
-    }
+  public void updateFavoriteArtist(Artist artist) {
+    this.favoriteArtist = artist;
+  }
+
+  public void updateRatingAvg(double avg) {
+    this.ratingAvg = avg;
+  }
+
+  public void withdraw() {
+    this.status = UserStatus.WITHDRAWN;
+    this.deletedAt = LocalDateTime.now();
+    this.nickname = "탈퇴한 사용자";
+    this.email = null;
+    this.profileImageUrl = null;
+    this.socialId = "deleted_" + this.id + "_" + UUID.randomUUID(); // 유니크 제약 회피
+  }
 }

@@ -25,36 +25,36 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Dev", description = "개발자 테스트용 API")
 public class DevController {
 
-    private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository; // RefreshTokenRepository 주입
+  private final UserService userService;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final RefreshTokenRepository refreshTokenRepository; // RefreshTokenRepository 주입
 
-    @Value("${jwt.refresh-token-validity}") // Refresh Token 유효기간 주입
-    private long refreshTokenValidity;
+  @Value("${jwt.refresh-token-validity}") // Refresh Token 유효기간 주입
+  private long refreshTokenValidity;
 
-    @GetMapping("/login")
-    @Operation(summary = "개발자용 토큰 발급 (userId=1)", description = "개발 테스트를 위해 1번 유저의 토큰을 즉시 발급합니다. (로컬/Dev 환경 전용)")
-    public ResponseEntity<ApiResponse<DevTokenResponseDto>> devLogin() {
-        Long devUserId = 1L;
+  @GetMapping("/login")
+  @Operation(summary = "개발자용 토큰 발급 (userId=1)", description = "개발 테스트를 위해 1번 유저의 토큰을 즉시 발급합니다. (로컬/Dev 환경 전용)")
+  public ResponseEntity<ApiResponse<DevTokenResponseDto>> devLogin() {
+    Long devUserId = 2L;
 
-        User user = userService.getUserById(devUserId);
+    User user = userService.getUserById(devUserId);
 
-        String accessToken = jwtTokenProvider.createAccessToken(user.getId());
-        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+    String accessToken = jwtTokenProvider.createAccessToken(user.getId());
+    String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
-        // Redis에 Refresh Token 저장
-        refreshTokenRepository.save(RefreshToken.builder()
-                .userId(user.getId())
-                .refreshToken(refreshToken)
-                .ttl(refreshTokenValidity / 1000)
-                .build());
+    // Redis에 Refresh Token 저장
+    refreshTokenRepository.save(RefreshToken.builder()
+        .userId(user.getId())
+        .refreshToken(refreshToken)
+        .ttl(refreshTokenValidity / 1000)
+        .build());
 
-        DevTokenResponseDto responseDto = DevTokenResponseDto.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+    DevTokenResponseDto responseDto = DevTokenResponseDto.builder()
+        .accessToken(accessToken)
+        .refreshToken(refreshToken)
+        .build();
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(SuccessStatus.OK, responseDto));
-    }
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(ApiResponse.success(SuccessStatus.OK, responseDto));
+  }
 }
