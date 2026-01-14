@@ -17,4 +17,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "groupBuyPost.artist"
     })
     List<Order> findByUser_IdOrderByCreatedAtDesc(Long userId);
+
+    void deleteByUser_Id(Long userId);
 }

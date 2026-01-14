@@ -17,4 +17,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
       "JOIN FETCH gbo.member m " +
       "WHERE gbo.id IN :optionIds")
   List<OrderItem> findAllByGroupBuyOptionIdIn(@Param("optionIds") List<Long> optionIds);
+
+  void deleteByGroupBuyOptionIdIn(List<Long> optionIds);
 }
