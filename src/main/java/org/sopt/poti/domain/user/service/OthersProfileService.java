@@ -5,10 +5,8 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
-import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
-import org.sopt.poti.domain.order.entity.OrderStatus;
-import org.sopt.poti.domain.order.service.OrderService;
-import org.sopt.poti.domain.user.dto.response.MyPageResponse;
+import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
+import org.sopt.poti.domain.user.dto.response.OthersProfileResponse;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.repository.UserRepository;
 import org.sopt.poti.global.error.BusinessException;
@@ -19,14 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class MyPageService {
+public class OthersProfileService {
 
     private final UserRepository userRepository;
-    private final OrderService orderService;
-    private final GroupBuyService groupBuyService;
+    private final GroupBuyRepository groupBuyRepository;
     private final ActivityMessageResolver activityMessageResolver;
 
-    public MyPageResponse getMyPage(Long userId) {
+    public OthersProfileResponse getProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
 
@@ -34,55 +31,33 @@ public class MyPageService {
         LocalDate joinedAt = user.getCreatedAt().toLocalDate();
         boolean hasFavoriteArtist = (user.getFavoriteArtist() != null);
 
-        String favoriteArtistName = hasFavoriteArtist
-                ? user.getFavoriteArtist().getName()
-                : null;
-
-        int pTotal = orderService.countByUser_Id(userId);
-
-        List<OrderStatus> pInProgressStatuses = List.of(
-                OrderStatus.WAIT_PAY,
-                OrderStatus.WAIT_PAY_CHECK,
-                OrderStatus.PAID,
-                OrderStatus.READY,
-                OrderStatus.SHIPPED
-        );
-        int pInProgress = orderService.countByUser_IdAndStatusIn(userId, pInProgressStatuses);
-
-        List<OrderStatus> pCompletedStatuses = List.of(OrderStatus.DELIVERED);
-        int pCompleted = orderService.countByUser_IdAndStatusIn(userId, pCompletedStatuses);
-
-        MyPageResponse.Summary participation = new MyPageResponse.Summary(pTotal, pInProgress, pCompleted);
-
-        int rTotal = groupBuyService.countByLeader_Id(userId);
+        int rTotal = groupBuyRepository.countByLeader_Id(userId);
 
         List<GroupBuyPostStatus> rInProgressStatuses = List.of(
                 GroupBuyPostStatus.RECRUITING,
                 GroupBuyPostStatus.PAYMENT_DONE,
                 GroupBuyPostStatus.SHIPPING
         );
-        int rInProgress = groupBuyService.countByLeader_IdAndStatusIn(userId, rInProgressStatuses);
+        int rInProgress = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rInProgressStatuses);
 
         List<GroupBuyPostStatus> rCompletedStatuses = List.of(
                 GroupBuyPostStatus.CLOSED,
                 GroupBuyPostStatus.DELIVERED,
                 GroupBuyPostStatus.COMPLETED
         );
-        int rCompleted = groupBuyService.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
+        int rCompleted = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
 
-        MyPageResponse.Summary recruit = new MyPageResponse.Summary(rTotal, rInProgress, rCompleted);
+        OthersProfileResponse.Summary recruit = new OthersProfileResponse.Summary(rTotal, rInProgress, rCompleted);
 
-        return new MyPageResponse(
+        return new OthersProfileResponse(
                 user.getId(),
-                user.getNickname(),
                 user.getEmail(),
+                user.getNickname(),
                 user.getProfileImageUrl(),
                 user.getRatingAvg(),
                 activityMessage,
                 joinedAt,
                 hasFavoriteArtist,
-                favoriteArtistName,
-                participation,
                 recruit
         );
     }
