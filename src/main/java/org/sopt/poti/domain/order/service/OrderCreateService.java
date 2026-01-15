@@ -1,7 +1,9 @@
 package org.sopt.poti.domain.order.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
@@ -64,14 +66,20 @@ public class OrderCreateService {
       throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_FOUND);
     }
 
-    // 4 옵션이 해당 post 소속인지를 검증
+    // 4 중복 옵션 검증
+    Set<Long> uniqueIds = new HashSet<>(optionIds);
+    if (uniqueIds.size() != optionIds.size()) {
+      throw new BusinessException(ErrorStatus.DUPLICATE_ORDER_OPTION);
+    }
+
+    // 5 옵션이 해당 post 소속인지를 검증
     for (GroupBuyOption option : options) {
       if (!option.getGroupBuyPost().getId().equals(post.getId())) {
         throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_IN_POST);
       }
     }
 
-    // 5 배송정보
+    // 6 배송정보
     DeliveryInfo deliveryInfo = new DeliveryInfo(
         request.deliveryInfo().receiverName(),
         request.deliveryInfo().zipcode(),
@@ -79,7 +87,7 @@ public class OrderCreateService {
         request.deliveryInfo().phone()
     );
 
-    // 6 총 금액 계산 = 옵션들 합 + 공구 배송비
+    // 7 총 금액 계산 = 옵션들 합 + 공구 배송비
     Map<Long, GroupBuyOption> optionMap = options.stream()
         .collect(Collectors.toMap(GroupBuyOption::getId, o -> o));
 
@@ -94,7 +102,7 @@ public class OrderCreateService {
 
     int totalAmount = itemsAmount + shippingPrice;
 
-    // 7 Order 저장
+    // 8 Order 저장
     Order order = Order.create(
         post,
         user,
@@ -105,7 +113,7 @@ public class OrderCreateService {
 
     Order savedOrder = orderRepository.save(order);
 
-    // 8 OrderItem 저장
+    // 9 OrderItem 저장
     List<OrderItem> orderItems = request.items().stream()
         .map(itemReq -> {
           GroupBuyOption option = optionMap.get(itemReq.groupBuyOptionId());
