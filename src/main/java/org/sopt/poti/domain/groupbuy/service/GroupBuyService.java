@@ -308,7 +308,7 @@ public class GroupBuyService {
     List<OrderItem> soldItems = optionIds.isEmpty()
         ? Collections.emptyList()
         : orderService.getOrderItemsByOptionIds(optionIds);
-    
+
     Set<Long> soldOptionIds = soldItems.stream()
         .map(item -> item.getGroupBuyOption().getId())
         .collect(Collectors.toSet());
@@ -347,11 +347,6 @@ public class GroupBuyService {
     return groupBuyRepository.countByLeader_IdAndStatusIn(userId, statuses);
   }
 
-  public GroupBuyPost getPostById(Long postId) {
-    return groupBuyRepository.findById(postId)
-        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
-  }
-
   public GroupBuyShipping getShippingInPost(Long shippingId, Long postId) {
     return groupBuyShippingRepository.findByIdAndGroupBuyPost_Id(shippingId, postId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.GROUP_BUY_SHIPPING_NOT_FOUND));
@@ -378,5 +373,17 @@ public class GroupBuyService {
 
     return options;
   }
+
+  public GroupBuyPost getRecruitingPostById(Long postId) {
+    GroupBuyPost post = groupBuyRepository.findById(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+
+    if (post.getStatus() != GroupBuyPostStatus.RECRUITING) {
+      throw new BusinessException(ErrorStatus.GROUP_BUY_POST_NOT_RECRUITING);
+    }
+
+    return post;
+  }
+
 
 }
