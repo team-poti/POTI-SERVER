@@ -56,28 +56,14 @@ public class OrderCreateService {
         .map(OrderItemRequest::groupBuyOptionId)
         .toList();
 
-    if (optionIds.isEmpty()) {
-      throw new BusinessException(ErrorStatus.ORDER_ITEM_EMPTY);
-    }
-
-    List<GroupBuyOption> options = groupBuyService.getOptionsInPost(optionIds, post.getId());
-
-    if (options.size() != optionIds.size()) {
-      throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_FOUND);
-    }
-
     // 4 중복 옵션 검증
     Set<Long> uniqueIds = new HashSet<>(optionIds);
     if (uniqueIds.size() != optionIds.size()) {
       throw new BusinessException(ErrorStatus.DUPLICATE_ORDER_OPTION);
     }
 
-    // 5 옵션이 해당 post 소속인지를 검증
-    for (GroupBuyOption option : options) {
-      if (!option.getGroupBuyPost().getId().equals(post.getId())) {
-        throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_IN_POST);
-      }
-    }
+    // 5 옵션 조회 및 검증
+    List<GroupBuyOption> options = groupBuyService.getOptionsInPost(optionIds, post.getId());
 
     // 6 배송정보
     DeliveryInfo deliveryInfo = new DeliveryInfo(
