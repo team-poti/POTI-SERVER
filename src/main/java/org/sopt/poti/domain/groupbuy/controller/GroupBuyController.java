@@ -8,9 +8,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyListRequest;
+import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyMeStatus;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyTitlesResponse;
 import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
@@ -101,5 +103,18 @@ public class GroupBuyController {
     GroupBuyPostOptionResponse groupBuyPostOptionResponse = groupBuyService.getGroupBuyPostOptionResponse(
         postId);
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyPostOptionResponse));
+  }
+
+  @GetMapping("/me")
+  @Operation(summary = "판매자용 내 판매 내역 리스트 조회", description =
+      "총대로 진행했던 내역들을 조회합니다. 상태값은 IN_PROGRESS (진행중) \n"
+          + "또는\n"
+          + "COMPLETED (완료)가 있습니다.")
+  public ResponseEntity<ApiResponse<GroupBuyMeResponse>> getGroupBuyMeList(
+      @RequestParam(name = "status") GroupBuyMeStatus status,
+      @AuthenticationPrincipal UserPrincipal userPrincipal
+  ) {
+    GroupBuyMeResponse response = groupBuyService.getMyGroupBuyPosts(userPrincipal.getUserId(), status);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, response));
   }
 }
