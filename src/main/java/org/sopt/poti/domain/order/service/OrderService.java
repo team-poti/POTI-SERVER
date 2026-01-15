@@ -78,10 +78,10 @@ public class OrderService {
     if (!groupBuyPost.getLeader().getId().equals(userId)) {
       throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
     }
-    
+
     // 이미 배송 처리된 주문건
     if (deliveryService.existsDeliveryByOrderId(orderId)) {
-      throw new BusinessException(ErrorStatus.ORDER_EXSIST_SHIPPINGS);
+      throw new BusinessException(ErrorStatus.ORDER_EXISTS_SHIPPINGS);
     }
 
     LocalDateTime shippedAt = LocalDateTime.now();
