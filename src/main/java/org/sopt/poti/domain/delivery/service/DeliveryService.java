@@ -3,8 +3,10 @@ package org.sopt.poti.domain.delivery.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.delivery.dto.response.DeliveryOptionsResponse;
+import org.sopt.poti.domain.delivery.entity.Delivery;
 import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 import org.sopt.poti.domain.delivery.repository.DeliveryMethodRepository;
+import org.sopt.poti.domain.delivery.repository.DeliveryRepository;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeliveryService {
 
   private final DeliveryMethodRepository deliveryMethodRepository;
+  private final DeliveryRepository deliveryRepository;
 
   public DeliveryMethod getDeliveryMethodById(Long deliveryMethodId) {
     return deliveryMethodRepository.findById(deliveryMethodId)
@@ -30,5 +33,10 @@ public class DeliveryService {
             deliveryMethod.getPrice()
         ))
         .toList();
+  }
+
+  @Transactional
+  public void saveDelivery(Delivery delivery) {
+    deliveryRepository.save(delivery);
   }
 }

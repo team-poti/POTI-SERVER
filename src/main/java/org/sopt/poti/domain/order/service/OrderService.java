@@ -1,7 +1,13 @@
 package org.sopt.poti.domain.order.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.delivery.dto.request.StartDeliveryRequest;
+import org.sopt.poti.domain.delivery.dto.response.StartDeliveryResponse;
+import org.sopt.poti.domain.delivery.entity.Delivery;
+import org.sopt.poti.domain.delivery.service.DeliveryService;
+import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.order.entity.OrderItem;
 import org.sopt.poti.domain.order.entity.OrderStatus;
@@ -19,6 +25,7 @@ public class OrderService {
 
   private final OrderRepository orderRepository;
   private final OrderItemRepository orderItemRepository;
+  private final DeliveryService deliveryService;
 
   public int countByUser_Id(Long userId) {
     return orderRepository.countByUser_Id(userId);
@@ -57,5 +64,32 @@ public class OrderService {
   // 해당 분철글에 대해 OrderStatus가 아닌 주문이 남아있는지 확인
   public long countByGroupBuyPostIdAndStatusNot(Long postId, OrderStatus status) {
     return orderRepository.countUnpaidOrders(postId, status);
+  }
+
+  // 배송사 등록
+  @Transactional
+  public StartDeliveryResponse startOrderDelivery(Long userId, Long orderId,
+      StartDeliveryRequest startDeliveryRequest) {
+    Order order = orderRepository.findByIdWithPostAndLeader(orderId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.ORDER_NOT_FOUND));
+
+    GroupBuyPost groupBuyPost = order.getGroupBuyPost();
+    // 분철글이 본인이 작성한 글인지 확인
+    if (!groupBuyPost.getLeader().getId().equals(userId)) {
+      throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
+    }
+
+    Delivery delivery = Delivery.builder()
+        .trackingNumber(startDeliveryRequest.trackingNumber())
+        .carrier(startDeliveryRequest.carrier())
+        .shippedAt(LocalDateTime.now())
+        .order(order)
+        .build();
+
+    deliveryService.saveDelivery(delivery);
+    order.updateStatus(OrderStatus.DELIVERED);
+
+    return new StartDeliveryResponse(orderId, order.getStatus(),
+        startDeliveryRequest.trackingNumber(), LocalDateTime.now());
   }
 }
