@@ -1,10 +1,10 @@
 package org.sopt.poti.domain.payment.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@NotBlank
 public record DepositFormRequest (
-        Long orderId,
-        String depositorName,
-        String depositedAt
+        @NotNull Long orderId,
+        @NotBlank String depositorName,
+        @NotBlank String depositedAt
 ){}
