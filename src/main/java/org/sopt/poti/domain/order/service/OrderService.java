@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.order.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.order.entity.OrderItem;
@@ -10,8 +11,6 @@ import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +50,12 @@ public class OrderService {
   }
 
 
-    public List<Order> getOrdersByUser(Long userId) {
-        return orderRepository.findByUser_IdOrderByCreatedAtDesc(userId);
-    }
+  public List<Order> getOrdersByUser(Long userId) {
+    return orderRepository.findByUser_IdOrderByCreatedAtDesc(userId);
+  }
+
+  // 해당 분철글에 대해 OrderStatus가 아닌 주문이 남아있는지 확인
+  public long countByGroupBuyPostIdAndStatusNot(Long postId, OrderStatus status) {
+    return orderRepository.countUnpaidOrders(postId, status);
+  }
 }

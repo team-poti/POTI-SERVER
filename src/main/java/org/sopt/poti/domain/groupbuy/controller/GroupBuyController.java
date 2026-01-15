@@ -11,6 +11,7 @@ import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyListRequest;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyTitlesResponse;
 import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
 import org.sopt.poti.global.common.ApiResponse;
@@ -90,5 +91,15 @@ public class GroupBuyController {
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK, response)
     );
+  }
+
+  @GetMapping("/{postId}/options")
+  @Operation(summary = "분철글 선택 가능한 분철 멤버 옵션과 배송 방법 조회", description = "특정 분철글에 참여(구매) 가능한 멤버 옵션과 배송 방법들을 조회합니다.")
+  public ResponseEntity<ApiResponse<GroupBuyPostOptionResponse>> getGroupBuyOptionList(
+      @PathVariable(name = "postId") Long postId
+  ) {
+    GroupBuyPostOptionResponse groupBuyPostOptionResponse = groupBuyService.getGroupBuyPostOptionResponse(
+        postId);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyPostOptionResponse));
   }
 }
