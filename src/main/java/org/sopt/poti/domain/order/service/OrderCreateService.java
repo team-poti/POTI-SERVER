@@ -8,9 +8,7 @@ import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyShipping;
-import org.sopt.poti.domain.groupbuy.repository.GroupBuyOptionRepository;
-import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
-import org.sopt.poti.domain.groupbuy.repository.GroupBuyShippingRepository;
+import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
 import org.sopt.poti.domain.order.dto.request.CreateOrderRequest;
 import org.sopt.poti.domain.order.dto.request.OrderItemRequest;
 import org.sopt.poti.domain.order.dto.response.CreateOrderResponse;
@@ -20,7 +18,7 @@ import org.sopt.poti.domain.order.entity.OrderItem;
 import org.sopt.poti.domain.order.repository.OrderItemRepository;
 import org.sopt.poti.domain.order.repository.OrderRepository;
 import org.sopt.poti.domain.user.entity.User;
-import org.sopt.poti.domain.user.repository.UserRepository;
+import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.stereotype.Service;
@@ -34,29 +32,22 @@ public class OrderCreateService {
   private final OrderRepository orderRepository;
   private final OrderItemRepository orderItemRepository;
 
-  private final GroupBuyRepository groupBuyRepository;
-  private final GroupBuyOptionRepository groupBuyOptionRepository;
-  private final GroupBuyShippingRepository groupBuyShippingRepository;
-
-  private final UserRepository userRepository;
+  private final GroupBuyService groupBuyService;
+  private final UserService userService;
 
   @Transactional
   public CreateOrderResponse createOrder(Long userId, CreateOrderRequest request) {
 
     // 1 게시글 조회
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+    User user = userService.getUserById(userId);
 
-    GroupBuyPost post = groupBuyRepository.findById(request.groupBuyPostId())
-        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+    GroupBuyPost post = groupBuyService.getPostById(request.groupBuyPostId());
 
     // 2 공구 배송 옵션 조회
-    GroupBuyShipping shipping = groupBuyShippingRepository
-        .findByIdAndGroupBuyPost_Id(request.shippingId(), post.getId())
-        .orElseThrow(() -> new BusinessException(ErrorStatus.GROUP_BUY_SHIPPING_NOT_FOUND));
-
-    DeliveryMethod deliveryMethod = shipping.getDeliveryMethod();
+    GroupBuyShipping shipping = groupBuyService.getShippingInPost(request.shippingId(),
+        post.getId());
     int shippingPrice = shipping.getPrice();
+    DeliveryMethod deliveryMethod = shipping.getDeliveryMethod();
 
     // 3 옵션(ex 장원영/ 안유진) id 조회
     List<Long> optionIds = request.items().stream()
@@ -67,7 +58,7 @@ public class OrderCreateService {
       throw new BusinessException(ErrorStatus.ORDER_ITEM_EMPTY);
     }
 
-    List<GroupBuyOption> options = groupBuyOptionRepository.findAllByIdIn(optionIds);
+    List<GroupBuyOption> options = groupBuyService.getOptionsInPost(optionIds, post.getId());
 
     if (options.size() != optionIds.size()) {
       throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_FOUND);

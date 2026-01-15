@@ -27,7 +27,9 @@ import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyShipping;
 import org.sopt.poti.domain.groupbuy.entity.ItemImage;
+import org.sopt.poti.domain.groupbuy.repository.GroupBuyOptionRepository;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
+import org.sopt.poti.domain.groupbuy.repository.GroupBuyShippingRepository;
 import org.sopt.poti.domain.order.entity.OrderItem;
 import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.review.service.ReviewService;
@@ -52,6 +54,9 @@ public class GroupBuyService {
   private final DeliveryService deliveryService;
   private final ReviewService reviewService;
   private final OrderService orderService;
+  private final GroupBuyOptionRepository groupBuyOptionRepository;
+  private final GroupBuyShippingRepository groupBuyShippingRepository;
+
 
   @Transactional
   public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
@@ -293,4 +298,36 @@ public class GroupBuyService {
   public int countByLeader_IdAndStatusIn(Long userId, List<GroupBuyPostStatus> statuses) {
     return groupBuyRepository.countByLeader_IdAndStatusIn(userId, statuses);
   }
+
+  public GroupBuyPost getPostById(Long postId) {
+    return groupBuyRepository.findById(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+  }
+
+  public GroupBuyShipping getShippingInPost(Long shippingId, Long postId) {
+    return groupBuyShippingRepository.findByIdAndGroupBuyPost_Id(shippingId, postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.GROUP_BUY_SHIPPING_NOT_FOUND));
+  }
+
+  public List<GroupBuyOption> getOptionsInPost(List<Long> optionIds, Long postId) {
+    if (optionIds == null || optionIds.isEmpty()) {
+      throw new BusinessException(ErrorStatus.ORDER_ITEM_EMPTY);
+    }
+
+    List<GroupBuyOption> options = groupBuyOptionRepository.findAllByIdIn(optionIds);
+
+    if (options.size() != optionIds.size()) {
+      throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_FOUND);
+    }
+
+    boolean invalid = options.stream()
+        .anyMatch(opt -> !opt.getGroupBuyPost().getId().equals(postId));
+
+    if (invalid) {
+      throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_IN_POST);
+    }
+
+    return options;
+  }
+
 }
