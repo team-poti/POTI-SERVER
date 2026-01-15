@@ -17,11 +17,8 @@ public class DeliveryInfo {
     @Column(length = 10)
     private String zipcode;
 
-    @Column(name = "address_line1", length = 255)
-    private String addressLine1;
-
-    @Column(name = "address_line2", length = 255)
-    private String addressLine2;
+    @Column(name = "address_line", length = 255)
+    private String addressLine;
 
     @Column(length = 20)
     private String phone;
@@ -29,14 +26,12 @@ public class DeliveryInfo {
     public DeliveryInfo(
             String receiverName,
             String zipcode,
-            String addressLine1,
-            String addressLine2,
+            String addressLine,
             String phone
     ) {
         this.receiverName = receiverName;
         this.zipcode = zipcode;
-        this.addressLine1 = addressLine1;
-        this.addressLine2 = addressLine2;
+        this.addressLine = addressLine;
         this.phone = phone;
     }
 }

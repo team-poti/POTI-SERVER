@@ -22,7 +22,12 @@ public enum ErrorStatus {
   PAYMENT_NOT_REQUESTED(40007, HttpStatus.BAD_REQUEST, "입금 확인 대기 상태에서만 입금 확인이 가능합니다."),
   ORDER_NOT_WAIT_PAY(40008, HttpStatus.BAD_REQUEST, "입금 대기 상태에서만 입금 정보를 제출할 수 있습니다."),
   ORDER_NOT_WAIT_PAY_CHECK(40009, HttpStatus.BAD_REQUEST, "입금 확인 대기 상태에서만 입금 완료 처리가 가능합니다."),
-  ORDER_NOT_PAID_OR_READY(40010, HttpStatus.BAD_REQUEST, "입금 완료 상태 또는 배송 대기 상태에서만 배송 중 처리가 가능합니다."),
+  ORDER_ITEM_EMPTY(40010, HttpStatus.BAD_REQUEST, "주문 항목이 비어 있습니다."),
+  ORDER_ITEM_INVALID_COUNT(40011, HttpStatus.BAD_REQUEST, "주문 수량은 1 이상이어야 합니다."),
+  GROUP_BUY_OPTION_NOT_IN_POST(40012, HttpStatus.BAD_REQUEST, "해당 분철글에 속하지 않은 옵션이 포함되어 있습니다."),
+  DUPLICATE_ORDER_OPTION(40013, HttpStatus.BAD_REQUEST, "중복된 옵션은 한 주문에서 선택할 수 없습니다."),
+  ORDER_NOT_PAID_OR_READY(40014, HttpStatus.BAD_REQUEST, "입금 완료 상태 또는 배송 대기 상태에서만 배송 중 처리가 가능합니다."),
+  ORDER_EXSIST_SHIPPINGS(40015, HttpStatus.BAD_REQUEST, "이미 배송처리된 주문입니다."),
 
   /**
    * 401 Unauthorized
@@ -53,11 +58,14 @@ public enum ErrorStatus {
   ORDER_NOT_FOUND(40406, HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
   POST_NOT_FOUND(40407, HttpStatus.NOT_FOUND, "존재하지 않는 분철글입니다."),
   PAYMENT_NOT_FOUND(40408, HttpStatus.NOT_FOUND, "존재하지 않는 결제 정보입니다."),
+  GROUP_BUY_SHIPPING_NOT_FOUND(40409, HttpStatus.NOT_FOUND, "해당 분철글에서 선택한 배송 옵션을 찾을 수 없습니다."),
+  GROUP_BUY_OPTION_NOT_FOUND(40410, HttpStatus.NOT_FOUND, "존재하지 않는 분철 옵션이 포함되어 있습니다."),
 
   /**
    * 409 Conflict
    */
   REVIEW_ALREADY_EXISTS(40900, HttpStatus.CONFLICT, "이미 리뷰가 작성된 주문입니다."),
+  GROUP_BUY_POST_NOT_RECRUITING(40901, HttpStatus.BAD_REQUEST, "모집중인 공구만 주문할 수 있습니다."),
 
   /**
    * 500 Internal Server Error

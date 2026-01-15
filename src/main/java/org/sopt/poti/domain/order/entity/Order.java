@@ -54,9 +54,6 @@ public class Order extends BaseTimeEntity {
   @Embedded
   private DeliveryInfo deliveryInfo;
 
-  @Column(name = "request_info", columnDefinition = "TEXT")
-  private String requestInfo;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "group_buy_post_id", nullable = false)
   private GroupBuyPost groupBuyPost;
@@ -84,15 +81,13 @@ public class Order extends BaseTimeEntity {
       User user,
       DeliveryMethod deliveryMethod,
       int totalAmount,
-      DeliveryInfo deliveryInfo,
-      String requestInfo
+      DeliveryInfo deliveryInfo
   ) {
     this.groupBuyPost = groupBuyPost;
     this.user = user;
     this.deliveryMethod = deliveryMethod;
     this.totalAmount = totalAmount;
     this.deliveryInfo = deliveryInfo;
-    this.requestInfo = requestInfo;
     this.status = OrderStatus.WAIT_PAY;
   }
 
@@ -101,8 +96,7 @@ public class Order extends BaseTimeEntity {
       User user,
       DeliveryMethod method,
       int totalAmount,
-      DeliveryInfo deliveryInfo,
-      String requestInfo
+      DeliveryInfo deliveryInfo
   ) {
     return Order.builder()
         .groupBuyPost(post)
@@ -110,7 +104,6 @@ public class Order extends BaseTimeEntity {
         .deliveryMethod(method)
         .totalAmount(totalAmount)
         .deliveryInfo(deliveryInfo)
-        .requestInfo(requestInfo)
         .build();
   }
 

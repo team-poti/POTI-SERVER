@@ -39,4 +39,8 @@ public class DeliveryService {
   public void saveDelivery(Delivery delivery) {
     deliveryRepository.save(delivery);
   }
+
+  public boolean existsDeliveryByOrderId(Long orderId) {
+    return deliveryRepository.existsDeliveryByOrderId(orderId);
+  }
 }
