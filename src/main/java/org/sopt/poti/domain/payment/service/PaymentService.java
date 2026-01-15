@@ -64,7 +64,7 @@ public class PaymentService {
         OrderStatus.PAID);
 
     //  미입금 주문이 없다면(모두 PAID라면) 분철글 상태 변경
-    if (allOrderPaid > 0) {
+    if (!(allOrderPaid > 0)) {
       groupBuyPost.updateStatus(GroupBuyPostStatus.PAYMENT_DONE);
     }
 
