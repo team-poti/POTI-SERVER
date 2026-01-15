@@ -300,7 +300,10 @@ public class GroupBuyService {
     List<Long> optionIds = options.stream().map(GroupBuyOption::getId).toList();
 
     // 이미 주문된(팔린) 옵션 조회 (OrderItem이 존재하는 옵션)
-    List<OrderItem> soldItems = orderService.getOrderItemsByOptionIds(optionIds);
+    List<OrderItem> soldItems = optionIds.isEmpty()
+        ? Collections.emptyList()
+        : orderService.getOrderItemsByOptionIds(optionIds);
+    
     Set<Long> soldOptionIds = soldItems.stream()
         .map(item -> item.getGroupBuyOption().getId())
         .collect(Collectors.toSet());
