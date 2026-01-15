@@ -3,6 +3,7 @@ package org.sopt.poti.domain.groupbuy.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
@@ -21,7 +22,6 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.Shippin
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.UploaderResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPotItem;
-import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPotItem.UploaderInfo;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
@@ -35,7 +35,6 @@ import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -101,12 +100,11 @@ public class GroupBuyService {
   }
 
   public List<String> searchTitles(Long artistId, String keyword) {
-    Pageable pageable = PageRequest.of(0, 5);
+    Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
     return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
   }
 
   public GroupBuyDetailResponse getGroupBuyDetail(Long userId, Long groupBuyId) {
-    // 2번의 추가 쿼리를 방지하기 위한 조회
     GroupBuyPost groupBuyPost = groupBuyRepository.findByIdWithUserAndArtist(groupBuyId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
 
@@ -151,40 +149,37 @@ public class GroupBuyService {
     /**
      * 참여자 리스트
      */
-    // 구매한 order 참여자들 리스트
     List<GroupBuyOption> options = groupBuyPost.getOptions();
     List<Long> optionIds = options.stream().map(GroupBuyOption::getId).toList();
 
     List<ParticipantResponse> participantResponseList = Collections.emptyList();
 
-    // 이 분철글에 옵션이 하나라도 있어야 주문이 가능
     if (!optionIds.isEmpty()) {
-      List<OrderItem> orderItemsByOrderId = orderService.getOrderItemsByOptionIds(optionIds);
+      List<OrderItem> orderItems = orderService.getOrderItemsByOptionIds(optionIds);
 
-      // 참여자 기준으로 OrderItem 묶기
-      Map<User, List<OrderItem>> itemsByUser = orderItemsByOrderId.stream()
-          .collect(Collectors.groupingBy(item -> item.getOrder().getUser()));
+      if (!orderItems.isEmpty()) {
+        Map<User, List<OrderItem>> itemsByUser = orderItems.stream()
+            .collect(Collectors.groupingBy(item -> item.getOrder().getUser()));
 
-      // 참여자 리스트 반환
-      participantResponseList = itemsByUser.entrySet().stream()
-          .map(entry -> {
-            User user = entry.getKey();
-            List<OrderItem> items = entry.getValue();
+        participantResponseList = itemsByUser.entrySet().stream()
+            .map(entry -> {
+              User user = entry.getKey();
+              List<OrderItem> items = entry.getValue();
 
-            // 해당 유저가 선택한 멤버옵션 이름 추출
-            List<String> memberList = items.stream()
-                .map(item -> item.getGroupBuyOption().getMember().getName())
-                .toList();
+              List<String> memberList = items.stream()
+                  .map(item -> item.getGroupBuyOption().getMember().getName())
+                  .toList();
 
-            return ParticipantResponse.builder()
-                .userId(user.getId())
-                .nickname(user.getNickname())
-                .profileImage(user.getProfileImageUrl())
-                .rating(user.getRatingAvg())
-                .selectedMembers(memberList)
-                .build();
-          })
-          .toList();
+              return ParticipantResponse.builder()
+                  .userId(user.getId())
+                  .nickname(user.getNickname())
+                  .profileImage(user.getProfileImageUrl())
+                  .rating(user.getRatingAvg())
+                  .selectedMembers(memberList)
+                  .build();
+            })
+            .toList();
+      }
     }
 
     /**
@@ -220,22 +215,38 @@ public class GroupBuyService {
    */
   public GroupBuyListResponse getGroupBuyListByPostTitle(GroupBuyListRequest request,
       Pageable pageable) {
-
     Slice<GroupBuyPost> postsSlice = groupBuyRepository.findGroupBuyList(request, pageable);
+
+    // 1. 모든 게시글의 옵션 ID 수집
+    List<Long> allOptionIds = postsSlice.getContent().stream()
+        .flatMap(post -> post.getOptions().stream())
+        .map(GroupBuyOption::getId)
+        .toList();
+
+    // 2. 한 번의 쿼리로 모든 주문 내역 조회 (판매된 옵션 확인)
+    List<OrderItem> allOrderItems = allOptionIds.isEmpty()
+        ? Collections.emptyList()
+        : orderService.getOrderItemsByOptionIds(allOptionIds);
+
+    // 3. 판매된 옵션 ID Set 생성
+    Set<Long> soldOptionIds = allOrderItems.stream()
+        .map(item -> item.getGroupBuyOption().getId())
+        .collect(Collectors.toSet());
 
     List<GroupBuyPotItem> potItems = postsSlice.getContent().stream()
         .map(post -> {
-          // 최저가 계산
           int minPrice = post.getOptions().stream()
               .mapToInt(GroupBuyOption::getPrice)
               .min()
               .orElse(0);
 
           // 남은 멤버 리스트
-          List<String> availableMembers = calculateAvailableMembers(post.getOptions());
+          List<String> availableMembers = post.getOptions().stream()
+              .filter(option -> !soldOptionIds.contains(option.getId()))
+              .map(option -> option.getMember().getName())
+              .toList();
 
-          // 총대 정보
-          UploaderInfo uploaderInfo = UploaderInfo.builder()
+          GroupBuyPotItem.UploaderInfo uploaderInfo = GroupBuyPotItem.UploaderInfo.builder()
               .userId(post.getLeader().getId())
               .nickname(post.getLeader().getNickname())
               .profileImage(post.getLeader().getProfileImageUrl())
@@ -255,13 +266,13 @@ public class GroupBuyService {
         })
         .toList();
 
-    String postTitle = null; // itemName 대신 postTitle
+    String postTitle = null;
     String artistName = null;
-    Long artistId = null; // artistId 추가
+    Long artistId = null;
     if (!postsSlice.getContent().isEmpty()) {
       GroupBuyPost firstPost = postsSlice.getContent().get(0);
       postTitle = firstPost.getTitle();
-      artistId = firstPost.getArtist().getId(); // artistId 추가
+      artistId = firstPost.getArtist().getId();
       artistName = firstPost.getArtist().getName();
     }
 
@@ -273,26 +284,6 @@ public class GroupBuyService {
         postsSlice.hasNext(),
         potItems
     );
-  }
-
-  // 남은 멤버 리스트 계산 헬퍼 메서드 (기존 calculateAvailableMembers 재사용)
-  private List<String> calculateAvailableMembers(List<GroupBuyOption> options) {
-    if (options.isEmpty()) {
-      return Collections.emptyList();
-    }
-    List<Long> optionIds = options.stream().map(GroupBuyOption::getId).toList();
-
-    List<OrderItem> orderedItems = orderService.getOrderItemsByOptionIds(optionIds);
-
-    List<Long> soldOptionIds = orderedItems.stream()
-        .map(item -> item.getGroupBuyOption().getId())
-        .distinct()
-        .toList();
-
-    return options.stream()
-        .filter(option -> !soldOptionIds.contains(option.getId()))
-        .map(option -> option.getMember().getName())
-        .toList();
   }
 
   public int countByLeader_Id(Long userId) {
