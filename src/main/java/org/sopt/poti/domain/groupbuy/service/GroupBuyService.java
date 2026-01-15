@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.groupbuy.service;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +31,9 @@ import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyShipping;
 import org.sopt.poti.domain.groupbuy.entity.ItemImage;
+import org.sopt.poti.domain.groupbuy.repository.GroupBuyOptionRepository;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
+import org.sopt.poti.domain.groupbuy.repository.GroupBuyShippingRepository;
 import org.sopt.poti.domain.order.entity.OrderItem;
 import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.review.service.ReviewService;
@@ -55,6 +58,9 @@ public class GroupBuyService {
   private final DeliveryService deliveryService;
   private final ReviewService reviewService;
   private final OrderService orderService;
+  private final GroupBuyOptionRepository groupBuyOptionRepository;
+  private final GroupBuyShippingRepository groupBuyShippingRepository;
+
 
   @Transactional
   public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
@@ -303,7 +309,7 @@ public class GroupBuyService {
     List<OrderItem> soldItems = optionIds.isEmpty()
         ? Collections.emptyList()
         : orderService.getOrderItemsByOptionIds(optionIds);
-    
+
     Set<Long> soldOptionIds = soldItems.stream()
         .map(item -> item.getGroupBuyOption().getId())
         .collect(Collectors.toSet());
@@ -341,4 +347,48 @@ public class GroupBuyService {
   public int countByLeader_IdAndStatusIn(Long userId, List<GroupBuyPostStatus> statuses) {
     return groupBuyRepository.countByLeader_IdAndStatusIn(userId, statuses);
   }
+
+  public GroupBuyShipping getShippingInPost(Long shippingId, Long postId) {
+    return groupBuyShippingRepository.findByIdAndGroupBuyPost_Id(shippingId, postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.GROUP_BUY_SHIPPING_NOT_FOUND));
+  }
+
+  @Transactional
+  public List<GroupBuyOption> getOptionsInPost(List<Long> optionIds, Long postId) {
+    if (optionIds == null || optionIds.isEmpty()) {
+      throw new BusinessException(ErrorStatus.ORDER_ITEM_EMPTY);
+    }
+
+    if (optionIds.size() != new HashSet<>(optionIds).size()) {
+      throw new BusinessException(ErrorStatus.DUPLICATE_ORDER_OPTION);
+    }
+
+    List<GroupBuyOption> options = groupBuyOptionRepository.findAllByIdInWithLock(optionIds);
+
+    if (options.size() != optionIds.size()) {
+      throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_FOUND);
+    }
+
+    boolean invalid = options.stream()
+        .anyMatch(opt -> !opt.getGroupBuyPost().getId().equals(postId));
+
+    if (invalid) {
+      throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_IN_POST);
+    }
+
+    return options;
+  }
+
+  public GroupBuyPost getRecruitingPostById(Long postId) {
+    GroupBuyPost post = groupBuyRepository.findById(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+
+    if (post.getStatus() != GroupBuyPostStatus.RECRUITING) {
+      throw new BusinessException(ErrorStatus.GROUP_BUY_POST_NOT_RECRUITING);
+    }
+
+    return post;
+  }
+
+
 }
