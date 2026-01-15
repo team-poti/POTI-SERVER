@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.artist.dto.response.ArtistTitlesResponse;
+import org.sopt.poti.domain.artist.service.ArtistService;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyListRequest;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GroupBuyController {
 
   private final GroupBuyService groupBuyService;
+  private final ArtistService artistService;
 
   @PostMapping
   @Operation(summary = "공동구매 게시글 등록", description = "새로운 공동구매 게시글을 등록합니다.")
@@ -101,5 +104,13 @@ public class GroupBuyController {
     GroupBuyPostOptionResponse groupBuyPostOptionResponse = groupBuyService.getGroupBuyPostOptionResponse(
         postId);
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyPostOptionResponse));
+  }
+
+  @GetMapping("/artists")
+  @Operation(summary = "아티스트 실시간 검색 자동완성/추천", description = "입력 키워드를 기반으로 아티스트명을 추천합니다.")
+  public ApiResponse<ArtistTitlesResponse> searchArtists(
+      @RequestParam String keyword
+  ) {
+    return ApiResponse.success(SuccessStatus.OK, artistService.searchArtists(keyword));
   }
 }

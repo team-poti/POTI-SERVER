@@ -3,6 +3,7 @@ package org.sopt.poti.domain.artist.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.artist.dto.response.ArtistListResponse;
+import org.sopt.poti.domain.artist.dto.response.ArtistTitlesResponse;
 import org.sopt.poti.domain.artist.dto.response.MemberListResponse;
 import org.sopt.poti.domain.artist.dto.response.MemberListResponse.MemberResponse;
 import org.sopt.poti.domain.artist.entity.Artist;
@@ -51,4 +52,14 @@ public class ArtistService {
 
     return new MemberListResponse(list);
   }
+
+  public ArtistTitlesResponse searchArtists(String keyword) {
+    if (keyword == null || keyword.trim().isEmpty()) {
+      return ArtistTitlesResponse.of(List.of());
+    }
+
+    List<String> titles = artistRepository.findNamesByPrefix(keyword.trim(), 5);
+    return ArtistTitlesResponse.of(titles);
+  }
+
 }
