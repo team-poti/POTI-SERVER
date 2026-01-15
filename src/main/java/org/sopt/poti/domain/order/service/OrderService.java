@@ -73,16 +73,17 @@ public class OrderService {
     Order order = orderRepository.findByIdWithPostAndLeader(orderId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.ORDER_NOT_FOUND));
 
-    // 이미 배송 처리된 주문건
-    if (deliveryService.existsDeliveryByOrderId(orderId)) {
-      throw new BusinessException(ErrorStatus.ORDER_EXSIST_SHIPPINGS);
-    }
-    
     GroupBuyPost groupBuyPost = order.getGroupBuyPost();
     // 분철글이 본인이 작성한 글인지 확인
     if (!groupBuyPost.getLeader().getId().equals(userId)) {
       throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
     }
+    
+    // 이미 배송 처리된 주문건
+    if (deliveryService.existsDeliveryByOrderId(orderId)) {
+      throw new BusinessException(ErrorStatus.ORDER_EXSIST_SHIPPINGS);
+    }
+
     LocalDateTime shippedAt = LocalDateTime.now();
 
     Delivery delivery = Delivery.builder()
