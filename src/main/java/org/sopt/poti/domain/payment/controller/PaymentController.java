@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.payment.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.payment.dto.request.DepositFormRequest;
 import org.sopt.poti.domain.payment.dto.response.DepositFormResponse;
@@ -23,7 +24,7 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<ApiResponse<DepositFormResponse>> submitDepositForm(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody DepositFormRequest request
+            @RequestBody @Valid DepositFormRequest request
     ) {
         Long userId = userPrincipal.getUserId();
         DepositFormResponse data = paymentService.submitDepositForm(userId, request);
