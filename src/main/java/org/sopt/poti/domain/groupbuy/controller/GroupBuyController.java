@@ -11,11 +11,9 @@ import org.sopt.poti.domain.artist.service.ArtistService;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyListRequest;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyMeStatus;
-import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyMeStatus;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
-import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyTitlesResponse;
@@ -127,7 +125,8 @@ public class GroupBuyController {
       @RequestParam(name = "status") GroupBuyMeStatus status,
       @AuthenticationPrincipal UserPrincipal userPrincipal
   ) {
-    GroupBuyMeResponse response = groupBuyService.getMyGroupBuyPosts(userPrincipal.getUserId(), status);
+    GroupBuyMeResponse response = groupBuyService.getMyGroupBuyPosts(userPrincipal.getUserId(),
+        status);
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, response));
   }
 }
