@@ -120,4 +120,12 @@ public class Order extends BaseTimeEntity {
     }
     this.status = OrderStatus.PAID;
   }
+
+  // 주문 상태 배달 중으로 변경 메서드 (PAID 또는 READY 상태에서만 가능)
+  public void startDelivery() {
+    if (this.status != OrderStatus.PAID && this.status != OrderStatus.READY) {
+      throw new BusinessException(ErrorStatus.ORDER_NOT_PAID_OR_READY);
+    }
+    this.status = OrderStatus.SHIPPED;
+  }
 }
