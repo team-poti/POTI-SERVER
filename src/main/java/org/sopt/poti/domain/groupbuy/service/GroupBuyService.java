@@ -15,6 +15,7 @@ import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 import org.sopt.poti.domain.delivery.service.DeliveryService;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyListRequest;
+import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyMeStatus;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.ImageResponse;
@@ -22,6 +23,7 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.Partici
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.ShippingResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.UploaderResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostDeliveryOption;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostMemberOption;
@@ -390,5 +392,45 @@ public class GroupBuyService {
     return post;
   }
 
+  public GroupBuyMeResponse getMyGroupBuyPosts(Long userId, GroupBuyMeStatus status) {
+    List<GroupBuyPostStatus> inProgressStatuses = List.of(
+        GroupBuyPostStatus.RECRUITING,
+        GroupBuyPostStatus.CLOSED,
+        GroupBuyPostStatus.PAYMENT_DONE,
+        GroupBuyPostStatus.SHIPPING
+    );
+    List<GroupBuyPostStatus> completedStatuses = List.of(
+        GroupBuyPostStatus.DELIVERED,
+        GroupBuyPostStatus.COMPLETED
+    );
 
+    List<GroupBuyPostStatus> targetStatuses = (status == GroupBuyMeStatus.IN_PROGRESS)
+        ? inProgressStatuses
+        : completedStatuses;
+
+    List<GroupBuyPost> posts = groupBuyRepository.findByLeader_IdAndStatusInOrderByCreatedAtDesc(
+        userId, targetStatuses);
+
+    List<GroupBuyMeResponse.GroupBuyResponse> groupBuyResponses = posts.stream()
+        .map(post -> new GroupBuyMeResponse.GroupBuyResponse(
+            post.getId(),
+            post.getArtist().getName(),
+            post.getTitle(),
+            post.getRepresentativeImageUrl(),
+            post.getStatus().name(),
+            post.getCreatedAt()
+        ))
+        .toList();
+
+    int inProgressCount = groupBuyRepository.countByLeader_IdAndStatusIn(userId,
+        inProgressStatuses);
+    int completedCount = groupBuyRepository.countByLeader_IdAndStatusIn(userId, completedStatuses);
+
+    return new GroupBuyMeResponse(
+        inProgressCount,
+        completedCount,
+        status,
+        groupBuyResponses
+    );
+  }
 }

@@ -23,4 +23,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuyPost, Long>, G
     void deleteByLeaderId(Long leaderId);
 
     List<GroupBuyPost> findAllByLeaderId(Long leaderId);
+
+    List<GroupBuyPost> findByLeader_IdAndStatusInOrderByCreatedAtDesc(Long leaderId, List<GroupBuyPostStatus> statuses);
 }
