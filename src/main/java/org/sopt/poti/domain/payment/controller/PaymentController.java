@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.payment.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.payment.dto.request.DepositFormRequest;
@@ -36,6 +37,9 @@ public class PaymentController {
   }
 
   @PatchMapping("/{orderId}/confirm")
+  @Operation(summary = "모집자(총대)가 참여자의 입금 상태를 입금 완료로 변경", description =
+      "모집자가 참여자의 입금 상태를 입금 완료로 변경합니다."
+          + "\n 상태 변경시 해당 분철글에 대한 모든 주문들의 상태를 조회해 전부 입금 완료 상태(PAID)이면 분철글의 상태도 입금 완료 상태로 변경합니다.")
   public ResponseEntity<ApiResponse<OrderConfirmResponse>> confirmPayment(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
       @PathVariable(name = "orderId") Long orderId
