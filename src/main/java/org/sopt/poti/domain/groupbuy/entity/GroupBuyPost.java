@@ -14,11 +14,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,29 +28,29 @@ import org.sopt.poti.global.entity.BaseTimeEntity;
 @Getter
 @Entity
 @Table(name = "group_buy_posts", indexes = { // 인덱스 추가
-        @Index(name = "idx_group_buy_post_title", columnList = "title")
+    @Index(name = "idx_group_buy_post_title", columnList = "title")
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupBuyPost extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, length = 200)
-    private String title;
+  @Column(nullable = false, length = 200)
+  private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+  @Column(columnDefinition = "TEXT")
+  private String content;
 
-    @Column(name = "recruit_deadline", nullable = false) // 마감일 필수
-    private LocalDate recruitDeadline;
+  @Column(name = "recruit_deadline", nullable = false) // 마감일 필수
+  private LocalDate recruitDeadline;
 
-    @Column(name = "bank_name", length = 50, nullable = false) // 은행명 필수
-    private String bankName;
+  @Column(name = "bank_name", length = 50, nullable = false) // 은행명 필수
+  private String bankName;
 
-    @Column(name = "account_number", length = 50, nullable = false) // 계좌번호 필수
-    private String accountNumber;
+  @Column(name = "account_number", length = 50, nullable = false) // 계좌번호 필수
+  private String accountNumber;
 
   @Column(name = "representative_image_url") // 대표 이미지 URL (성능 최적화용)
   private String representativeImageUrl;
@@ -139,13 +137,18 @@ public class GroupBuyPost extends BaseTimeEntity {
     option.setGroupBuyPost(this); // 양방향 연관관계 설정
   }
 
-    public void addImage(ItemImage image) {
-        this.images.add(image);
-        image.setGroupBuyPost(this); // 양방향 연관관계 설정
-    }
+  public void addImage(ItemImage image) {
+    this.images.add(image);
+    image.setGroupBuyPost(this); // 양방향 연관관계 설정
+  }
 
-    public void addShipping(GroupBuyShipping shipping) {
-        this.shippings.add(shipping);
-        shipping.setGroupBuyPost(this); // 양방향 연관관계 설정
-    }
+  public void addShipping(GroupBuyShipping shipping) {
+    this.shippings.add(shipping);
+    shipping.setGroupBuyPost(this); // 양방향 연관관계 설정
+  }
+
+  // 분철글 상태 변경 메서드
+  public void updateStatus(GroupBuyPostStatus status) {
+    this.status = status;
+  }
 }
