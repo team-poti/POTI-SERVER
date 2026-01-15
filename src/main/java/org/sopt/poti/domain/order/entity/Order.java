@@ -1,6 +1,21 @@
 package org.sopt.poti.domain.order.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -22,79 +37,87 @@ import org.sopt.poti.global.error.ErrorStatus;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Version
-    private Long version;
+  @Version
+  private Long version;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private OrderStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 30)
+  private OrderStatus status;
 
-    @Column(nullable = false)
-    private int totalAmount;
+  @Column(nullable = false)
+  private int totalAmount;
 
-    @Embedded
-    private DeliveryInfo deliveryInfo;
+  @Embedded
+  private DeliveryInfo deliveryInfo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_buy_post_id", nullable = false)
-    private GroupBuyPost groupBuyPost;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "group_buy_post_id", nullable = false)
+  private GroupBuyPost groupBuyPost;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "delivery_method_id", nullable = false)
-    private DeliveryMethod deliveryMethod;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "delivery_method_id", nullable = false)
+  private DeliveryMethod deliveryMethod;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<OrderItem> orderItems = new ArrayList<>();
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private final List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<Payment> payments = new ArrayList<>();
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private final List<Payment> payments = new ArrayList<>();
 
-    @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
-    private Review review;
+  @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
+  private Review review;
 
-    @Builder
-    private Order(
-            GroupBuyPost groupBuyPost,
-            User user,
-            DeliveryMethod deliveryMethod,
-            int totalAmount,
-            DeliveryInfo deliveryInfo
-    ) {
-        this.groupBuyPost = groupBuyPost;
-        this.user = user;
-        this.deliveryMethod = deliveryMethod;
-        this.totalAmount = totalAmount;
-        this.deliveryInfo = deliveryInfo;
-        this.status = OrderStatus.WAIT_PAY;
+  @Builder
+  private Order(
+      GroupBuyPost groupBuyPost,
+      User user,
+      DeliveryMethod deliveryMethod,
+      int totalAmount,
+      DeliveryInfo deliveryInfo
+  ) {
+    this.groupBuyPost = groupBuyPost;
+    this.user = user;
+    this.deliveryMethod = deliveryMethod;
+    this.totalAmount = totalAmount;
+    this.deliveryInfo = deliveryInfo;
+    this.status = OrderStatus.WAIT_PAY;
+  }
+
+  public static Order create(
+      GroupBuyPost post,
+      User user,
+      DeliveryMethod method,
+      int totalAmount,
+      DeliveryInfo deliveryInfo
+  ) {
+    return Order.builder()
+        .groupBuyPost(post)
+        .user(user)
+        .deliveryMethod(method)
+        .totalAmount(totalAmount)
+        .deliveryInfo(deliveryInfo)
+        .build();
+  }
+
+  public void requestPayCheck() {
+    if (this.status != OrderStatus.WAIT_PAY) {
+      throw new BusinessException(ErrorStatus.ORDER_NOT_WAIT_PAY);
     }
+    this.status = OrderStatus.WAIT_PAY_CHECK;
+  }
 
-    public static Order create(
-            GroupBuyPost post,
-            User user,
-            DeliveryMethod method,
-            int totalAmount,
-            DeliveryInfo deliveryInfo
-    ) {
-        return Order.builder()
-                .groupBuyPost(post)
-                .user(user)
-                .deliveryMethod(method)
-                .totalAmount(totalAmount)
-                .deliveryInfo(deliveryInfo)
-                .build();
+  public void confirmPayment() {
+    if (this.status != OrderStatus.WAIT_PAY_CHECK) {
+      throw new BusinessException(ErrorStatus.ORDER_NOT_WAIT_PAY_CHECK);
     }
-    public void requestPayCheck() {
-        if (this.status != OrderStatus.WAIT_PAY) {
-            throw new BusinessException(ErrorStatus.ORDER_NOT_WAIT_PAY);
-        }
-        this.status = OrderStatus.WAIT_PAY_CHECK;
-    }
+    this.status = OrderStatus.PAID;
+  }
 }
