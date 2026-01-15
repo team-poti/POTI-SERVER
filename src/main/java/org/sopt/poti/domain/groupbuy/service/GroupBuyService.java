@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.groupbuy.service;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -356,6 +357,10 @@ public class GroupBuyService {
   public List<GroupBuyOption> getOptionsInPost(List<Long> optionIds, Long postId) {
     if (optionIds == null || optionIds.isEmpty()) {
       throw new BusinessException(ErrorStatus.ORDER_ITEM_EMPTY);
+    }
+
+    if (optionIds.size() != new HashSet<>(optionIds).size()) {
+      throw new BusinessException(ErrorStatus.DUPLICATE_ORDER_OPTION);
     }
 
     List<GroupBuyOption> options = groupBuyOptionRepository.findAllByIdInWithLock(optionIds);
