@@ -62,6 +62,7 @@ public enum ErrorStatus {
    * 409 Conflict
    */
   REVIEW_ALREADY_EXISTS(40900, HttpStatus.CONFLICT, "이미 리뷰가 작성된 주문입니다."),
+  GROUP_BUY_POST_NOT_RECRUITING(40801, HttpStatus.BAD_REQUEST, "모집중인 공구만 주문할 수 있습니다."),
 
   /**
    * 500 Internal Server Error
