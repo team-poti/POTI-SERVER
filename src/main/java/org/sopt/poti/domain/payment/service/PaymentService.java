@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.payment.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.order.entity.OrderStatus;
@@ -30,6 +31,7 @@ public class PaymentService {
             throw new BusinessException(ErrorStatus.ORDER_NOT_WAIT_PAY);
         }
 
+        @Valid
         Payment payment = paymentRepository.findTopByOrderIdOrderByIdDesc(order.getId())
                 .orElseThrow(() -> new BusinessException(ErrorStatus.PAYMENT_NOT_FOUND));
 
