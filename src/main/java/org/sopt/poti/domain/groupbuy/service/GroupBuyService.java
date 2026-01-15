@@ -21,6 +21,9 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.Partici
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.ShippingResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.UploaderResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostDeliveryOption;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostMemberOption;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPotItem;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
@@ -84,7 +87,8 @@ public class GroupBuyService {
     request.shippings().forEach(shippingRequest -> {
       DeliveryMethod deliveryMethod = deliveryService.getDeliveryMethodById(
           shippingRequest.deliveryMethodId());
-      GroupBuyShipping shipping = GroupBuyShipping.create(shippingRequest.price(), deliveryMethod);
+      GroupBuyShipping shipping = GroupBuyShipping.create(shippingRequest.price(), deliveryMethod,
+          null);
       groupBuyPost.addShipping(shipping);
     });
 
@@ -284,6 +288,50 @@ public class GroupBuyService {
         postsSlice.hasNext(),
         potItems
     );
+  }
+
+  public GroupBuyPostOptionResponse getGroupBuyPostOptionResponse(Long postId) {
+    // 게시글 및 옵션 전체 조회
+    GroupBuyPost post = groupBuyRepository.findById(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+    List<GroupBuyOption> options = post.getOptions();
+
+    // option 식별자들 추출
+    List<Long> optionIds = options.stream().map(GroupBuyOption::getId).toList();
+
+    // 이미 주문된(팔린) 옵션 조회 (OrderItem이 존재하는 옵션)
+    List<OrderItem> soldItems = optionIds.isEmpty()
+        ? Collections.emptyList()
+        : orderService.getOrderItemsByOptionIds(optionIds);
+    
+    Set<Long> soldOptionIds = soldItems.stream()
+        .map(item -> item.getGroupBuyOption().getId())
+        .collect(Collectors.toSet());
+
+    // 이미 팔린 옵션 제외
+    List<GroupBuyOption> memberList = options.stream()
+        .filter(option -> !soldOptionIds.contains(option.getId()))
+        .toList();
+
+    List<GroupBuyPostMemberOption> groupBuyPostMemberOptions = memberList.stream().map(
+            member ->
+                new GroupBuyPostMemberOption(
+                    member.getId(),
+                    member.getMember().getName(),
+                    member.getPrice())
+        )
+        .toList();
+
+    List<GroupBuyPostDeliveryOption> deliveryOptions = post.getShippings().stream().map(
+            delivery ->
+                new GroupBuyPostDeliveryOption(
+                    delivery.getId(),
+                    delivery.getDeliveryMethod().getName(),
+                    delivery.getPrice())
+        )
+        .toList();
+
+    return new GroupBuyPostOptionResponse(groupBuyPostMemberOptions, deliveryOptions);
   }
 
   public int countByLeader_Id(Long userId) {

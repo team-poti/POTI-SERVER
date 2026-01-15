@@ -13,7 +13,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
+import org.sopt.poti.domain.order.entity.Order;
 
 @Getter
 @Entity
@@ -21,37 +23,44 @@ import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupBuyShipping {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private int price; // 해당 공구에서의 배송비
+  @Column(nullable = false)
+  private int price; // 해당 공구에서의 배송비
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_buy_post_id", nullable = false)
-    private GroupBuyPost groupBuyPost;
+  // 양방향 연관관계 편의 메서드
+  @Setter
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "group_buy_post_id", nullable = false)
+  private GroupBuyPost groupBuyPost;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "delivery_method_id", nullable = false)
-    private DeliveryMethod deliveryMethod;
+  @Setter
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "delivery_method_id", nullable = false)
+  private DeliveryMethod deliveryMethod;
 
-    @Builder
-    private GroupBuyShipping(int price, GroupBuyPost groupBuyPost, DeliveryMethod deliveryMethod) {
-        this.price = price;
-        this.groupBuyPost = groupBuyPost;
-        this.deliveryMethod = deliveryMethod;
-    }
+  @Setter
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "order_id")
+  private Order order;
 
-    public static GroupBuyShipping create(int price, DeliveryMethod deliveryMethod) {
-        return GroupBuyShipping.builder()
-                .price(price)
-                .deliveryMethod(deliveryMethod)
-                .build();
-    }
+  @Builder
+  private GroupBuyShipping(int price, GroupBuyPost groupBuyPost, DeliveryMethod deliveryMethod,
+      Order order) {
+    this.price = price;
+    this.groupBuyPost = groupBuyPost;
+    this.deliveryMethod = deliveryMethod;
+    this.order = order;
+  }
 
-    // 양방향 연관관계 편의 메서드
-    public void setGroupBuyPost(GroupBuyPost groupBuyPost) {
-        this.groupBuyPost = groupBuyPost;
-    }
+  public static GroupBuyShipping create(int price, DeliveryMethod deliveryMethod, Order order) {
+    return GroupBuyShipping.builder()
+        .price(price)
+        .deliveryMethod(deliveryMethod)
+        .order(order)
+        .build();
+  }
+
 }
