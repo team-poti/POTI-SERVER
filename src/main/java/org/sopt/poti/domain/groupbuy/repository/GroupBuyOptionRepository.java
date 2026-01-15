@@ -16,9 +16,7 @@ import org.springframework.stereotype.Repository;
 public interface GroupBuyOptionRepository extends JpaRepository<GroupBuyOption, Long> {
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("SELECT o FROM GroupBuyOption o WHERE o.id IN :ids")
+  @Query("SELECT o FROM GroupBuyOption o WHERE o.id IN :ids ORDER BY o.id")
   @QueryHints(@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000"))
-//데드락 방지를 위한 락 타임아웃 3초
-//
   List<GroupBuyOption> findAllByIdInWithLock(@Param("ids") List<Long> ids);
 }
