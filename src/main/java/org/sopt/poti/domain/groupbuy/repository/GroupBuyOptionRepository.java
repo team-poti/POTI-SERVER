@@ -1,14 +1,24 @@
 package org.sopt.poti.domain.groupbuy.repository;
 
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
+import java.util.List;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface GroupBuyOptionRepository extends JpaRepository<GroupBuyOption, Long> {
 
-    List<GroupBuyOption> findAllByIdIn(List<Long> ids);
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("SELECT o FROM GroupBuyOption o WHERE o.id IN :ids")
+  @QueryHints(@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000"))
+//데드락 방지를 위한 락 타임아웃 3초
+//
+  List<GroupBuyOption> findAllByIdInWithLock(@Param("ids") List<Long> ids);
 }

@@ -309,12 +309,13 @@ public class GroupBuyService {
         .orElseThrow(() -> new BusinessException(ErrorStatus.GROUP_BUY_SHIPPING_NOT_FOUND));
   }
 
+  @Transactional
   public List<GroupBuyOption> getOptionsInPost(List<Long> optionIds, Long postId) {
     if (optionIds == null || optionIds.isEmpty()) {
       throw new BusinessException(ErrorStatus.ORDER_ITEM_EMPTY);
     }
 
-    List<GroupBuyOption> options = groupBuyOptionRepository.findAllByIdIn(optionIds);
+    List<GroupBuyOption> options = groupBuyOptionRepository.findAllByIdInWithLock(optionIds);
 
     if (options.size() != optionIds.size()) {
       throw new BusinessException(ErrorStatus.GROUP_BUY_OPTION_NOT_FOUND);
