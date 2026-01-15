@@ -9,19 +9,20 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public enum ErrorStatus {
 
-    /**
-     * 400 Bad Request
-     */
-    BAD_REQUEST(40000, HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
-    INVALID_NICKNAME(40001, HttpStatus.BAD_REQUEST, "닉네임 형식이 올바르지 않습니다."), // 특수문자랑 길이 검사
-    PROFANITY_DETECTED(40002, HttpStatus.BAD_REQUEST, "비속어가 포함되어 있습니다."),
-    NICKNAME_DUPLICATED(40003, HttpStatus.BAD_REQUEST, "이미 사용 중인 닉네임입니다."),
-    INVALID_SOCIAL_TYPE(40004, HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인 타입입니다."),
-    ORDER_NOT_COMPLETED(40005, HttpStatus.BAD_REQUEST, "거래 완료(배송 완료) 후에만 리뷰를 작성할 수 있습니다."),
-    PAYMENT_NOT_PENDING(40006, HttpStatus.BAD_REQUEST, "입금 대기 상태에서만 입금 정보를 제출할 수 있습니다."),
-    PAYMENT_NOT_REQUESTED(40007, HttpStatus.BAD_REQUEST, "입금 확인 대기 상태에서만 입금 확인이 가능합니다."),
-    ORDER_NOT_WAIT_PAY(40008, HttpStatus.BAD_REQUEST, "입금 대기 상태에서만 입금 정보를 제출할 수 있습니다."),
-    ORDER_NOT_WAIT_PAY_CHECK(40009, HttpStatus.BAD_REQUEST, "입금 확인 대기 상태에서만 입금 완료 처리가 가능합니다."),
+  /**
+   * 400 Bad Request
+   */
+  BAD_REQUEST(40000, HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+  INVALID_NICKNAME(40001, HttpStatus.BAD_REQUEST, "닉네임 형식이 올바르지 않습니다."), // 특수문자랑 길이 검사
+  PROFANITY_DETECTED(40002, HttpStatus.BAD_REQUEST, "비속어가 포함되어 있습니다."),
+  NICKNAME_DUPLICATED(40003, HttpStatus.BAD_REQUEST, "이미 사용 중인 닉네임입니다."),
+  INVALID_SOCIAL_TYPE(40004, HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인 타입입니다."),
+  ORDER_NOT_COMPLETED(40005, HttpStatus.BAD_REQUEST, "거래 완료(배송 완료) 후에만 리뷰를 작성할 수 있습니다."),
+  PAYMENT_NOT_PENDING(40006, HttpStatus.BAD_REQUEST, "입금 대기 상태에서만 입금 정보를 제출할 수 있습니다."),
+  PAYMENT_NOT_REQUESTED(40007, HttpStatus.BAD_REQUEST, "입금 확인 대기 상태에서만 입금 확인이 가능합니다."),
+  ORDER_NOT_WAIT_PAY(40008, HttpStatus.BAD_REQUEST, "입금 대기 상태에서만 입금 정보를 제출할 수 있습니다."),
+  ORDER_NOT_WAIT_PAY_CHECK(40009, HttpStatus.BAD_REQUEST, "입금 확인 대기 상태에서만 입금 완료 처리가 가능합니다."),
+  ORDER_NOT_PAID_OR_READY(40010, HttpStatus.BAD_REQUEST, "입금 완료 상태 또는 배송 대기 상태에서만 배송 중 처리가 가능합니다."),
 
   /**
    * 401 Unauthorized
@@ -51,7 +52,7 @@ public enum ErrorStatus {
   DELIVERY_METHOD_NOT_FOUND(40405, HttpStatus.NOT_FOUND, "존재하지 않는 배송 방법입니다."),
   ORDER_NOT_FOUND(40406, HttpStatus.NOT_FOUND, "존재하지 않는 주문입니다."),
   POST_NOT_FOUND(40407, HttpStatus.NOT_FOUND, "존재하지 않는 분철글입니다."),
-    PAYMENT_NOT_FOUND(40408, HttpStatus.NOT_FOUND, "존재하지 않는 결제 정보입니다."),
+  PAYMENT_NOT_FOUND(40408, HttpStatus.NOT_FOUND, "존재하지 않는 결제 정보입니다."),
 
   /**
    * 409 Conflict

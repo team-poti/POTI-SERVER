@@ -78,18 +78,19 @@ public class OrderService {
     if (!groupBuyPost.getLeader().getId().equals(userId)) {
       throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
     }
+    LocalDateTime shippedAt = LocalDateTime.now();
 
     Delivery delivery = Delivery.builder()
         .trackingNumber(startDeliveryRequest.trackingNumber())
         .carrier(startDeliveryRequest.carrier())
-        .shippedAt(LocalDateTime.now())
+        .shippedAt(shippedAt)
         .order(order)
         .build();
 
     deliveryService.saveDelivery(delivery);
-    order.updateStatus(OrderStatus.DELIVERED);
+    order.startDelivery();
 
     return new StartDeliveryResponse(orderId, order.getStatus(),
-        startDeliveryRequest.trackingNumber(), LocalDateTime.now());
+        startDeliveryRequest.trackingNumber(), shippedAt);
   }
 }

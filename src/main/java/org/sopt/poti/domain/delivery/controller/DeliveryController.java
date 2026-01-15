@@ -2,6 +2,7 @@ package org.sopt.poti.domain.delivery.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.delivery.dto.request.StartDeliveryRequest;
@@ -39,10 +40,10 @@ public class DeliveryController {
 
   @PatchMapping("/orders/{orderId}/deliveries")
   @Operation(summary = "주문에 해당하는 운송장 번호 등록", description = "주문에 해당하는 운송장 번호와 운송사를 등록할 수 있습니다.")
-  public ResponseEntity<ApiResponse<?>> startDelivery(
+  public ResponseEntity<ApiResponse<StartDeliveryResponse>> startDelivery(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
       @PathVariable Long orderId,
-      @RequestBody StartDeliveryRequest startDeliveryRequest
+      @RequestBody @Valid StartDeliveryRequest startDeliveryRequest
   ) {
     StartDeliveryResponse startDeliveryResponse = orderService.startOrderDelivery(
         userPrincipal.getUserId(), orderId, startDeliveryRequest);
