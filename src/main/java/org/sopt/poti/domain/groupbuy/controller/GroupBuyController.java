@@ -17,6 +17,7 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyTitlesResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse;
 import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
 import org.sopt.poti.global.common.ApiResponse;
 import org.sopt.poti.global.common.SuccessStatus;
@@ -117,7 +118,7 @@ public class GroupBuyController {
   }
 
   @GetMapping("/me")
-  @Operation(summary = "판매자용 내 판매 내역 리스트 조회", description =
+  @Operation(summary = "판매자 - 내 판매 내역 리스트 조회", description =
       "총대로 진행했던 내역들을 조회합니다. 상태값은 IN_PROGRESS (진행중) \n"
           + "또는\n"
           + "COMPLETED (완료)가 있습니다.")
@@ -128,5 +129,17 @@ public class GroupBuyController {
     GroupBuyMeResponse response = groupBuyService.getMyGroupBuyPosts(userPrincipal.getUserId(),
         status);
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, response));
+  }
+
+  @GetMapping("/{postId}/participants")
+  @Operation(summary = "판매자 - 특정 분철글의 참여자 목록 조회", description = "특정 분철글의 참여자 목록을 조회합니다."
+      + "\nOrderStatus별로 주는 값이 달라집니다. 컬럼이 사라지진 않고, null로 반환합니다.")
+  public ResponseEntity<ApiResponse<PostParticipantListResponse>> getGroupBuyParticipantList(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable(name = "postId") Long postId
+  ) {
+    PostParticipantListResponse groupBuyParticipantList = groupBuyService.getGroupBuyParticipantList(
+        userPrincipal.getUserId(), postId);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyParticipantList));
   }
 }

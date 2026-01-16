@@ -41,9 +41,9 @@ public class PaymentService {
 
     Payment payment = Payment.create(
         req.depositorName(),
-        req.depositedAt(),
         order.getTotalAmount(),
-        order
+        order,
+        req.depositedAt()
     );
     try {
       paymentRepository.saveAndFlush(payment);
@@ -66,10 +66,11 @@ public class PaymentService {
       throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
     }
 
+    LocalDateTime confirmDateTime = LocalDateTime.now();
     // 입금 확인됨으로 처리
     order.confirmPayment();
     OrderConfirmResponse orderConfirmResponse = new OrderConfirmResponse(orderId,
-        order.getStatus(), LocalDateTime.now());
+        order.getStatus(), confirmDateTime);
 
     // 해당 분철글에 대해 'PAID'가 아닌 주문이 남아있는지 확인
     long allOrderPaid = orderService.countByGroupBuyPostIdAndStatusNot(groupBuyPost.getId(),

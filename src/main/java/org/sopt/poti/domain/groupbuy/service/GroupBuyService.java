@@ -28,6 +28,7 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostDeliveryOption;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostMemberOption;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPotItem;
+import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
@@ -431,5 +432,21 @@ public class GroupBuyService {
         status,
         groupBuyResponses
     );
+  }
+
+  // 특정 분철글 참여자 목록 조회
+  public PostParticipantListResponse getGroupBuyParticipantList(Long userId, Long postId) {
+    GroupBuyPost groupBuyPost = groupBuyRepository.findById(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+    if (!groupBuyPost.getLeader().getId().equals(userId)) {
+      throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
+    }
+    
+    return orderService.findParticipants(groupBuyPost.getId());
+  }
+
+  public GroupBuyPost getGroupBuyPostById(Long postId) {
+    return groupBuyRepository.findById(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
   }
 }
