@@ -46,7 +46,7 @@ public class PaymentService {
         order
     );
     try {
-      paymentRepository.save(payment);
+      paymentRepository.saveAndFlush(payment);
     } catch (DataIntegrityViolationException e) {
       throw new BusinessException(ErrorStatus.PAYMENT_ALREADY_SUBMITTED);
     }
