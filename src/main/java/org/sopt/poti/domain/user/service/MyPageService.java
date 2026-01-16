@@ -58,13 +58,13 @@ public class MyPageService {
 
     List<GroupBuyPostStatus> rInProgressStatuses = List.of(
         GroupBuyPostStatus.RECRUITING,
+        GroupBuyPostStatus.CLOSED,
         GroupBuyPostStatus.PAYMENT_DONE,
         GroupBuyPostStatus.SHIPPING
     );
     int rInProgress = groupBuyService.countByLeader_IdAndStatusIn(userId, rInProgressStatuses);
 
     List<GroupBuyPostStatus> rCompletedStatuses = List.of(
-        GroupBuyPostStatus.CLOSED,
         GroupBuyPostStatus.DELIVERED
     );
     int rCompleted = groupBuyService.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
