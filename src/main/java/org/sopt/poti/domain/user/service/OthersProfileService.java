@@ -2,7 +2,6 @@ package org.sopt.poti.domain.user.service;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
@@ -19,46 +18,46 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class OthersProfileService {
 
-    private final UserRepository userRepository;
-    private final GroupBuyRepository groupBuyRepository;
-    private final ActivityMessageResolver activityMessageResolver;
+  private final UserRepository userRepository;
+  private final GroupBuyRepository groupBuyRepository;
+  private final ActivityMessageResolver activityMessageResolver;
 
-    public OthersProfileResponse getProfile(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+  public OthersProfileResponse getProfile(Long userId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
 
-        String activityMessage = activityMessageResolver.resolve(user.getLastActiveAt());
-        LocalDate joinedAt = user.getCreatedAt().toLocalDate();
-        boolean hasFavoriteArtist = (user.getFavoriteArtist() != null);
+    String activityMessage = activityMessageResolver.resolve(user.getLastActiveAt());
+    LocalDate joinedAt = user.getCreatedAt().toLocalDate();
+    boolean hasFavoriteArtist = (user.getFavoriteArtist() != null);
 
-        int rTotal = groupBuyRepository.countByLeader_Id(userId);
+    int rTotal = groupBuyRepository.countByLeader_Id(userId);
 
-        List<GroupBuyPostStatus> rInProgressStatuses = List.of(
-                GroupBuyPostStatus.RECRUITING,
-                GroupBuyPostStatus.PAYMENT_DONE,
-                GroupBuyPostStatus.SHIPPING
-        );
-        int rInProgress = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rInProgressStatuses);
+    List<GroupBuyPostStatus> rInProgressStatuses = List.of(
+        GroupBuyPostStatus.RECRUITING,
+        GroupBuyPostStatus.PAYMENT_DONE,
+        GroupBuyPostStatus.SHIPPING
+    );
+    int rInProgress = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rInProgressStatuses);
 
-        List<GroupBuyPostStatus> rCompletedStatuses = List.of(
-                GroupBuyPostStatus.CLOSED,
-                GroupBuyPostStatus.DELIVERED,
-                GroupBuyPostStatus.COMPLETED
-        );
-        int rCompleted = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
+    List<GroupBuyPostStatus> rCompletedStatuses = List.of(
+        GroupBuyPostStatus.CLOSED,
+        GroupBuyPostStatus.DELIVERED
+    );
+    int rCompleted = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
 
-        OthersProfileResponse.Summary recruit = new OthersProfileResponse.Summary(rTotal, rInProgress, rCompleted);
+    OthersProfileResponse.Summary recruit = new OthersProfileResponse.Summary(rTotal, rInProgress,
+        rCompleted);
 
-        return new OthersProfileResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getNickname(),
-                user.getProfileImageUrl(),
-                user.getRatingAvg(),
-                activityMessage,
-                joinedAt,
-                hasFavoriteArtist,
-                recruit
-        );
-    }
+    return new OthersProfileResponse(
+        user.getId(),
+        user.getEmail(),
+        user.getNickname(),
+        user.getProfileImageUrl(),
+        user.getRatingAvg(),
+        activityMessage,
+        joinedAt,
+        hasFavoriteArtist,
+        recruit
+    );
+  }
 }

@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.participation.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
@@ -11,8 +12,6 @@ import org.sopt.poti.domain.participation.entity.ParticipationStatus;
 import org.sopt.poti.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +32,11 @@ public class ParticipationService {
 
     for (Order order : orders) {
       GroupBuyPostStatus postStatus = order.getGroupBuyPost().getStatus();
-      if (isCompleted(postStatus)) completedCount++;
-      else inProgressCount++;
+      if (isCompleted(postStatus)) {
+        completedCount++;
+      } else {
+        inProgressCount++;
+      }
     }
 
     List<ParticipationListResponse> filtered = orders.stream()
@@ -46,8 +48,7 @@ public class ParticipationService {
   }
 
   private boolean isCompleted(GroupBuyPostStatus status) {
-    return status == GroupBuyPostStatus.DELIVERED
-        || status == GroupBuyPostStatus.COMPLETED;
+    return status == GroupBuyPostStatus.DELIVERED;
   }
 
   private boolean matchParticipationStatus(Order order, ParticipationStatus status) {
@@ -59,8 +60,7 @@ public class ParticipationService {
           || postStatus == GroupBuyPostStatus.PAYMENT_DONE
           || postStatus == GroupBuyPostStatus.SHIPPING;
 
-      case COMPLETED -> postStatus == GroupBuyPostStatus.DELIVERED
-          || postStatus == GroupBuyPostStatus.COMPLETED;
+      case COMPLETED -> postStatus == GroupBuyPostStatus.DELIVERED;
     };
   }
 

@@ -154,7 +154,7 @@ public class ParticipationDetailService {
       case CLOSED -> "모집 완료";
       case PAYMENT_DONE -> "입금 완료";
       case SHIPPING -> "배송 시작";
-      case DELIVERED, COMPLETED -> "배송 완료";
+      case DELIVERED -> "배송 완료";
     };
   }
 
