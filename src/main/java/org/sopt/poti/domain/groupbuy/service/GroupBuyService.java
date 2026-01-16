@@ -400,8 +400,7 @@ public class GroupBuyService {
         GroupBuyPostStatus.SHIPPING
     );
     List<GroupBuyPostStatus> completedStatuses = List.of(
-        GroupBuyPostStatus.DELIVERED,
-        GroupBuyPostStatus.COMPLETED
+        GroupBuyPostStatus.DELIVERED
     );
 
     List<GroupBuyPostStatus> targetStatuses = (status == GroupBuyMeStatus.IN_PROGRESS)

@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.participation.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
@@ -12,74 +13,73 @@ import org.sopt.poti.domain.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ParticipationService {
 
-    private final OrderService orderService;
-    private final UserService userService;
+  private final OrderService orderService;
+  private final UserService userService;
 
-    public ParticipationSummaryResponse getMyParticipations(Long userId, ParticipationStatus status) {
+  public ParticipationSummaryResponse getMyParticipations(Long userId, ParticipationStatus status) {
 
-        userService.getUserById(userId);
+    userService.getUserById(userId);
 
-        List<Order> orders = orderService.getOrdersByUser(userId);
+    List<Order> orders = orderService.getOrdersByUser(userId);
 
-        int inProgressCount = 0;
-        int completedCount = 0;
+    int inProgressCount = 0;
+    int completedCount = 0;
 
-        for (Order order : orders) {
-            GroupBuyPostStatus postStatus = order.getGroupBuyPost().getStatus();
-            if (isCompleted(postStatus)) completedCount++;
-            else inProgressCount++;
-        }
-
-        List<ParticipationListResponse> filtered = orders.stream()
-                .filter(order -> matchParticipationStatus(order, status))
-                .map(this::toResponse)
-                .toList();
-
-        return new ParticipationSummaryResponse(inProgressCount, completedCount, filtered);
+    for (Order order : orders) {
+      GroupBuyPostStatus postStatus = order.getGroupBuyPost().getStatus();
+      if (isCompleted(postStatus)) {
+        completedCount++;
+      } else {
+        inProgressCount++;
+      }
     }
 
-    private boolean isCompleted(GroupBuyPostStatus status) {
-        return status == GroupBuyPostStatus.DELIVERED
-                || status == GroupBuyPostStatus.COMPLETED;
-    }
+    List<ParticipationListResponse> filtered = orders.stream()
+        .filter(order -> matchParticipationStatus(order, status))
+        .map(this::toResponse)
+        .toList();
 
-    private boolean matchParticipationStatus(Order order, ParticipationStatus status) {
-        GroupBuyPostStatus postStatus = order.getGroupBuyPost().getStatus();
+    return new ParticipationSummaryResponse(inProgressCount, completedCount, filtered);
+  }
 
-        return switch (status) {
-            case IN_PROGRESS -> postStatus == GroupBuyPostStatus.RECRUITING
-                    || postStatus == GroupBuyPostStatus.CLOSED
-                    || postStatus == GroupBuyPostStatus.PAYMENT_DONE
-                    || postStatus == GroupBuyPostStatus.SHIPPING;
+  private boolean isCompleted(GroupBuyPostStatus status) {
+    return status == GroupBuyPostStatus.DELIVERED;
+  }
 
-            case COMPLETED -> postStatus == GroupBuyPostStatus.DELIVERED
-                    || postStatus == GroupBuyPostStatus.COMPLETED;
-        };
-    }
+  private boolean matchParticipationStatus(Order order, ParticipationStatus status) {
+    GroupBuyPostStatus postStatus = order.getGroupBuyPost().getStatus();
 
-    private ParticipationListResponse toResponse(Order order) {
-        GroupBuyPost post = order.getGroupBuyPost();
+    return switch (status) {
+      case IN_PROGRESS -> postStatus == GroupBuyPostStatus.RECRUITING
+          || postStatus == GroupBuyPostStatus.CLOSED
+          || postStatus == GroupBuyPostStatus.PAYMENT_DONE
+          || postStatus == GroupBuyPostStatus.SHIPPING;
 
-        return new ParticipationListResponse(
-                order.getId(),
-                post.getId(),
-                post.getArtist().getName(),
-                post.getTitle(),
-                post.getRepresentativeImageUrl(),
-                mapToClientStatus(post.getStatus()),
-                order.getTotalAmount(),
-                order.getCreatedAt()
-        );
-    }
+      case COMPLETED -> postStatus == GroupBuyPostStatus.DELIVERED;
+    };
+  }
 
-    private String mapToClientStatus(GroupBuyPostStatus postStatus) {
-        return isCompleted(postStatus) ? "COMPLETED" : "IN_PROGRESS";
-    }
+  private ParticipationListResponse toResponse(Order order) {
+    GroupBuyPost post = order.getGroupBuyPost();
+
+    return new ParticipationListResponse(
+        order.getId(),
+        post.getId(),
+        post.getArtist().getName(),
+        post.getTitle(),
+        post.getRepresentativeImageUrl(),
+        mapToClientStatus(post.getStatus()),
+        order.getTotalAmount(),
+        order.getCreatedAt()
+    );
+  }
+
+  private String mapToClientStatus(GroupBuyPostStatus postStatus) {
+    return isCompleted(postStatus) ? "COMPLETED" : "IN_PROGRESS";
+  }
 }
