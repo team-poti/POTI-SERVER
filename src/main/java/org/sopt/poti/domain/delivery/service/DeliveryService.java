@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.delivery.service;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.delivery.dto.response.DeliveryOptionsResponse;
 import org.sopt.poti.domain.delivery.entity.Delivery;
@@ -42,5 +43,9 @@ public class DeliveryService {
 
   public boolean existsDeliveryByOrderId(Long orderId) {
     return deliveryRepository.existsDeliveryByOrderId(orderId);
+  }
+
+  public Optional<Delivery> findTopByOrder_IdOrderByIdDesc(Long orderId) {
+    return deliveryRepository.findTopByOrder_IdOrderByIdDesc(orderId);
   }
 }
