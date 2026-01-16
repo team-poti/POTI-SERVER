@@ -14,6 +14,7 @@ import org.sopt.poti.domain.payment.entity.Payment;
 import org.sopt.poti.domain.payment.repository.PaymentRepository;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +45,11 @@ public class PaymentService {
         order.getTotalAmount(),
         order
     );
-    paymentRepository.save(payment);
-
+    try {
+      paymentRepository.save(payment);
+    } catch (DataIntegrityViolationException e) {
+      throw new BusinessException(ErrorStatus.PAYMENT_ALREADY_SUBMITTED);
+    }
     order.requestPayCheck();
 
     return new DepositFormResponse(payment.getId());
