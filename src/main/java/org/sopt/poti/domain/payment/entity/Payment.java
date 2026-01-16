@@ -1,11 +1,23 @@
 package org.sopt.poti.domain.payment.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.order.entity.Order;
+import org.sopt.poti.global.entity.BaseTimeEntity;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 
@@ -13,59 +25,59 @@ import org.sopt.poti.global.error.ErrorStatus;
 @Entity
 @Table(name = "payments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Payment {
+public class Payment extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Version
-    private Long version;
+  @Version
+  private Long version;
 
-    @Column(name = "depositor", length = 50)
-    private String depositor;
+  @Column(name = "depositor", length = 50)
+  private String depositor;
 
-    @Column(name = "deposited_at", length = 30)
-    private String depositedAt;
+  @Column(name = "deposited_at", length = 30)
+  private String depositedAt;
 
-    @Column(nullable = false)
-    private int amount;
+  @Column(nullable = false)
+  private int amount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private PaymentStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  private PaymentStatus status;
 
-    @Column(name = "confirmed_at")
-    private LocalDateTime confirmedAt;
+  @Column(name = "confirmed_at")
+  private LocalDateTime confirmedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "order_id", nullable = false)
+  private Order order;
 
-    public static Payment create(String depositor, int amount, Order order, String depositedAt) {
-        Payment p = new Payment();
-        p.depositor = depositor;
-        p.amount = amount;
-        p.order = order;
-        p.depositedAt = depositedAt;
-        p.status = PaymentStatus.PENDING;
-        return p;
+  public static Payment create(String depositor, int amount, Order order, String depositedAt) {
+    Payment p = new Payment();
+    p.depositor = depositor;
+    p.amount = amount;
+    p.order = order;
+    p.depositedAt = depositedAt;
+    p.status = PaymentStatus.PENDING;
+    return p;
+  }
+
+  public void submitDepositForm(String depositorName, String depositedAt) {
+    if (this.status != PaymentStatus.PENDING) {
+      throw new BusinessException(ErrorStatus.PAYMENT_NOT_PENDING);
     }
+    this.depositor = depositorName;
+    this.depositedAt = depositedAt;
+    this.status = PaymentStatus.REQUESTED;
+  }
 
-    public void submitDepositForm(String depositorName, String depositedAt) {
-        if (this.status != PaymentStatus.PENDING) {
-            throw new BusinessException(ErrorStatus.PAYMENT_NOT_PENDING);
-        }
-        this.depositor = depositorName;
-        this.depositedAt = depositedAt;
-        this.status = PaymentStatus.REQUESTED;
+  public void confirm(LocalDateTime confirmedAt) {
+    if (this.status != PaymentStatus.REQUESTED) {
+      throw new BusinessException(ErrorStatus.PAYMENT_NOT_REQUESTED);
     }
-
-    public void confirm(LocalDateTime confirmedAt) {
-        if (this.status != PaymentStatus.REQUESTED) {
-            throw new BusinessException(ErrorStatus.PAYMENT_NOT_REQUESTED);
-        }
-        this.status = PaymentStatus.CONFIRMED;
-        this.confirmedAt = confirmedAt;
-    }
+    this.status = PaymentStatus.CONFIRMED;
+    this.confirmedAt = confirmedAt;
+  }
 }

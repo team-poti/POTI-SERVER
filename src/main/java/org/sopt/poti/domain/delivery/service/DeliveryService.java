@@ -43,4 +43,8 @@ public class DeliveryService {
   public boolean existsDeliveryByOrderId(Long orderId) {
     return deliveryRepository.existsDeliveryByOrderId(orderId);
   }
+
+  public Delivery getDeliveryByOrderId(Long orderID) {
+    return deliveryRepository.findById(orderID).orElse(null);
+  }
 }
