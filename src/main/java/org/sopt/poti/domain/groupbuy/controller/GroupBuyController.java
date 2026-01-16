@@ -139,7 +139,7 @@ public class GroupBuyController {
       @PathVariable(name = "postId") Long postId
   ) {
     PostParticipantListResponse groupBuyParticipantList = groupBuyService.getGroupBuyParticipantList(
-        postId);
+        userPrincipal.getUserId(), postId);
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyParticipantList));
   }
 }

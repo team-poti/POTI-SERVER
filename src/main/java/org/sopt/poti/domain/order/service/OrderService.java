@@ -208,9 +208,9 @@ public class OrderService {
 
     // 상태: PAID(입금완료), SHIPPED, DELIVERED
     DeliveryInfo info = order.getDeliveryInfo();
-    Delivery deliveryByOrderId = deliveryService.getDeliveryByOrderId(order.getId());
+    Delivery deliveryByOrderId = order.getDelivery();
 
-    if (info == null && deliveryByOrderId == null) {
+    if (info == null) {
       return null; // 방어 로직
     }
 
@@ -218,8 +218,16 @@ public class OrderService {
     String trackingNumber =
         (deliveryByOrderId != null) ? deliveryByOrderId.getTrackingNumber() : null;
 
+    if (status.equals(OrderStatus.DELIVERED.name())) {
+      return new ShippingInfo(
+          null,
+          null,
+          null,
+          trackingNumber
+      );
+    }
     return new ShippingInfo(
-        Objects.requireNonNull(info).getReceiverName(),
+        info.getReceiverName(),
         info.getAddressLine(),
         info.getPhone(),
         trackingNumber

@@ -22,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.sopt.poti.domain.delivery.entity.Delivery;
 import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.payment.entity.Payment;
@@ -74,6 +75,9 @@ public class Order extends BaseTimeEntity {
 
   @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
   private Review review;
+
+  @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Delivery delivery;
 
   @Builder
   private Order(

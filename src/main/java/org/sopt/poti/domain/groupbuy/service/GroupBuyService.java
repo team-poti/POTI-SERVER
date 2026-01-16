@@ -436,10 +436,13 @@ public class GroupBuyService {
   }
 
   // 특정 분철글 참여자 목록 조회
-  public PostParticipantListResponse getGroupBuyParticipantList(Long postId) {
+  public PostParticipantListResponse getGroupBuyParticipantList(Long userId, Long postId) {
     GroupBuyPost groupBuyPost = groupBuyRepository.findById(postId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
-
+    if (!groupBuyPost.getLeader().getId().equals(userId)) {
+      throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
+    }
+    
     return orderService.findParticipants(groupBuyPost.getId());
   }
 
