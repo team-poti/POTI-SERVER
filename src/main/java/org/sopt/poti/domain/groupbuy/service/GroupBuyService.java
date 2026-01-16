@@ -28,6 +28,7 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostDeliveryOption;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostMemberOption;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPotItem;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
@@ -441,12 +442,23 @@ public class GroupBuyService {
     if (!groupBuyPost.getLeader().getId().equals(userId)) {
       throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
     }
-    
+
     return orderService.findParticipants(groupBuyPost.getId());
   }
 
   public GroupBuyPost getGroupBuyPostById(Long postId) {
     return groupBuyRepository.findById(postId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+  }
+
+  public GroupBuySaleDetailResponse getGroupBuyPostDetailForSale(Long userId, Long postId) {
+    GroupBuyPost groupBuyPost = groupBuyRepository.findByIdWithUserAndArtist(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+    if (!groupBuyPost.getLeader().getId().equals(userId)) {
+      throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
+    }
+
+    return orderService.findParticipantsForPostDetail(
+        groupBuyPost);
   }
 }

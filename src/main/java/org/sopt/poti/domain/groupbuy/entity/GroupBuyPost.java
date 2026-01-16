@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
+import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.global.entity.BaseTimeEntity;
 
@@ -81,6 +82,9 @@ public class GroupBuyPost extends BaseTimeEntity {
 
   @OneToMany(mappedBy = "groupBuyPost", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<GroupBuyShipping> shippings = new ArrayList<>();
+
+  @OneToMany(mappedBy = "groupBuyPost")
+  private List<Order> orders = new ArrayList<>();
 
   @Builder
   private GroupBuyPost(
@@ -145,6 +149,11 @@ public class GroupBuyPost extends BaseTimeEntity {
   public void addShipping(GroupBuyShipping shipping) {
     this.shippings.add(shipping);
     shipping.setGroupBuyPost(this); // 양방향 연관관계 설정
+  }
+
+  public void addOrder(Order order) {
+    this.orders.add(order);
+    order.setGroupBuyPost(this);
   }
 
   // 분철글 상태 변경 메서드
