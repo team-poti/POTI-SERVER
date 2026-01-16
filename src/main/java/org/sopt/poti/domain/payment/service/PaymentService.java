@@ -28,21 +28,29 @@ public class PaymentService {
   @Transactional
   public DepositFormResponse submitDepositForm(Long userId, DepositFormRequest req) {
     Order order = orderService.getOrderById(req.orderId());
-
     orderService.validateOrderOwner(order, userId);
 
     if (order.getStatus() != OrderStatus.WAIT_PAY) {
       throw new BusinessException(ErrorStatus.ORDER_NOT_WAIT_PAY);
     }
 
-    Payment payment = paymentRepository.findTopByOrderIdOrderByIdDesc(order.getId())
-        .orElseThrow(() -> new BusinessException(ErrorStatus.PAYMENT_NOT_FOUND));
+    if (paymentRepository.existsByOrder_Id(order.getId())) {
+      throw new BusinessException(ErrorStatus.PAYMENT_ALREADY_SUBMITTED);
+    }
 
-    payment.submitDepositForm(req.depositorName(), req.depositedAt());
+    Payment payment = Payment.create(
+        req.depositorName(),
+        req.depositedAt(),
+        order.getTotalAmount(),
+        order
+    );
+    paymentRepository.save(payment);
+
     order.requestPayCheck();
 
     return new DepositFormResponse(payment.getId());
   }
+
 
   @Transactional
   public OrderConfirmResponse confirmPayment(Long userId, Long orderId) {
