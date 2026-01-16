@@ -2,8 +2,6 @@ package org.sopt.poti.domain.payment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -18,12 +17,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.global.entity.BaseTimeEntity;
-import org.sopt.poti.global.error.BusinessException;
-import org.sopt.poti.global.error.ErrorStatus;
 
 @Getter
 @Entity
-@Table(name = "payments")
+@Table(name = "payments",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_payments_order_id",
+        columnNames = "order_id"
+    )
+)
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Payment extends BaseTimeEntity {
 
@@ -34,18 +37,14 @@ public class Payment extends BaseTimeEntity {
   @Version
   private Long version;
 
-  @Column(name = "depositor", length = 50)
+  @Column(name = "depositor", length = 50, nullable = false)
   private String depositor;
 
-  @Column(name = "deposited_at", length = 30)
+  @Column(name = "deposited_at", length = 30, nullable = false)
   private String depositedAt;
 
   @Column(nullable = false)
   private int amount;
-
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 20)
-  private PaymentStatus status;
 
   @Column(name = "confirmed_at")
   private LocalDateTime confirmedAt;
@@ -60,24 +59,15 @@ public class Payment extends BaseTimeEntity {
     p.amount = amount;
     p.order = order;
     p.depositedAt = depositedAt;
-    p.status = PaymentStatus.PENDING;
     return p;
   }
 
   public void submitDepositForm(String depositorName, String depositedAt) {
-    if (this.status != PaymentStatus.PENDING) {
-      throw new BusinessException(ErrorStatus.PAYMENT_NOT_PENDING);
-    }
     this.depositor = depositorName;
     this.depositedAt = depositedAt;
-    this.status = PaymentStatus.REQUESTED;
   }
 
   public void confirm(LocalDateTime confirmedAt) {
-    if (this.status != PaymentStatus.REQUESTED) {
-      throw new BusinessException(ErrorStatus.PAYMENT_NOT_REQUESTED);
-    }
-    this.status = PaymentStatus.CONFIRMED;
     this.confirmedAt = confirmedAt;
   }
 }

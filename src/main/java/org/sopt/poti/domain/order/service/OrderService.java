@@ -3,6 +3,7 @@ package org.sopt.poti.domain.order.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.delivery.dto.request.StartDeliveryRequest;
 import org.sopt.poti.domain.delivery.dto.response.StartDeliveryResponse;
@@ -232,5 +233,8 @@ public class OrderService {
         info.getPhone(),
         trackingNumber
     );
+  }
+  public Optional<Order> findWithDetailsById(Long orderId) {
+    return orderRepository.findWithDetailsById(orderId);
   }
 }
