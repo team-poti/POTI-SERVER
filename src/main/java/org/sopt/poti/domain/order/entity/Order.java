@@ -22,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.sopt.poti.domain.delivery.entity.Delivery;
 import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
@@ -55,6 +56,7 @@ public class Order extends BaseTimeEntity {
   @Embedded
   private DeliveryInfo deliveryInfo;
 
+  @Setter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "group_buy_post_id", nullable = false)
   private GroupBuyPost groupBuyPost;
