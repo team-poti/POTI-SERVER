@@ -89,7 +89,6 @@ public class ParticipationDetailService {
             mapDepositStatus(postStatus, orderStatus),
             bank,
             accountNumber,
-            accountHolder,
             depositDeadline
         ),
         new ParticipationDetailResponse.ShippingInfo(

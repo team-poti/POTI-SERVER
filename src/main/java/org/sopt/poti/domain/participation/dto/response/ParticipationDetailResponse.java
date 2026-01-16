@@ -27,7 +27,6 @@ public record ParticipationDetailResponse(
       String depositStatus,
       String bank,
       String accountNumber,
-      String accountHolder,
       String depositDeadline
   ) {
 
