@@ -66,6 +66,7 @@ public enum ErrorStatus {
    */
   REVIEW_ALREADY_EXISTS(40900, HttpStatus.CONFLICT, "이미 리뷰가 작성된 주문입니다."),
   GROUP_BUY_POST_NOT_RECRUITING(40901, HttpStatus.BAD_REQUEST, "모집중인 공구만 주문할 수 있습니다."),
+  PAYMENT_ALREADY_SUBMITTED(40902, HttpStatus.CONFLICT, "이미 입금 정보가 제출된 주문입니다."),
 
   /**
    * 500 Internal Server Error
