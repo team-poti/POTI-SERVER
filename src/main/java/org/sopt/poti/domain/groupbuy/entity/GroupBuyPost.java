@@ -151,4 +151,15 @@ public class GroupBuyPost extends BaseTimeEntity {
   public void updateStatus(GroupBuyPostStatus status) {
     this.status = status;
   }
+
+  //분철글 참여자 다 찼을때 분철글 상태 변경하는 메서드
+  public void increaseCurrentQuantity(int count) {
+    this.currentQuantity += count;
+
+    if (this.currentQuantity >= this.goalQuantity) {
+      this.currentQuantity = this.goalQuantity;
+      this.status = GroupBuyPostStatus.CLOSED;
+    }
+  }
+
 }

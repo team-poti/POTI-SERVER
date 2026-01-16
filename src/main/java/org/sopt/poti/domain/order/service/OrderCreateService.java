@@ -109,6 +109,9 @@ public class OrderCreateService {
 
     orderItemRepository.saveAll(orderItems);
 
+    // 10 분철글 현재 인원 증가 및 분철 정원 다 차면 상태 변경(CLOSED)
+    post.increaseCurrentQuantity(orderItems.size());
+
     return new CreateOrderResponse(savedOrder.getId());
   }
 }
