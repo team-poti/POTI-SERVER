@@ -442,4 +442,9 @@ public class GroupBuyService {
 
     return orderService.findParticipants(groupBuyPost.getId());
   }
+
+  public GroupBuyPost getGroupBuyPostById(Long postId) {
+    return groupBuyRepository.findById(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+  }
 }

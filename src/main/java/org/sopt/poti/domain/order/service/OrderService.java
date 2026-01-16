@@ -15,6 +15,7 @@ import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse.Po
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse.PriceInfo;
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse.ShippingInfo;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
+import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.order.entity.DeliveryInfo;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.order.entity.OrderItem;
@@ -122,15 +123,21 @@ public class OrderService {
 
     // 2. DTO 변환 (여기서 배치 로딩으로 연관 데이터 쿼리 나감)
     List<PostParticipantResponse> participantResponses = orders.stream()
-        .map(this::convertToParticipantResponse)
+        .map(order -> convertToParticipantResponse(order.getGroupBuyPost().getStatus(), order)
+        )
         .toList();
 
     return new PostParticipantListResponse(participantResponses);
   }
 
   // 단일 주문을 응답 DTO로 변환하는 메인 로직
-  private PostParticipantResponse convertToParticipantResponse(Order order) {
-    OrderStatus status = order.getStatus();
+  private PostParticipantResponse convertToParticipantResponse(
+      GroupBuyPostStatus groupBuyPostStatus, Order order) {
+    String status = order.getStatus().name();
+
+    if (groupBuyPostStatus.equals(GroupBuyPostStatus.RECRUITING)) {
+      status = groupBuyPostStatus.name();
+    }
 
     return new PostParticipantResponse(
         order.getId(),
@@ -145,9 +152,7 @@ public class OrderService {
     );
   }
 
-  // -------------------------------------------------------------
-  // Helper Methods (조건 로직 분리)
-  // -------------------------------------------------------------
+  //=== Helper Methods (조건 로직 분리) ===//
 
   // 1. 멤버 이름 리스트 추출
   private List<String> getMemberNames(Order order) {
@@ -174,9 +179,10 @@ public class OrderService {
   }
 
   // 3. 입금 정보 생성 (입금 확인중 이상부터 노출)
-  private DepositInfo createDepositInfo(Order order, OrderStatus status) {
-    // 모집 대기(WAIT_PAY) 상태면 안 보여줌
-    if (status == OrderStatus.WAIT_PAY) {
+  private DepositInfo createDepositInfo(Order order, String status) {
+    // 분철글 모집 대기(WAIT_PAY) 상태면 안 보여줌 && 입금 대기 중 상태면 안보여줌
+    if (Objects.equals(status, OrderStatus.WAIT_PAY.name()) || Objects.equals(status,
+        GroupBuyPostStatus.RECRUITING.name())) {
       return null;
     }
 
@@ -190,20 +196,13 @@ public class OrderService {
     } else {
       return null;
     }
-
-//    return order.getPayments().stream()
-//        .findFirst() // 가장 최근 입금 내역
-//        .map(payment -> new DepositInfo(
-//            payment.getDepositorName(),
-//            payment.getDepositedAt().toString() // 포맷팅 필요 시 Utils 사용
-//        ))
-//        .orElse(null); // 데이터가 없으면 null
   }
 
   // 4. 배송 정보 생성 (입금 완료 이상부터 노출)
-  private ShippingInfo createShippingInfo(Order order, OrderStatus status) {
+  private ShippingInfo createShippingInfo(Order order, String status) {
     // 모집 대기(WAIT_PAY) or 입금 확인중(WAIT_PAY_CHECK)이면 안 보여줌
-    if (status == OrderStatus.WAIT_PAY || status == OrderStatus.WAIT_PAY_CHECK) {
+    if (status.equals(OrderStatus.WAIT_PAY.name()) || status.equals(
+        OrderStatus.WAIT_PAY_CHECK.name()) || status.equals(GroupBuyPostStatus.RECRUITING.name())) {
       return null;
     }
 

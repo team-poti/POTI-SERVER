@@ -1,7 +1,6 @@
 package org.sopt.poti.domain.groupbuy.dto.response;
 
 import java.util.List;
-import org.sopt.poti.domain.order.entity.OrderStatus;
 
 public record PostParticipantListResponse(
     List<PostParticipantResponse> participants
@@ -13,7 +12,7 @@ public record PostParticipantListResponse(
       String profileImage,
       String nickname,
       List<String> memberNames, // 구매한 아티스트 멤버들 (클라이언트에서 유진, 레이 로 이어서 사용)
-      OrderStatus status, // 해당 주문 상태
+      String status, // 해당 주문 상태
       PriceInfo priceInfo,  // 금액 정보
       DepositInfo depositInfo,  // 입금 정보
       ShippingInfo shippingInfo // 배송 정보
