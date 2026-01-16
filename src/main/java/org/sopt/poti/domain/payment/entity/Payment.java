@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,7 +18,13 @@ import org.sopt.poti.domain.order.entity.Order;
 
 @Getter
 @Entity
-@Table(name = "payments")
+@Table(name = "payments",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_payments_order_id",
+        columnNames = "order_id"
+    )
+)
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Payment {
 
