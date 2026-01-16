@@ -142,7 +142,7 @@ public class OrderService {
 
     String message = groupBuyPost.getStatus().getSellerMessage();
     if (groupBuyPost.getStatus().equals(GroupBuyPostStatus.CLOSED)
-        && existsByGroupBuyPost_IdAndStatus(orders)) {
+        && allOrdersWaitingPayCheck(orders)) {
       message = "입금 확인을 기다리는 참여자가 있어요";
     }
 
@@ -163,8 +163,8 @@ public class OrderService {
   }
 
   // 분철글이 모집완료된 상태인데, 입금 확인 대기중인 주문이 있으면
-  private boolean existsByGroupBuyPost_IdAndStatus(List<Order> orders) {
-    return orders.stream()
+  private boolean allOrdersWaitingPayCheck(List<Order> orders) {
+    return !orders.isEmpty() && orders.stream()
         .allMatch(order -> order.getStatus().equals(OrderStatus.WAIT_PAY_CHECK));
   }
 
