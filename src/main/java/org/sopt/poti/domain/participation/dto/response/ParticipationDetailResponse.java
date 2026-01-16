@@ -7,8 +7,11 @@ public record ParticipationDetailResponse(
     String imageUrl,
     String artistName,
     String title,
-    String postStatusText, // 상품명 아래 상태 (모집대기, 모집완료 등)
-    String statusMessage,  // 안내 문구
+
+    String postStatus,    // GroupBuyPostStatus
+    String orderStatus,   // OrderStatus
+    String statusMessage, // 상단 진행 멘트
+
     List<MemberPaymentDto> memberPayments,
     PaymentInfo paymentInfo,
     ShippingInfo shippingInfo
@@ -24,7 +27,7 @@ public record ParticipationDetailResponse(
   public record PaymentInfo(
       int shippingFee,
       int totalAmount,
-      String depositStatus,
+      String depositStatus, // OrderStatus
       String bank,
       String accountNumber,
       String depositDeadline
@@ -40,7 +43,7 @@ public record ParticipationDetailResponse(
       String phone,
       String carrier,
       String trackingNumber,
-      String shippingStatus
+      String shippingStatus // OrderStatus
   ) {
 
   }

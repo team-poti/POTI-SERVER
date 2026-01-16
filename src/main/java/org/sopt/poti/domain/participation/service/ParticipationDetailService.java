@@ -10,7 +10,6 @@ import org.sopt.poti.domain.delivery.service.DeliveryService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.order.entity.Order;
-import org.sopt.poti.domain.order.entity.OrderItem;
 import org.sopt.poti.domain.order.entity.OrderStatus;
 import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.participation.dto.response.ParticipationDetailResponse;
@@ -26,7 +25,6 @@ public class ParticipationDetailService {
 
   private final OrderService orderService;
   private final DeliveryService deliveryService;
-
 
   // 입금 마감 기한 포멧
   private static final DateTimeFormatter DEADLINE_FORMATTER =
@@ -44,6 +42,12 @@ public class ParticipationDetailService {
     OrderStatus orderStatus = order.getStatus();
     GroupBuyPostStatus postStatus = post.getStatus();
 
+    String postStatusValue = (postStatus != null) ? postStatus.name() : null;
+    String orderStatusValue = (orderStatus != null) ? orderStatus.name() : null;
+
+    // 상단 진행 멘트
+    String statusMessage = determineStatusMessage(postStatus, orderStatus);
+
     // 1. 계좌 및 입금기한 노출 제어
     boolean showPaymentDetails =
         (postStatus != GroupBuyPostStatus.RECRUITING
@@ -51,7 +55,6 @@ public class ParticipationDetailService {
 
     String bank = showPaymentDetails ? post.getBankName() : null;
     String accountNumber = showPaymentDetails ? post.getAccountNumber() : null;
-    String accountHolder = showPaymentDetails ? post.getLeader().getNickname() : null;
 
     // 입금 마감 기한
     String depositDeadline = null;
@@ -64,7 +67,7 @@ public class ParticipationDetailService {
     Delivery delivery = deliveryService.findTopByOrder_IdOrderByIdDesc(order.getId())
         .orElse(null);
 
-    // 배송 상태에 따른 정보
+    // 배송 상태에 따른 정보값
     boolean isShippingActive = (orderStatus == OrderStatus.SHIPPED);
 
     String carrier = isShippingActive
@@ -80,17 +83,21 @@ public class ParticipationDetailService {
         post.getRepresentativeImageUrl(),
         post.getArtist().getName(),
         post.getTitle(),
-        mapPostStatusLabel(postStatus),
-        determineStatusMessage(postStatus, orderStatus),
+        postStatusValue,
+        orderStatusValue,
+        statusMessage,
+
         getMemberPaymentList(order),
+
         new ParticipationDetailResponse.PaymentInfo(
             order.getDeliveryMethod().getPrice(),
             order.getTotalAmount(),
-            mapDepositStatus(postStatus, orderStatus),
+            orderStatusValue,
             bank,
             accountNumber,
             depositDeadline
         ),
+
         new ParticipationDetailResponse.ShippingInfo(
             order.getDeliveryMethod().getName(),
             order.getDeliveryInfo().getReceiverName(),
@@ -99,12 +106,11 @@ public class ParticipationDetailService {
             order.getDeliveryInfo().getPhone(),
             carrier,
             trackingNumber,
-            mapShippingStatus(orderStatus)
+            orderStatusValue
         )
     );
   }
-
-  // 상단 진행 멘트
+  
   private String determineStatusMessage(GroupBuyPostStatus postStatus, OrderStatus orderStatus) {
     if (postStatus == GroupBuyPostStatus.RECRUITING) {
       return "다른 참여자들을 기다리고 있어요";
@@ -119,55 +125,12 @@ public class ParticipationDetailService {
     };
   }
 
-  // 입금 상태
-  private String mapDepositStatus(GroupBuyPostStatus postStatus, OrderStatus orderStatus) {
-    if (postStatus == GroupBuyPostStatus.RECRUITING) {
-      return null;
-    }
-    if (orderStatus == OrderStatus.WAIT_PAY_CHECK) {
-      return "입금 확인중";
-    }
-    if (orderStatus.ordinal() >= OrderStatus.PAID.ordinal()) {
-      return "입금 완료";
-    }
-    return "입금 대기";
-  }
-
-  // 배송 상태
-  private String mapShippingStatus(OrderStatus orderStatus) {
-    if (orderStatus.ordinal() < OrderStatus.PAID.ordinal()) {
-      return null;
-    }
-    return switch (orderStatus) {
-      case PAID, READY -> "배송 대기";
-      case SHIPPED -> "배송 시작";
-      case DELIVERED -> "배송 완료";
-      default -> null;
-    };
-  }
-
-  // 상품명 아래 상태 (모집대기, 모집완료 등)
-  private String mapPostStatusLabel(GroupBuyPostStatus postStatus) {
-    return switch (postStatus) {
-      case RECRUITING -> "모집 대기";
-      case CLOSED -> "모집 완료";
-      case PAYMENT_DONE -> "입금 완료";
-      case SHIPPING -> "배송 시작";
-      case DELIVERED -> "배송 완료";
-    };
-  }
-
   private List<ParticipationDetailResponse.MemberPaymentDto> getMemberPaymentList(Order order) {
     return order.getOrderItems().stream()
         .map(item -> new ParticipationDetailResponse.MemberPaymentDto(
             item.getGroupBuyOption().getMember().getName(),
-            item.getItemAmount()))
+            item.getItemAmount()
+        ))
         .toList();
-  }
-
-  private int calculateProductPrice(Order order) {
-    return order.getOrderItems().stream()
-        .mapToInt(OrderItem::getItemAmount)
-        .sum();
   }
 }
