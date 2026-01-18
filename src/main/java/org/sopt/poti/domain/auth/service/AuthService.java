@@ -85,7 +85,9 @@ public class AuthService {
           request.socialType(),
           email,
           nickname,
-          profileImageUrl == null ? DEFAULT_PROFILE_IMAGE : profileImageUrl,
+          (profileImageUrl == null || profileImageUrl.isBlank())
+              ? DEFAULT_PROFILE_IMAGE
+              : profileImageUrl,
           null
       );
       userService.registerUser(user);
