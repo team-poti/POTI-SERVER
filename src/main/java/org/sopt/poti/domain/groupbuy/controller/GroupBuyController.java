@@ -70,7 +70,9 @@ public class GroupBuyController {
           .body(ApiResponse.success(SuccessStatus.OK,
               GroupBuyTitlesResponse.of(Collections.emptyList())));
     }
-    List<String> titles = groupBuyService.searchTitles(artistId, keyword);
+    // 공백 제거
+    String trim = keyword.trim();
+    List<String> titles = groupBuyService.searchTitles(artistId, trim);
     return ResponseEntity.status(HttpStatus.OK)
         .body(ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles)));
   }
