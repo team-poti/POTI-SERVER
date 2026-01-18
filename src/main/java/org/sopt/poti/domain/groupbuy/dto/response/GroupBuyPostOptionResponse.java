@@ -7,16 +7,16 @@ public record GroupBuyPostOptionResponse(
     @Schema(description = "선택 가능한 멤버 옵션 리스트")
     List<GroupBuyPostMemberOption> members,
     @Schema(description = "선택 가능한 배송 옵션 리스트")
-    List<GroupBuyPostDeliveryOption> options
+    List<GroupBuyPostDeliveryOption> shippings
 ) {
 
   public record GroupBuyPostMemberOption(
       @Schema(description = "멤버 옵션 ID (주문 시 사용)", example = "1")
-      Long memberId,
+      Long memberOptionId,
       @Schema(description = "멤버 이름", example = "하니")
       String memberName,
       @Schema(description = "옵션 가격", example = "15000")
-      Integer memberPrice
+      Integer memberOptionPrice
   ) {
 
   }
