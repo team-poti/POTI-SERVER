@@ -22,14 +22,14 @@ public class GlobalExceptionHandler {
       MethodArgumentTypeMismatchException e) {
     // 에러가 난 파라미터가 Enum 타입인지 확인
     if (e.getRequiredType() != null && e.getRequiredType().isEnum()) {
+      log.error("Enum 타입 변환 오류: {}", e.getRequiredType());
       return ResponseEntity
           .status(HttpStatus.BAD_REQUEST)
           .body(ApiResponse.fail(ErrorStatus.BAD_REQUEST));
     }
-
-    // Enum 말고 다른 타입 에러면 그냥 500으로 던지거나 처리
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ApiResponse.fail(ErrorStatus.INTERNAL_SERVER_ERROR));
+    
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.fail(ErrorStatus.BAD_REQUEST));
   }
 
   // 데이터 무결성 위반. 중복 닉네임, 외래키 문제 등
