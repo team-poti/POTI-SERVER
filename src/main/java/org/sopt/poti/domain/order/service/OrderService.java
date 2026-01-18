@@ -266,7 +266,7 @@ public class OrderService {
     }
     return new ShippingInfo(
         info.getReceiverName(),
-        info.getAddressLine(),
+        "(" + info.getZipcode() + ") " + info.getAddressLine(),
         info.getPhone(),
         trackingNumber
     );
@@ -297,7 +297,7 @@ public class OrderService {
     DeliveryInfo deliveryInfo = order.getDeliveryInfo();
     return new ShippingInfoForDetail(
         deliveryInfo.getReceiverName(),
-        "(" + deliveryInfo.getZipcode() + ")" + deliveryInfo.getAddressLine(),
+        "(" + deliveryInfo.getZipcode() + ") " + deliveryInfo.getAddressLine(),
         deliveryInfo.getPhone()
     );
   }
