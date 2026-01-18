@@ -29,6 +29,10 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     try {
       filterChain.doFilter(request, response);
     } catch (Exception ex) {
+      if (response.isCommitted()) { // 응답이 이미 커밋되었는지 확인
+        log.warn("응답이 이미 커밋되어 에러 응답을 작성할 수 없습니다: {}", ex.getMessage(), ex);
+        return; // 이미 커밋되었으면 추가 처리를 하지 않고 종료
+      }
       // 예외가 BusinessException인지, 아니면 ServletException 등에 감싸져 있는지 확인
       BusinessException businessException = null;
 
