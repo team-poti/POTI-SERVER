@@ -2,21 +2,22 @@ package org.sopt.poti.global.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
-import java.util.concurrent.TimeUnit; // TimeUnit import
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate; // RedisTemplate import
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -73,7 +74,7 @@ public class JwtTokenProvider {
           .build()
           .parseSignedClaims(token)
           .getPayload();
-    } catch (SecurityException | MalformedJwtException e) {
+    } catch (SecurityException | MalformedJwtException | SignatureException e) {
       log.error("잘못된 JWT 서명입니다: {}", e.getMessage());
       throw new BusinessException(ErrorStatus.SIGNATURE_INVALID_JWT_TOKEN);
     } catch (ExpiredJwtException e) {
@@ -85,6 +86,9 @@ public class JwtTokenProvider {
     } catch (IllegalArgumentException e) {
       log.error("JWT 토큰이 잘못되었습니다 (비어있거나 null 등): {}", e.getMessage());
       throw new BusinessException(ErrorStatus.MISSING_JWT_TOKEN);
+    } catch (JwtException e) {  // 나머지 모든 jwt 에러 핸들링
+      log.error("JWT 토큰 처리 중 오류 발생: {}", e.getMessage());
+      throw new BusinessException(ErrorStatus.INVALID_TOKEN);
     }
   }
 
