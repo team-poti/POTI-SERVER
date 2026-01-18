@@ -20,33 +20,45 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtExceptionFilter extends OncePerRequestFilter {
 
-    private final ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        try {
-            filterChain.doFilter(request, response);
-        } catch (BusinessException ex) { // BusinessException만 잡도록 변경
-            log.error("BusinessException 발생: {}", ex.getErrorStatus().getMessage());
-            setErrorResponse(response, ex.getErrorStatus());
-        } catch (Exception ex) { // 그 외 예상치 못한 모든 예외
-            log.error("예상치 못한 예외 발생: {}", ex.getMessage(), ex);
-            // 모든 예상치 못한 예외는 내부 서버 오류로 처리 (클라이언트에게 자세한 정보 노출 방지)
-            setErrorResponse(response, ErrorStatus.INTERNAL_SERVER_ERROR);
-        }
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+      FilterChain filterChain)
+      throws ServletException, IOException {
+    try {
+      filterChain.doFilter(request, response);
+    } catch (Exception ex) {
+      // 예외가 BusinessException인지, 아니면 ServletException 등에 감싸져 있는지 확인
+      BusinessException businessException = null;
+
+      if (ex instanceof BusinessException) {
+        businessException = (BusinessException) ex;
+      } else if (ex.getCause() instanceof BusinessException) {
+        businessException = (BusinessException) ex.getCause();
+      } else if (ex instanceof ServletException && ex.getCause() instanceof BusinessException) {
+        businessException = (BusinessException) ex.getCause();
+      }
+
+      if (businessException != null) {
+        log.error("BusinessException 발생 (필터): {}", businessException.getErrorStatus().getMessage());
+        setErrorResponse(response, businessException.getErrorStatus());
+      } else {
+        // 그 외 예상치 못한 모든 예외는 INTERNAL_SERVER_ERROR로 처리
+        log.error("예상치 못한 예외 발생 (필터): {}", ex.getMessage(), ex);
+        setErrorResponse(response, ErrorStatus.INTERNAL_SERVER_ERROR);
+      }
     }
+  }
 
-    // ErrorStatus를 인자로 받도록 변경
-    private void setErrorResponse(HttpServletResponse response, ErrorStatus errorStatus) throws IOException {
-        response.setStatus(errorStatus.getHttpStatus().value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
+  private void setErrorResponse(HttpServletResponse response, ErrorStatus errorStatus)
+      throws IOException {
+    response.setStatus(errorStatus.getHttpStatus().value());
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setCharacterEncoding("UTF-8");
 
-        // ApiResponse.fail()을 사용하여 통일된 에러 응답 객체 생성
-        ApiResponse<?> apiResponse = ApiResponse.fail(errorStatus);
+    ApiResponse<?> apiResponse = ApiResponse.fail(errorStatus);
 
-        // 객체를 JSON 문자열로 변환하여 응답에 작성
-        objectMapper.writeValue(response.getWriter(), apiResponse);
-    }
+    objectMapper.writeValue(response.getWriter(), apiResponse);
+  }
 }
