@@ -58,8 +58,9 @@ public class ArtistService {
       return ArtistTitlesResponse.of(List.of());
     }
 
-    List<String> titles = artistRepository.findNamesByPrefix(keyword.trim(), 5);
-    return ArtistTitlesResponse.of(titles);
+    List<ArtistTitlesResponse.ArtistTitleDto> artists =
+        artistRepository.findByPrefix(keyword.trim(), 5);
+    return ArtistTitlesResponse.of(artists);
   }
 
 }
