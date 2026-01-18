@@ -73,9 +73,7 @@ public class ParticipationService {
         post.getArtist().getName(),
         post.getTitle(),
         post.getRepresentativeImageUrl(),
-        mapToClientStatus(post.getStatus()),
-        order.getTotalAmount(),
-        order.getCreatedAt()
+        mapToClientStatus(post.getStatus())
     );
   }
 
