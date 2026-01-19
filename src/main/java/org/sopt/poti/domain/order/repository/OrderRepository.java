@@ -15,6 +15,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
 
   int countByUser_IdAndStatusIn(Long userId, List<OrderStatus> statuses);
 
+  boolean existsByOrderNumber(String orderNumber);
+
   @EntityGraph(attributePaths = {
       "groupBuyPost",
       "groupBuyPost.artist"

@@ -80,6 +80,7 @@ public class ParticipationDetailService {
 
     return new ParticipationDetailResponse(
         order.getId(),
+        order.getOrderNumber(),
         post.getRepresentativeImageUrl(),
         post.getArtist().getName(),
         post.getTitle(),
@@ -110,7 +111,7 @@ public class ParticipationDetailService {
         )
     );
   }
-  
+
   private String determineStatusMessage(GroupBuyPostStatus postStatus, OrderStatus orderStatus) {
     if (postStatus == GroupBuyPostStatus.RECRUITING) {
       return "다른 참여자들을 기다리고 있어요";
