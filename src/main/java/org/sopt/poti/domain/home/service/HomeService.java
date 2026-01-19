@@ -61,11 +61,14 @@ public class HomeService {
     // TODO: 배너 로직 구현 필요 (현재는 더미 추후에 기획에 물어보고 변경할 예정 => 3개만.)
     List<HomeBanner> banners = List.of(
         HomeBanner.builder().postId(1L)
-            .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner1.jpg").build(),
+            .imageUrl("https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/banners/banner-1.png")
+            .build(),
         HomeBanner.builder().postId(2L)
-            .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner2.jpg").build(),
+            .imageUrl("https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/banners/banner-2.png")
+            .build(),
         HomeBanner.builder().postId(3L)
-            .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner2.jpg").build()
+            .imageUrl("https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/banners/banner-3.png")
+            .build()
     );
 
     return HomeResponse.builder()
