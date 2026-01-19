@@ -9,12 +9,28 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(
+      MethodArgumentTypeMismatchException e) {
+    // 에러가 난 파라미터가 Enum 타입인지 확인
+    if (e.getRequiredType() != null && e.getRequiredType().isEnum()) {
+      log.error("Enum 타입 변환 오류: {}", e.getRequiredType());
+      return ResponseEntity
+          .status(HttpStatus.BAD_REQUEST)
+          .body(ApiResponse.fail(ErrorStatus.BAD_REQUEST));
+    }
+    
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.fail(ErrorStatus.BAD_REQUEST));
+  }
 
   // 데이터 무결성 위반. 중복 닉네임, 외래키 문제 등
   @ExceptionHandler(DataIntegrityViolationException.class)
