@@ -64,7 +64,7 @@ public class HomeService {
             .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner1.jpg").build(),
         HomeBanner.builder().postId(2L)
             .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner2.jpg").build(),
-        HomeBanner.builder().postId(2L)
+        HomeBanner.builder().postId(3L)
             .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner2.jpg").build()
     );
 
