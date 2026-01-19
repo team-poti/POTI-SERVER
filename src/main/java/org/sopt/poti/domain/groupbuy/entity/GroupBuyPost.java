@@ -163,6 +163,20 @@ public class GroupBuyPost extends BaseTimeEntity {
     this.status = status;
   }
 
+  //분철글 참여자 다 찼을때 분철글 상태 변경하는 메서드
+  public void increaseCurrentQuantity(int count) {
+    if (count <= 0) {
+      throw new BusinessException(ErrorStatus.GROUP_BUY_POST_INVALID_INCREASE_COUNT);
+    }
+    this.currentQuantity += count;
+
+    if (this.currentQuantity >= this.goalQuantity) {
+      this.currentQuantity = this.goalQuantity;
+      this.status = GroupBuyPostStatus.CLOSED;
+    }
+  }
+
+
   // 분철글 상태 변경 메서드 (참여자 모두의 OrderStatus가 배송완료일때, GroupBuyPostStatus도 배송완료로 변경)
   public void completePostDelivery() {
     if (this.status != GroupBuyPostStatus.SHIPPING) {
