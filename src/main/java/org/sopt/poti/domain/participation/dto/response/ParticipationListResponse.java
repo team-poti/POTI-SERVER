@@ -6,7 +6,7 @@ public record ParticipationListResponse(
     String artistName,
     String productName,
     String thumbnailUrl,
-    String status
+    String postStatus
 ) {
 
 }

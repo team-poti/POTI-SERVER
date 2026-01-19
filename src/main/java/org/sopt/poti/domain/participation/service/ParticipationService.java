@@ -47,7 +47,7 @@ public class ParticipationService {
         .map(this::toResponse)
         .toList();
 
-    return new ParticipationSummaryResponse(inProgressCount, completedCount, filtered);
+    return new ParticipationSummaryResponse(status, inProgressCount, completedCount, filtered);
   }
 
   //배송 완료 처리
@@ -99,6 +99,7 @@ public class ParticipationService {
 
   private ParticipationListResponse toResponse(Order order) {
     GroupBuyPost post = order.getGroupBuyPost();
+    GroupBuyPostStatus postStatus = post.getStatus();
 
     return new ParticipationListResponse(
         order.getId(),
@@ -106,7 +107,7 @@ public class ParticipationService {
         post.getArtist().getName(),
         post.getTitle(),
         post.getRepresentativeImageUrl(),
-        mapToClientStatus(post.getStatus())
+        postStatus.name()
     );
   }
 
