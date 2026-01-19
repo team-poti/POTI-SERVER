@@ -36,6 +36,7 @@ spring:
         static: ap-northeast-2 # S3Config에 설정된 리전과 일치
       s3:
         bucket: test-bucket
+        base_url: test-url
 
   # 테스트 환경에서는 JWT 설정값들을 임의로 지정 (환경변수 의존 제거)
 jwt:

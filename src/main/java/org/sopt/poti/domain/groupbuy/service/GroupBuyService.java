@@ -1,9 +1,12 @@
 package org.sopt.poti.domain.groupbuy.service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +27,12 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.Shippin
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse.UploaderResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse.GroupBuyResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostDeliveryOption;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse.GroupBuyPostMemberOption;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPotItem;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPotItem.UploaderInfo;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyOption;
@@ -45,6 +50,8 @@ import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -65,6 +72,8 @@ public class GroupBuyService {
   private final GroupBuyOptionRepository groupBuyOptionRepository;
   private final GroupBuyShippingRepository groupBuyShippingRepository;
 
+  @Value("${spring.cloud.aws.s3.base_url}")
+  private String S3_BASE_URL;
 
   @Transactional
   public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
@@ -76,7 +85,14 @@ public class GroupBuyService {
         request.imageUrls().isEmpty() ? null : request.imageUrls().get(0);
     int goalQuantity = request.options().size();
 
+    // 고유번호 생성 (중복 체크)
+    String orderNumber;
+    do {
+      orderNumber = generateOrderNumber();
+    } while (groupBuyRepository.existsByOrderNumber(orderNumber));
+
     GroupBuyPost groupBuyPost = GroupBuyPost.create(
+        orderNumber, // 고유번호 전달
         request.title(),
         request.content(),
         request.deadline(),
@@ -104,7 +120,7 @@ public class GroupBuyService {
 
     List<String> imageUrls = request.imageUrls();
     for (int i = 0; i < imageUrls.size(); i++) {
-      ItemImage image = ItemImage.create(imageUrls.get(i), i);
+      ItemImage image = ItemImage.create(S3_BASE_URL + imageUrls.get(i), i);
       groupBuyPost.addImage(image);
     }
 
@@ -113,8 +129,24 @@ public class GroupBuyService {
     return GroupBuyCreateResponse.of(groupBuyPost.getId());
   }
 
+  private String generateOrderNumber() {
+    String date = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE); // yyyyMMdd
+    String randomStr = generateRandomString(4);
+    return date + "-" + randomStr;
+  }
+
+  private String generateRandomString(int length) {
+    String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    Random random = new Random();
+    StringBuilder sb = new StringBuilder(length);
+    for (int i = 0; i < length; i++) {
+      sb.append(characters.charAt(random.nextInt(characters.length())));
+    }
+    return sb.toString();
+  }
+
   public List<String> searchTitles(Long artistId, String keyword) {
-    Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
+    Pageable pageable = PageRequest.of(0, 5);
     return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
   }
 
@@ -260,7 +292,7 @@ public class GroupBuyService {
               .map(option -> option.getMember().getName())
               .toList();
 
-          GroupBuyPotItem.UploaderInfo uploaderInfo = GroupBuyPotItem.UploaderInfo.builder()
+          UploaderInfo uploaderInfo = UploaderInfo.builder()
               .userId(post.getLeader().getId())
               .nickname(post.getLeader().getNickname())
               .profileImage(post.getLeader().getProfileImageUrl())
@@ -412,8 +444,8 @@ public class GroupBuyService {
     List<GroupBuyPost> posts = groupBuyRepository.findByLeader_IdAndStatusInOrderByCreatedAtDesc(
         userId, targetStatuses);
 
-    List<GroupBuyMeResponse.GroupBuyResponse> groupBuyResponses = posts.stream()
-        .map(post -> new GroupBuyMeResponse.GroupBuyResponse(
+    List<GroupBuyResponse> groupBuyResponses = posts.stream()
+        .map(post -> new GroupBuyResponse(
             post.getId(),
             post.getArtist().getName(),
             post.getTitle(),

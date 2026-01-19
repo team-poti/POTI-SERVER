@@ -159,6 +159,7 @@ public class OrderService {
         .postStatus(groupBuyPost.getStatus())
         .statusMessage(message)
         .participant(participants)
+        .orderNumber(groupBuyPost.getOrderNumber())
         .build();
   }
 
