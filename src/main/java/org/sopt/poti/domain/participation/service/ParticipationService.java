@@ -5,11 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.order.entity.Order;
+import org.sopt.poti.domain.order.entity.OrderStatus;
 import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.participation.dto.response.ParticipationListResponse;
 import org.sopt.poti.domain.participation.dto.response.ParticipationSummaryResponse;
 import org.sopt.poti.domain.participation.entity.ParticipationStatus;
 import org.sopt.poti.domain.user.service.UserService;
+import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +49,36 @@ public class ParticipationService {
 
     return new ParticipationSummaryResponse(inProgressCount, completedCount, filtered);
   }
+
+  //배송 완료 처리
+  @Transactional
+  public void confirmDelivered(Long userId, Long participationId) {
+
+    Order order = orderService.findWithDetailsById(participationId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.ORDER_NOT_FOUND));
+
+    if (!order.getUser().getId().equals(userId)) {
+      throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
+    }
+
+    // 1 내 주문 배송완료 처리 (OrderStatus)
+    order.completeDelivery();
+
+    // 2 해당 공구글의 모든 주문(OrderStatus)이 배송완료인지 검사
+    Long postId = order.getGroupBuyPost().getId();
+    long remaining = orderService.countByGroupBuyPostIdAndStatusNot(postId, OrderStatus.DELIVERED);
+
+    // 3) 남은 주문이 0개 -> GroupBuyPostStatus도 배송완료로 변경
+    if (remaining == 0) {
+      GroupBuyPost post = order.getGroupBuyPost();
+
+      // 이미 DELIVERED면 종료처리
+      if (post.getStatus() != GroupBuyPostStatus.DELIVERED) {
+        post.completePostDelivery();
+      }
+    }
+  }
+
 
   private boolean isCompleted(GroupBuyPostStatus status) {
     return status == GroupBuyPostStatus.DELIVERED;
