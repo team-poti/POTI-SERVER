@@ -24,6 +24,8 @@ import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.global.entity.BaseTimeEntity;
+import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.error.ErrorStatus;
 
 @Getter
 @Entity
@@ -155,7 +157,7 @@ public class GroupBuyPost extends BaseTimeEntity {
   //분철글 참여자 다 찼을때 분철글 상태 변경하는 메서드
   public void increaseCurrentQuantity(int count) {
     if (count <= 0) {
-      throw new IllegalArgumentException("count는 반드시 양수여야합니다.");
+      throw new BusinessException(ErrorStatus.GROUP_BUY_POST_INVALID_INCREASE_COUNT);
     }
     this.currentQuantity += count;
 
