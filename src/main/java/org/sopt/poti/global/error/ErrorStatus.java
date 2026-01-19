@@ -28,6 +28,8 @@ public enum ErrorStatus {
   DUPLICATE_ORDER_OPTION(40013, HttpStatus.BAD_REQUEST, "중복된 옵션은 한 주문에서 선택할 수 없습니다."),
   ORDER_NOT_PAID_OR_READY(40014, HttpStatus.BAD_REQUEST, "입금 완료 상태 또는 배송 대기 상태에서만 배송 중 처리가 가능합니다."),
   ORDER_EXISTS_SHIPPINGS(40015, HttpStatus.BAD_REQUEST, "이미 배송처리된 주문입니다."),
+  ORDER_NOT_SHIPPED(40016, HttpStatus.BAD_REQUEST, "배송 시작 상태에서만 배송 완료로 변경할 수 있습니다."),
+  POST_NOT_SHIPPING(40017, HttpStatus.BAD_REQUEST, "배송 중인 공구글만 배송 완료로 변경할 수 있습니다."),
 
   /**
    * 401 Unauthorized

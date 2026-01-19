@@ -134,4 +134,13 @@ public class Order extends BaseTimeEntity {
     }
     this.status = OrderStatus.SHIPPED;
   }
+
+  //배달 중 상태를 배달 완료로 변경하는 메서드(SHIPPED 상태에서만 가능)
+  public void completeDelivery() {
+    if (this.status != OrderStatus.SHIPPED) {
+      throw new BusinessException(ErrorStatus.ORDER_NOT_SHIPPED);
+    }
+    this.status = OrderStatus.DELIVERED;
+  }
+
 }
