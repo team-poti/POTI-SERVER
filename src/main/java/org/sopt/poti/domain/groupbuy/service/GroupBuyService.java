@@ -129,8 +129,8 @@ public class GroupBuyService {
         .map(
             itemImage ->
                 ImageResponse.builder()
-                    .sortOrder(itemImage.getSortOrder())
-                    .imageUrl(itemImage.getImageUrl())
+                    .order(itemImage.getSortOrder())
+                    .url(itemImage.getImageUrl())
                     .build()
         ).toList();
 
