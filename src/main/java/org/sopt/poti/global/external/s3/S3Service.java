@@ -28,13 +28,12 @@ public class S3Service {
   @Value("${spring.cloud.aws.s3.bucket}")
   private String bucketName;
 
-  public List<PresignedUrlResponse> getPresignedUrls(ImageDirectory directory, int count,
-      String extension) {
+  public List<PresignedUrlResponse> getPresignedUrls(ImageDirectory directory, List<String> extensions) {
     List<PresignedUrlResponse> responses = new ArrayList<>();
 
-    for (int i = 0; i < count; i++) {
+    for (String extension : extensions) {
       String path = createPath(directory.getPrefix(), extension);
-      String presignedUrl = generatePresignedUrl(path);
+      String presignedUrl = generatePresignedUrl(path, extension); // Content-Type을 위해 extension 전달
 
       responses.add(PresignedUrlResponse.of(path, presignedUrl));
     }
@@ -42,11 +41,12 @@ public class S3Service {
     return responses;
   }
 
-  private String generatePresignedUrl(String key) {
+  private String generatePresignedUrl(String key, String extension) {
     try {
       PutObjectRequest objectRequest = PutObjectRequest.builder()
           .bucket(bucketName)
           .key(key)
+          .contentType(getContentType(extension)) // Content-Type 설정
           .build();
 
       PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -70,5 +70,17 @@ public class S3Service {
     // 예: posts/2026/01/uuid.jpg
     return String.format("%s/%d/%02d/%s.%s",
         prefix, now.getYear(), now.getMonthValue(), fileId, extension);
+  }
+
+  // 확장자에 따른 Content-Type 반환 헬퍼 메서드
+  private String getContentType(String extension) {
+    return switch (extension.toLowerCase()) {
+      case "jpg", "jpeg" -> "image/jpeg";
+      case "png" -> "image/png";
+      case "gif" -> "image/gif";
+      case "webp" -> "image/webp";
+      case "heic" -> "image/heic"; // HEIC mime type, S3가 지원하는지 확인 필요
+      default -> "application/octet-stream"; // 기본값
+    };
   }
 }

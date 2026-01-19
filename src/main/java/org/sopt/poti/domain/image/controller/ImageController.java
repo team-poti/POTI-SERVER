@@ -26,14 +26,13 @@ public class ImageController {
   private final S3Service s3Service;
 
   @GetMapping("/presigned-url")
-  @Operation(summary = "Presigned URL 다중 발급", description = "S3에 이미지를 업로드하기 위한 Presigned URL을 요청 수(count)만큼 발급받습니다.")
+  @Operation(summary = "Presigned URL 다중 발급", description = "S3에 이미지를 업로드하기 위한 Presigned URL을 요청된 확장자 리스트(extensions)에 맞춰 발급받습니다.")
   public ResponseEntity<ApiResponse<ImagePresignedUrlsResponse>> getPresignedUrl(
       @ModelAttribute @Valid PresignedUrlRequest request
   ) {
     List<PresignedUrlResponse> urls = s3Service.getPresignedUrls(
         request.type(),
-        request.count(),
-        request.extension()
+        request.extensions() // extensions 리스트 전달
     );
     return ResponseEntity.ok(
         ApiResponse.success(
