@@ -154,6 +154,9 @@ public class GroupBuyPost extends BaseTimeEntity {
 
   //분철글 참여자 다 찼을때 분철글 상태 변경하는 메서드
   public void increaseCurrentQuantity(int count) {
+    if (count <= 0) {
+      throw new IllegalArgumentException("count는 반드시 양수여야합니다.");
+    }
     this.currentQuantity += count;
 
     if (this.currentQuantity >= this.goalQuantity) {
