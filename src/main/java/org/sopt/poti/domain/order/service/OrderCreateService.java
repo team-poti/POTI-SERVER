@@ -1,8 +1,11 @@
 package org.sopt.poti.domain.order.service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -88,13 +91,20 @@ public class OrderCreateService {
 
     int totalAmount = itemsAmount + shippingPrice;
 
-    // 8 Order 저장
+    // 8 Order 저장 전에 참여자 주문 고유번호 생성
+    String orderNumber;
+    do {
+      orderNumber = generateOrderNumber();
+    } while (orderRepository.existsByOrderNumber(orderNumber));
+
+    // 9 Order 저장
     Order order = Order.create(
         post,
         user,
         deliveryMethod,
         totalAmount,
-        deliveryInfo
+        deliveryInfo,
+        orderNumber
     );
 
     Order savedOrder = orderRepository.save(order);
@@ -115,5 +125,22 @@ public class OrderCreateService {
         .sum();
     post.increaseCurrentQuantity(totalCount);
     return new CreateOrderResponse(savedOrder.getId());
+  }
+
+  //고유 주문번호 생성 관련 메서드
+  private String generateOrderNumber() {
+    String date = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE); // yyyyMMdd
+    String randomStr = generateRandomString(4);
+    return date + "-" + randomStr;
+  }
+
+  private String generateRandomString(int length) {
+    String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    Random random = new Random();
+    StringBuilder sb = new StringBuilder(length);
+    for (int i = 0; i < length; i++) {
+      sb.append(characters.charAt(random.nextInt(characters.length())));
+    }
+    return sb.toString();
   }
 }
