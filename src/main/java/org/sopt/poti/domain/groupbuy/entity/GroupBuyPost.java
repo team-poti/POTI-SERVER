@@ -39,7 +39,7 @@ public class GroupBuyPost extends BaseTimeEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "order_number", length = 20, unique = true, nullable = false)
+  @Column(name = "order_number", length = 20, unique = true)
   private String orderNumber;
 
   @Column(nullable = false, length = 200)
