@@ -12,6 +12,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false # true면 실행 중인 배포 취소, false면 대기 (순차 실행)
     steps:
       - uses: actions/checkout@v4
 
