@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -38,9 +39,9 @@ public class DevController {
 
   @GetMapping("/login")
   @Operation(summary = "개발자용 토큰 발급 (userId=1)", description = "개발 테스트를 위해 1번 유저의 토큰을 즉시 발급합니다. (로컬/Dev 환경 전용)")
-  public ResponseEntity<ApiResponse<DevTokenResponseDto>> devLogin() {
-    Long devUserId = 1L;
-
+  public ResponseEntity<ApiResponse<DevTokenResponseDto>> devLogin(
+      @RequestParam(defaultValue = "1") Long devUserId
+  ) {
     User user = userService.getUserById(devUserId);
 
     String accessToken = jwtTokenProvider.createAccessToken(user.getId());

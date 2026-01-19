@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.payment.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.payment.dto.request.DepositFormRequest;
@@ -21,11 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Payments", description = "결제 관련 API")
 @RequestMapping("/api/v1/payments")
 public class PaymentController {
 
   private final PaymentService paymentService;
 
+  @Operation(summary = "구매자용 입금 폼 제출", description = "구매자가 입금자명과 입금 시간을 입력해 전송합니다.")
   @PostMapping
   public ResponseEntity<ApiResponse<DepositFormResponse>> submitDepositForm(
       @AuthenticationPrincipal UserPrincipal userPrincipal,

@@ -22,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.sopt.poti.domain.delivery.entity.Delivery;
 import org.sopt.poti.domain.delivery.entity.DeliveryMethod;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
@@ -55,6 +56,7 @@ public class Order extends BaseTimeEntity {
   @Embedded
   private DeliveryInfo deliveryInfo;
 
+  @Setter
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "group_buy_post_id", nullable = false)
   private GroupBuyPost groupBuyPost;
@@ -132,4 +134,13 @@ public class Order extends BaseTimeEntity {
     }
     this.status = OrderStatus.SHIPPED;
   }
+
+  //배달 중 상태를 배달 완료로 변경하는 메서드(SHIPPED 상태에서만 가능)
+  public void completeDelivery() {
+    if (this.status != OrderStatus.SHIPPED) {
+      throw new BusinessException(ErrorStatus.ORDER_NOT_SHIPPED);
+    }
+    this.status = OrderStatus.DELIVERED;
+  }
+
 }

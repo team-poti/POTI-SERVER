@@ -16,6 +16,7 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyTitlesResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse;
 import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
@@ -69,7 +70,9 @@ public class GroupBuyController {
           .body(ApiResponse.success(SuccessStatus.OK,
               GroupBuyTitlesResponse.of(Collections.emptyList())));
     }
-    List<String> titles = groupBuyService.searchTitles(artistId, keyword);
+    // 공백 제거
+    String trim = keyword.trim();
+    List<String> titles = groupBuyService.searchTitles(artistId, trim);
     return ResponseEntity.status(HttpStatus.OK)
         .body(ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles)));
   }
@@ -141,5 +144,18 @@ public class GroupBuyController {
     PostParticipantListResponse groupBuyParticipantList = groupBuyService.getGroupBuyParticipantList(
         userPrincipal.getUserId(), postId);
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyParticipantList));
+  }
+
+  @GetMapping("/sale/{postId}")
+  @Operation(summary = "판매자 - 분철글 상세 조회", description = "특정 분철글을 상세 조회합니다.")
+  public ResponseEntity<ApiResponse<GroupBuySaleDetailResponse>> getGroupBuySaleDetail(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable(name = "postId") Long postId
+  ) {
+    GroupBuySaleDetailResponse groupBuyPostDetailForSale = groupBuyService.getGroupBuyPostDetailForSale(
+        userPrincipal.getUserId(), postId);
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK, groupBuyPostDetailForSale)
+    );
   }
 }

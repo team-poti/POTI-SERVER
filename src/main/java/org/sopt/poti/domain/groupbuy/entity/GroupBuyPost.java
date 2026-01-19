@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
+import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.global.entity.BaseTimeEntity;
 import org.sopt.poti.global.error.BusinessException;
@@ -83,6 +84,9 @@ public class GroupBuyPost extends BaseTimeEntity {
 
   @OneToMany(mappedBy = "groupBuyPost", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<GroupBuyShipping> shippings = new ArrayList<>();
+
+  @OneToMany(mappedBy = "groupBuyPost")
+  private List<Order> orders = new ArrayList<>();
 
   @Builder
   private GroupBuyPost(
@@ -149,6 +153,11 @@ public class GroupBuyPost extends BaseTimeEntity {
     shipping.setGroupBuyPost(this); // 양방향 연관관계 설정
   }
 
+  public void addOrder(Order order) {
+    this.orders.add(order);
+    order.setGroupBuyPost(this);
+  }
+
   // 분철글 상태 변경 메서드
   public void updateStatus(GroupBuyPostStatus status) {
     this.status = status;
@@ -165,6 +174,15 @@ public class GroupBuyPost extends BaseTimeEntity {
       this.currentQuantity = this.goalQuantity;
       this.status = GroupBuyPostStatus.CLOSED;
     }
+  }
+
+
+  // 분철글 상태 변경 메서드 (참여자 모두의 OrderStatus가 배송완료일때, GroupBuyPostStatus도 배송완료로 변경)
+  public void completePostDelivery() {
+    if (this.status != GroupBuyPostStatus.SHIPPING) {
+      throw new BusinessException(ErrorStatus.POST_NOT_SHIPPING);
+    }
+    this.status = GroupBuyPostStatus.DELIVERED;
   }
 
 }

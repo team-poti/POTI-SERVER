@@ -37,6 +37,8 @@ public class AuthService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final RedisTemplate<String, String> redisTemplate; // RedisTemplate 주입
 
+  private final static String DEFAULT_PROFILE_IMAGE = "https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/users/img-basic-profile.png";
+
   @Value("${jwt.refresh-token-validity}")
   private long refreshTokenValidity;
 
@@ -83,7 +85,9 @@ public class AuthService {
           request.socialType(),
           email,
           nickname,
-          profileImageUrl,
+          (profileImageUrl == null || profileImageUrl.isBlank())
+              ? DEFAULT_PROFILE_IMAGE
+              : profileImageUrl,
           null
       );
       userService.registerUser(user);

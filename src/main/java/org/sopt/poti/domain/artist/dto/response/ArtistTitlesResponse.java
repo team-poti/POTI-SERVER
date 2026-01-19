@@ -3,10 +3,14 @@ package org.sopt.poti.domain.artist.dto.response;
 import java.util.List;
 
 public record ArtistTitlesResponse(
-    List<String> titles
+    List<ArtistTitleDto> artists
 ) {
 
-  public static ArtistTitlesResponse of(List<String> titles) {
-    return new ArtistTitlesResponse(titles);
+  public record ArtistTitleDto(Long artistId, String name) {
+
+  }
+
+  public static ArtistTitlesResponse of(List<ArtistTitleDto> artists) {
+    return new ArtistTitlesResponse(artists);
   }
 }

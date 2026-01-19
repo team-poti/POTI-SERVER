@@ -27,8 +27,8 @@ public record GroupBuyDetailResponse(
 
   @Builder
   public record ImageResponse(
-      Integer sortOrder,
-      String imageUrl
+      Integer order,
+      String url
   ) {
 
   }

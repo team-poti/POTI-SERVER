@@ -14,6 +14,7 @@ import org.sopt.poti.global.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,5 +55,18 @@ public class ParticipationController {
         participationDetailService.getParticipationDetail(userId, participationId);
 
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, data));
+  }
+
+  @PatchMapping("/{participationId}/delivered")
+  @Operation(summary = "참여자- 배송 완료 등록", description = "참여한 분철의 배송 완료 여부를 등록합니다.")
+  public ResponseEntity<ApiResponse<Void>> confirmDelivered(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable Long participationId
+  ) {
+    Long userId = userPrincipal.getUserId();
+
+    participationService.confirmDelivered(userId, participationId);
+
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, null));
   }
 }

@@ -26,7 +26,7 @@ public class FeedController {
   private final FeedService feedService;
 
   @GetMapping
-  @Operation(summary = "분철 게시글 목록 조회", description = "피드에서 분철 게시글 목록을 필터링(아티스트), 정렬(최신/인기), 페이징하여 조회합니다.")
+  @Operation(summary = "분철 게시글 목록 조회", description = "피드에서 분철 게시글 목록을 필터링(아티스트), 정렬(최신/인기/랜덤), 페이징하여 조회합니다.")
   public ResponseEntity<ApiResponse<FeedResponse>> getFeed(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
       @RequestParam(required = false) Long artistId,

@@ -9,6 +9,10 @@ import org.sopt.poti.domain.delivery.dto.request.StartDeliveryRequest;
 import org.sopt.poti.domain.delivery.dto.response.StartDeliveryResponse;
 import org.sopt.poti.domain.delivery.entity.Delivery;
 import org.sopt.poti.domain.delivery.service.DeliveryService;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse.Participant;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse.PriceInfoForDetail;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse.ShippingInfoForDetail;
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse.DepositInfo;
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse.MemberPerPrice;
@@ -131,6 +135,39 @@ public class OrderService {
     return new PostParticipantListResponse(participantResponses);
   }
 
+  // 판매자 - 분철글 상세 조회를 위한 참여자 조회
+  public GroupBuySaleDetailResponse findParticipantsForPostDetail(GroupBuyPost groupBuyPost) {
+
+    List<Order> orders = orderRepository.findAllOrdersWithBasicInfo(groupBuyPost.getId());
+
+    String message = groupBuyPost.getStatus().getSellerMessage();
+    if (groupBuyPost.getStatus().equals(GroupBuyPostStatus.CLOSED)
+        && allOrdersWaitingPayCheck(orders)) {
+      message = "입금 확인을 기다리는 참여자가 있어요";
+    }
+
+    List<Participant> participants = orders.stream()
+        .map(this::participant)
+        .toList();
+
+    return GroupBuySaleDetailResponse.builder()
+        .postId(groupBuyPost.getId())
+        .totalCount(participants.size())
+        .imageUrl(groupBuyPost.getImages().getFirst().getImageUrl())
+        .artistName(groupBuyPost.getArtist().getName())
+        .title(groupBuyPost.getTitle())
+        .postStatus(groupBuyPost.getStatus())
+        .statusMessage(message)
+        .participant(participants)
+        .build();
+  }
+
+  // 분철글이 모집완료된 상태인데, 입금 확인 대기중인 주문이 있으면
+  private boolean allOrdersWaitingPayCheck(List<Order> orders) {
+    return !orders.isEmpty() && orders.stream()
+        .allMatch(order -> order.getStatus().equals(OrderStatus.WAIT_PAY_CHECK));
+  }
+
   // 단일 주문을 응답 DTO로 변환하는 메인 로직
   private PostParticipantResponse convertToParticipantResponse(
       GroupBuyPostStatus groupBuyPostStatus, Order order) {
@@ -229,11 +266,42 @@ public class OrderService {
     }
     return new ShippingInfo(
         info.getReceiverName(),
-        info.getAddressLine(),
+        "(" + info.getZipcode() + ") " + info.getAddressLine(),
         info.getPhone(),
         trackingNumber
     );
   }
+
+  // 판매자 - 분철글 상세 조회 (참여자 조회)
+  private Participant participant(Order order) {
+    return new Participant(
+        order.getId(),
+        order.getUser().getId(),
+        getMemberNames(order),
+        order.getStatus(),
+        priceInfoForDetail(order),
+        shippingInfoForDetail(order)
+    );
+  }
+
+  // 판매자 - 분철글 상세 조회 (금액 정보 및 배송 방법)
+  private PriceInfoForDetail priceInfoForDetail(Order order) {
+    return new PriceInfoForDetail(
+        order.getDeliveryMethod().getName(),
+        order.getTotalAmount()
+    );
+  }
+
+  // 판매자 - 분철글 상세 조회 (배송정보)
+  private ShippingInfoForDetail shippingInfoForDetail(Order order) {
+    DeliveryInfo deliveryInfo = order.getDeliveryInfo();
+    return new ShippingInfoForDetail(
+        deliveryInfo.getReceiverName(),
+        "(" + deliveryInfo.getZipcode() + ") " + deliveryInfo.getAddressLine(),
+        deliveryInfo.getPhone()
+    );
+  }
+
   public Optional<Order> findWithDetailsById(Long orderId) {
     return orderRepository.findWithDetailsById(orderId);
   }

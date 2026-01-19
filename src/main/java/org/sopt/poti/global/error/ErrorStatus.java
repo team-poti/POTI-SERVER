@@ -29,6 +29,8 @@ public enum ErrorStatus {
   ORDER_NOT_PAID_OR_READY(40014, HttpStatus.BAD_REQUEST, "입금 완료 상태 또는 배송 대기 상태에서만 배송 중 처리가 가능합니다."),
   ORDER_EXISTS_SHIPPINGS(40015, HttpStatus.BAD_REQUEST, "이미 배송처리된 주문입니다."),
   GROUP_BUY_POST_INVALID_INCREASE_COUNT(40016, HttpStatus.BAD_REQUEST, "증가 수량은 1 이상이어야 합니다."),
+  ORDER_NOT_SHIPPED(40017, HttpStatus.BAD_REQUEST, "배송 시작 상태에서만 배송 완료로 변경할 수 있습니다."),
+  POST_NOT_SHIPPING(40018, HttpStatus.BAD_REQUEST, "배송 중인 공구글만 배송 완료로 변경할 수 있습니다."),
 
   /**
    * 401 Unauthorized
@@ -68,6 +70,7 @@ public enum ErrorStatus {
   REVIEW_ALREADY_EXISTS(40900, HttpStatus.CONFLICT, "이미 리뷰가 작성된 주문입니다."),
   GROUP_BUY_POST_NOT_RECRUITING(40901, HttpStatus.BAD_REQUEST, "모집중인 공구만 주문할 수 있습니다."),
   PAYMENT_ALREADY_SUBMITTED(40902, HttpStatus.CONFLICT, "이미 입금 정보가 제출된 주문입니다."),
+  CONFLICT_ERROR(40903, HttpStatus.CONFLICT, "이미 존재하는 데이터이거나 중복된 요청입니다."),
 
   /**
    * 500 Internal Server Error
