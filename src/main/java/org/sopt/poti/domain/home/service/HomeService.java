@@ -41,6 +41,12 @@ public class HomeService {
       myGroupItems = groupBuyRepository.findPopularTitlesByArtist(favoriteArtistId,
           ITEM_LIMIT);
 
+      // 내 최애 아티스트의 공구글이 없을 때에도 전체 인기순으로 보여주기
+      if (myGroupItems.isEmpty()) {
+        myGroupItems = groupBuyRepository.findPopularTitlesByArtist(null,
+            ITEM_LIMIT);
+      }
+
       otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(favoriteArtistId,
           "RANDOM", ITEM_LIMIT);
     } else {
@@ -52,11 +58,13 @@ public class HomeService {
           ITEM_LIMIT);
     }
 
-    // TODO: 배너 로직 구현 필요 (현재는 더미 추후에 기획에 물어보고 변경할 예정)
+    // TODO: 배너 로직 구현 필요 (현재는 더미 추후에 기획에 물어보고 변경할 예정 => 3개만.)
     List<HomeBanner> banners = List.of(
         HomeBanner.builder().postId(1L)
             .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner1.jpg").build(),
         HomeBanner.builder().postId(2L)
+            .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner2.jpg").build(),
+        HomeBanner.builder().postId(3L)
             .imageUrl("https://poti.s3.ap-northeast-2.amazonaws.com/banners/banner2.jpg").build()
     );
 
