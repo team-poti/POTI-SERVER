@@ -1,5 +1,7 @@
 package org.sopt.poti.domain.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
@@ -17,22 +19,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Users", description = "유저 관련 API")
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    @PatchMapping("/onboarding")
-    public ResponseEntity<ApiResponse<UserOnboardingResponse>> onboarding(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @Validated @RequestBody UserOnboardingRequest request
-    ) {
-        Long userId = userPrincipal.getUserId();
+  @Operation(summary = "온보딩", description = "온보딩 정보(닉네임, 최애 설정) 입력")
+  @PatchMapping("/onboarding")
+  public ResponseEntity<ApiResponse<UserOnboardingResponse>> onboarding(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @Validated @RequestBody UserOnboardingRequest request
+  ) {
+    Long userId = userPrincipal.getUserId();
 
-        UserOnboardingResponse response = userService.saveOnboarding(userId, request);
+    UserOnboardingResponse response = userService.saveOnboarding(userId, request);
 
-        return ResponseEntity
-                .status(SuccessStatus.CREATED.getHttpStatus())
-                .body(ApiResponse.created(SuccessStatus.CREATED, response));
-    }
+    return ResponseEntity
+        .status(SuccessStatus.CREATED.getHttpStatus())
+        .body(ApiResponse.created(SuccessStatus.CREATED, response));
+  }
 }
