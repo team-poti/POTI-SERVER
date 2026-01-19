@@ -29,7 +29,8 @@ import org.sopt.poti.global.entity.BaseTimeEntity;
 @Getter
 @Entity
 @Table(name = "group_buy_posts", indexes = { // 인덱스 추가
-    @Index(name = "idx_group_buy_post_title", columnList = "title")
+    @Index(name = "idx_group_buy_post_title", columnList = "title"),
+    @Index(name = "idx_group_buy_post_order_number", columnList = "order_number")
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupBuyPost extends BaseTimeEntity {
@@ -37,6 +38,9 @@ public class GroupBuyPost extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(name = "order_number", length = 20, unique = true, nullable = false)
+  private String orderNumber;
 
   @Column(nullable = false, length = 200)
   private String title;
@@ -88,6 +92,7 @@ public class GroupBuyPost extends BaseTimeEntity {
 
   @Builder
   private GroupBuyPost(
+      String orderNumber,
       String title,
       String content,
       LocalDate recruitDeadline,
@@ -98,6 +103,7 @@ public class GroupBuyPost extends BaseTimeEntity {
       User leader,
       Artist artist
   ) {
+    this.orderNumber = orderNumber;
     this.title = title;
     this.content = content;
     this.recruitDeadline = recruitDeadline;
@@ -112,6 +118,7 @@ public class GroupBuyPost extends BaseTimeEntity {
   }
 
   public static GroupBuyPost create(
+      String orderNumber,
       String title,
       String content,
       LocalDate recruitDeadline,
@@ -123,6 +130,7 @@ public class GroupBuyPost extends BaseTimeEntity {
       Artist artist
   ) {
     return GroupBuyPost.builder()
+        .orderNumber(orderNumber)
         .title(title)
         .content(content)
         .recruitDeadline(recruitDeadline)

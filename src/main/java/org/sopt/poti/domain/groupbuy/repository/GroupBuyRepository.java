@@ -25,4 +25,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuyPost, Long>, G
     List<GroupBuyPost> findAllByLeaderId(Long leaderId);
 
     List<GroupBuyPost> findByLeader_IdAndStatusInOrderByCreatedAtDesc(Long leaderId, List<GroupBuyPostStatus> statuses);
+
+    boolean existsByOrderNumber(String orderNumber);
 }

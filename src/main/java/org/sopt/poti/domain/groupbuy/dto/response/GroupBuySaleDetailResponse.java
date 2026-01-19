@@ -8,6 +8,7 @@ import org.sopt.poti.domain.order.entity.OrderStatus;
 @Builder
 public record GroupBuySaleDetailResponse(
     Long postId,
+    String orderNumber, // 총대 - 분철글 고유 번호
     Integer totalCount,
     String imageUrl,
     String artistName,
