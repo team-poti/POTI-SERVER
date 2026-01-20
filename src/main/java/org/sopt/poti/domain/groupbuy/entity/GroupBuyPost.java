@@ -187,9 +187,6 @@ public class GroupBuyPost extends BaseTimeEntity {
 
   // 분철글 상태 변경 메서드 (참여자 모두의 OrderStatus가 배송완료일때, GroupBuyPostStatus도 배송완료로 변경)
   public void completePostDelivery() {
-    if (this.status != GroupBuyPostStatus.SHIPPING) {
-      throw new BusinessException(ErrorStatus.POST_NOT_SHIPPING);
-    }
     this.status = GroupBuyPostStatus.DELIVERED;
   }
 
