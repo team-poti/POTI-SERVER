@@ -52,6 +52,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
         .select(Projections.constructor(HomeGroupBuyItem.class,
             groupBuyPost.title,
             artist.name,
+            artist.id,
             JPAExpressions.select(subGroupBuyPost.representativeImageUrl)
                 .from(subGroupBuyPost)
                 .where(subGroupBuyPost.id.eq(
@@ -84,6 +85,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
         .select(Projections.constructor(HomeGroupBuyItem.class,
             groupBuyPost.title,
             artist.name,
+            artist.id,
             JPAExpressions.select(subGroupBuyPost.representativeImageUrl)
                 .from(subGroupBuyPost)
                 .where(subGroupBuyPost.id.eq(
@@ -114,6 +116,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
     List<FeedGroupItem> content = queryFactory
         .select(Projections.constructor(FeedGroupItem.class,
             artist.name,
+            artist.id,
             JPAExpressions.select(subGroupBuyPost.representativeImageUrl)
                 .from(subGroupBuyPost)
                 .where(subGroupBuyPost.id.eq(
