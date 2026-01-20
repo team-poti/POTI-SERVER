@@ -54,7 +54,7 @@ public class Order extends BaseTimeEntity {
   private int totalAmount;
 
   //고유 주문번호
-  @Column(name = "order_number", length = 20, unique = true, nullable = false)
+  @Column(name = "order_number", length = 20, unique = true, nullable = true)
   private String orderNumber;
 
   @Embedded
