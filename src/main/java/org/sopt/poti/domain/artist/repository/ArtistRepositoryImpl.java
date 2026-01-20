@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.artist.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,7 @@ public class ArtistRepositoryImpl implements ArtistRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public List<ArtistTitleDto> findByPrefix(String keyword, int limit) {
+  public List<ArtistTitleDto> findByKeyword(String keyword, int limit) {
     QArtist artist = QArtist.artist;
 
     return queryFactory
@@ -25,9 +26,18 @@ public class ArtistRepositoryImpl implements ArtistRepositoryCustom {
             )
         )
         .from(artist)
-        .where(artist.name.startsWithIgnoreCase(keyword))
-        .orderBy(artist.name.asc())
+        .where(
+            artist.name.containsIgnoreCase(keyword)
+        )
+        .orderBy(
+            new CaseBuilder()
+                .when(artist.name.startsWithIgnoreCase(keyword)).then(0)
+                .otherwise(1)
+                .asc(),
+            artist.name.asc()
+        )
         .limit(limit)
         .fetch();
   }
+
 }
