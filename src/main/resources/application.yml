@@ -93,3 +93,6 @@ logging:
   level:
     root: INFO
     org.sopt: DEBUG
+
+discord:
+  webhook-url: ${DISCORD_WEBHOOK}

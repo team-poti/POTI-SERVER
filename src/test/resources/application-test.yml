@@ -48,3 +48,6 @@ jwt:
 logging:
   level:
     root: INFO
+
+discord:
+  webhook-url: test

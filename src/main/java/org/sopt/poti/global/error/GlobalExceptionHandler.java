@@ -1,7 +1,10 @@
 package org.sopt.poti.global.error;
 
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.global.common.ApiResponse;
+import org.sopt.poti.global.external.discord.DiscordNotificationService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +18,10 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+  private final DiscordNotificationService discordNotificationService;
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(
@@ -27,7 +33,7 @@ public class GlobalExceptionHandler {
           .status(HttpStatus.BAD_REQUEST)
           .body(ApiResponse.fail(ErrorStatus.BAD_REQUEST));
     }
-    
+
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(ApiResponse.fail(ErrorStatus.BAD_REQUEST));
   }
@@ -84,8 +90,10 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+  public ResponseEntity<ApiResponse<Void>> handleException(Exception e,
+      HttpServletRequest request) {
     log.error("예상치 못한 예외 발생: ", e);
+    discordNotificationService.sendErrorNotification(e, request); // 디스코드 알림 전송
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
         ApiResponse.fail(ErrorStatus.INTERNAL_SERVER_ERROR)
     );
