@@ -81,6 +81,7 @@ public class ParticipationDetailService {
 
     return new ParticipationDetailResponse(
         order.getId(),
+        order.getOrderNumber(),
         post.getRepresentativeImageUrl(),
         post.getArtist().getName(),
         post.getTitle(),

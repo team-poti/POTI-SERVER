@@ -4,6 +4,7 @@ import java.util.List;
 
 public record ParticipationDetailResponse(
     Long participationId,
+    String orderNumber,//고유 주문번호
     String imageUrl,
     String artistName,
     String title,
