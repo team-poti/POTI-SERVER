@@ -30,6 +30,7 @@ public class HomeService {
 
     String nickname = user.getNickname();
     String mainArtistName = null;
+    Long mainArtistId = null;
 
     List<HomeGroupBuyItem> myGroupItems;
     List<HomeGroupBuyItem> otherGroupItems;
@@ -37,6 +38,7 @@ public class HomeService {
     if (user.getFavoriteArtist() != null) {
       Long favoriteArtistId = user.getFavoriteArtist().getId();
       mainArtistName = user.getFavoriteArtist().getName();
+      mainArtistId = user.getFavoriteArtist().getId();
 
       myGroupItems = groupBuyRepository.findPopularTitlesByArtist(favoriteArtistId,
           ITEM_LIMIT);
@@ -74,6 +76,7 @@ public class HomeService {
     return HomeResponse.builder()
         .nickname(nickname)
         .mainArtist(mainArtistName)
+        .mainArtistId(mainArtistId)
         .myGroupItems(myGroupItems)
         .otherGroupItems(otherGroupItems)
         .banners(banners)

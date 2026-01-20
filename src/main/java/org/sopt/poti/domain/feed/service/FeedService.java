@@ -34,9 +34,12 @@ public class FeedService {
     String mainArtist =
         user.getFavoriteArtist() != null ? user.getFavoriteArtist().getName() : null;
 
+    Long mainArtistId = user.getFavoriteArtist() != null ? user.getFavoriteArtist().getId() : null;
+
     return FeedResponse.of(
         user.getNickname(),
         mainArtist,
+        mainArtistId,
         feedItems.hasNext(),
         feedItems.getContent()
     );
