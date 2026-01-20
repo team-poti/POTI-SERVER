@@ -53,6 +53,11 @@ public class Order extends BaseTimeEntity {
   @Column(nullable = false)
   private int totalAmount;
 
+  //고유 주문번호
+  // TODO: 앱잼 이후 nullable=false로 변경 및 중복 처리 로직 보강
+  @Column(name = "order_number", length = 20, unique = true, nullable = true)
+  private String orderNumber;
+
   @Embedded
   private DeliveryInfo deliveryInfo;
 
@@ -87,13 +92,15 @@ public class Order extends BaseTimeEntity {
       User user,
       DeliveryMethod deliveryMethod,
       int totalAmount,
-      DeliveryInfo deliveryInfo
+      DeliveryInfo deliveryInfo,
+      String orderNumber
   ) {
     this.groupBuyPost = groupBuyPost;
     this.user = user;
     this.deliveryMethod = deliveryMethod;
     this.totalAmount = totalAmount;
     this.deliveryInfo = deliveryInfo;
+    this.orderNumber = orderNumber;
     this.status = OrderStatus.WAIT_PAY;
   }
 
@@ -102,14 +109,15 @@ public class Order extends BaseTimeEntity {
       User user,
       DeliveryMethod method,
       int totalAmount,
-      DeliveryInfo deliveryInfo
-  ) {
+      DeliveryInfo deliveryInfo,
+      String orderNumber) {
     return Order.builder()
         .groupBuyPost(post)
         .user(user)
         .deliveryMethod(method)
         .totalAmount(totalAmount)
         .deliveryInfo(deliveryInfo)
+        .orderNumber(orderNumber)
         .build();
   }
 
