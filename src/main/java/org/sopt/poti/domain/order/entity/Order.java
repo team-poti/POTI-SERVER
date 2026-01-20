@@ -54,6 +54,7 @@ public class Order extends BaseTimeEntity {
   private int totalAmount;
 
   //고유 주문번호
+  // TODO: 앱잼 이후 nullable=false로 변경 및 중복 처리 로직 보강
   @Column(name = "order_number", length = 20, unique = true, nullable = true)
   private String orderNumber;
 
