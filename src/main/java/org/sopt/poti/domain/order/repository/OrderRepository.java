@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.order.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.sopt.poti.domain.order.entity.Order;
@@ -42,4 +43,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
         WHERE o.id = :orderId
       """)
   Optional<Order> findWithDetailsById(@Param("orderId") Long orderId);
+
+  // 특정 게시글에서, 주어진 상태 목록에 해당하는 주문이 몇 개인지 조회
+  long countByGroupBuyPostIdAndStatusIn(Long postId, Collection<OrderStatus> statuses);
 }

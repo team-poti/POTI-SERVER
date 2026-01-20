@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.payment.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
@@ -72,12 +73,11 @@ public class PaymentService {
     OrderConfirmResponse orderConfirmResponse = new OrderConfirmResponse(orderId,
         order.getStatus(), confirmDateTime);
 
-    // 해당 분철글에 대해 'PAID'가 아닌 주문이 남아있는지 확인
-    long allOrderPaid = orderService.countByGroupBuyPostIdAndStatusNot(groupBuyPost.getId(),
-        OrderStatus.PAID);
-
-    //  미입금 주문이 없다면(모두 PAID라면) 분철글 상태 변경
-    if (!(allOrderPaid > 0)) {
+    long unpaidCount = orderService.countByGroupBuyPostIdAndStatusIn(
+        groupBuyPost.getId(),
+        List.of(OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK)
+    );
+    if (unpaidCount == 0) { // 모두 입금 완료(PAID) 이상
       groupBuyPost.updateStatus(GroupBuyPostStatus.PAYMENT_DONE);
     }
 
