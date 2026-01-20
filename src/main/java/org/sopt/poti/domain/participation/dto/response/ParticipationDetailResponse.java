@@ -8,8 +8,7 @@ public record ParticipationDetailResponse(
     String artistName,
     String title,
 
-    String postStatus,    // GroupBuyPostStatus
-    String orderStatus,   // OrderStatus
+    String status,//OrderStatus 기반 상단 Status (GroupBuyPostStatus같이)
     String statusMessage, // 상단 진행 멘트
 
     List<MemberPaymentDto> memberPayments,

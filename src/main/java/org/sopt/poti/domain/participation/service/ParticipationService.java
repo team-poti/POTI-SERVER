@@ -61,6 +61,12 @@ public class ParticipationService {
       throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
     }
 
+    // OrderStatus기준 배송중(SHIPPED)일 때만 배송완료 확정 가능
+    if (order.getStatus() != OrderStatus.SHIPPED) {
+      throw new BusinessException(
+          ErrorStatus.ORDER_NOT_SHIPPED);
+    }
+
     // 1 내 주문 배송완료 처리 (OrderStatus)
     order.completeDelivery();
 
