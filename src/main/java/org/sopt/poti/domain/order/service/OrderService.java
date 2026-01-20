@@ -99,6 +99,16 @@ public class OrderService {
       throw new BusinessException(ErrorStatus.ORDER_EXISTS_SHIPPINGS);
     }
 
+    long notShippedCount = orderRepository.countByGroupBuyPostIdAndStatusIn(
+        groupBuyPost.getId(),
+        List.of(OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK, OrderStatus.PAID,
+            OrderStatus.READY)
+    );
+
+    if (notShippedCount == 0) { // 모두 배송 시작(SHIPPED) 이상
+      groupBuyPost.updateStatus(GroupBuyPostStatus.SHIPPING);
+    }
+
     LocalDateTime shippedAt = LocalDateTime.now();
 
     Delivery delivery = Delivery.builder()
@@ -305,5 +315,12 @@ public class OrderService {
 
   public Optional<Order> findWithDetailsById(Long orderId) {
     return orderRepository.findWithDetailsById(orderId);
+  }
+
+  public long countByGroupBuyPostIdAndStatusIn(Long groupBuyPostId, List<OrderStatus> statusList) {
+    return orderRepository.countByGroupBuyPostIdAndStatusIn(
+        groupBuyPostId,
+        statusList
+    );
   }
 }
