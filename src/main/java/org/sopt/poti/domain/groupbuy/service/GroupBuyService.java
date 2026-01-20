@@ -99,7 +99,7 @@ public class GroupBuyService {
         request.bankName(),
         request.accountNumber(),
         goalQuantity,
-        representativeImageUrl,
+        S3_BASE_URL + representativeImageUrl,
         leader,
         artist
     );
