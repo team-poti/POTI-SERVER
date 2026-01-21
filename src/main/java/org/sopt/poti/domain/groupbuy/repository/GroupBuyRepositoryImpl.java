@@ -15,6 +15,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -250,18 +251,28 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
     return artistId != null ? post.artist.id.eq(artistId) : null;
   }
 
-  private OrderSpecifier<?> sortCondition(String sort) {
-    if ("HOT".equals(sort)) {
+  private OrderSpecifier<?>[] sortCondition(String sort) {
+    log.info("sort :{}", sort);
+    List<OrderSpecifier<?>> orders = new ArrayList<>();
+
+    if ("HOT".equalsIgnoreCase(sort)) {
       log.info("HOT SORT");
-      return groupBuyPost.id.count().desc();
-    }
-    if ("RANDOM".equals(sort)) {
+      orders.add(groupBuyPost.id.count().desc()); // 1순위: 인기순 (게시글 수)
+      orders.add(groupBuyPost.createdAt.max().desc()); // 2순위: 최신순 (동점 처리)
+    } else if ("RANDOM".equalsIgnoreCase(sort)) {
       log.info("RANDOM SORT");
       LocalDate today = LocalDate.now();
       int seed = Integer.parseInt(today.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
-      return Expressions.numberTemplate(Double.class, "function('rand', {0})", seed).asc();
+      orders.add(Expressions.numberTemplate(Double.class, "function('rand', {0})", seed).asc());
+      orders.add(groupBuyPost.createdAt.max().desc()); // 랜덤 정렬 시에도 최신순을 2차 기준으로
+    } else { // LATEST (기본값)
+      log.info("LATEST SORT");
+      orders.add(groupBuyPost.createdAt.max().desc());
     }
-    log.info("LATEST SORT");
-    return groupBuyPost.createdAt.max().desc();
+
+    // HOT이 기본 정렬이므로, sort 파라미터가 없거나 인식되지 않으면 HOT 로직을 타도록 한다.
+    // 하지만 현재 컨트롤러에서 defaultValue="HOT"으로 명시되어 있으므로 이 else 분기는 LATEST만 처리함.
+
+    return orders.toArray(new OrderSpecifier[0]);
   }
 }
