@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
+import org.sopt.poti.domain.item.entity.Item;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.global.entity.BaseTimeEntity;
@@ -91,6 +92,10 @@ public class GroupBuyPost extends BaseTimeEntity {
 
   @OneToMany(mappedBy = "groupBuyPost")
   private List<Order> orders = new ArrayList<>();
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "item_id")
+  private Item item;
 
   @Builder
   private GroupBuyPost(
