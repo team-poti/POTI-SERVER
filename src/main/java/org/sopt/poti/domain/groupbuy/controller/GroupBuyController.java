@@ -3,7 +3,6 @@ package org.sopt.poti.domain.groupbuy.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.artist.dto.response.ArtistTitlesResponse;
@@ -20,6 +19,7 @@ import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyTitlesResponse;
 import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse;
 import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
+import org.sopt.poti.domain.order.dto.request.GroupBuySearchTitleRequest;
 import org.sopt.poti.global.common.ApiResponse;
 import org.sopt.poti.global.common.SuccessStatus;
 import org.sopt.poti.global.security.UserPrincipal;
@@ -28,7 +28,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,19 +61,13 @@ public class GroupBuyController {
   @GetMapping("/titles")
   @Operation(summary = "상품명 자동완성/추천", description = "입력 키워드를 기반으로 공동구매 상품명 리스트를 추천합니다.")
   public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitles(
-      @RequestParam Long artistId,
-      @RequestParam String keyword
+      @ModelAttribute @Valid GroupBuySearchTitleRequest request
   ) {
-    if (!StringUtils.hasText(keyword)) {
-      return ResponseEntity.status(HttpStatus.OK)
-          .body(ApiResponse.success(SuccessStatus.OK,
-              GroupBuyTitlesResponse.of(Collections.emptyList())));
-    }
-    // 공백 제거
-    String trim = keyword.trim();
-    List<String> titles = groupBuyService.searchTitles(artistId, trim);
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles)));
+    List<String> titles = groupBuyService.searchTitles(request.artistId(), request.keyword());
+
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles))
+    );
   }
 
   @GetMapping("/{postId}")
