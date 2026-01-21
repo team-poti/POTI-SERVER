@@ -251,11 +251,11 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
   }
 
   private OrderSpecifier<?> sortCondition(String sort) {
-    if ("HOT".equalsIgnoreCase(sort)) {
+    if ("HOT".equals(sort)) {
       log.info("HOT SORT");
       return groupBuyPost.id.count().desc();
     }
-    if ("RANDOM".equalsIgnoreCase(sort)) {
+    if ("RANDOM".equals(sort)) {
       log.info("RANDOM SORT");
       LocalDate today = LocalDate.now();
       int seed = Integer.parseInt(today.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
