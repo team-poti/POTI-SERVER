@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -87,6 +88,16 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         ApiResponse.fail(ErrorStatus.BAD_REQUEST)
     );
+  }
+
+  // 필수 파라미터 누락 시 발생하는 예외 처리
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameterException(
+      MissingServletRequestParameterException e) {
+    log.warn("필수 파라미터 누락: {}", e.getParameterName());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.fail(ErrorStatus.BAD_REQUEST,
+            "필수 파라미터 '" + e.getParameterName() + "'가 누락되었습니다."));
   }
 
   @ExceptionHandler(Exception.class)
