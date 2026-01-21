@@ -30,7 +30,7 @@ public class FeedController {
   public ResponseEntity<ApiResponse<FeedResponse>> getFeed(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
       @RequestParam(required = false) Long artistId,
-      @RequestParam(required = false, defaultValue = "LATEST") String sort,
+      @RequestParam(required = false, defaultValue = "HOT") String sort,
       @PageableDefault(size = 10) Pageable pageable
   ) {
     FeedResponse response = feedService.getFeed(userPrincipal.getUserId(), artistId, sort,
