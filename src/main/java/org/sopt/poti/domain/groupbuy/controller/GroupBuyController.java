@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.artist.dto.request.ArtistSearchRequest;
 import org.sopt.poti.domain.artist.dto.response.ArtistTitlesResponse;
 import org.sopt.poti.domain.artist.service.ArtistService;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
@@ -108,10 +109,14 @@ public class GroupBuyController {
   @GetMapping("/artists")
   @Operation(summary = "아티스트 실시간 검색 자동완성/추천", description = "입력 키워드를 기반으로 아티스트명을 추천합니다.")
   public ApiResponse<ArtistTitlesResponse> searchArtists(
-      @RequestParam String keyword
+      @ModelAttribute @Valid ArtistSearchRequest request
   ) {
-    return ApiResponse.success(SuccessStatus.OK, artistService.searchArtists(keyword));
+    return ApiResponse.success(
+        SuccessStatus.OK,
+        artistService.searchArtists(request.keyword())
+    );
   }
+
 
   @GetMapping("/me")
   @Operation(summary = "판매자 - 내 판매 내역 리스트 조회", description =
