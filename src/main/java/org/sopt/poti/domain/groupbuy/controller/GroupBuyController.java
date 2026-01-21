@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Tag(name = "GroupBuy", description = "공동구매글 관련 API")
 public class GroupBuyController {
@@ -47,7 +47,7 @@ public class GroupBuyController {
   private final GroupBuyService groupBuyService;
   private final ArtistService artistService;
 
-  @PostMapping
+  @PostMapping("/v1/posts")
   @Operation(summary = "공동구매 게시글 등록", description = "새로운 공동구매 게시글을 등록합니다.")
   public ResponseEntity<ApiResponse<GroupBuyCreateResponse>> createGroupBuy(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -59,7 +59,7 @@ public class GroupBuyController {
         .body(ApiResponse.success(SuccessStatus.CREATED, response));
   }
 
-  @GetMapping("/titles")
+  @GetMapping("/v1/posts/titles")
   @Operation(summary = "상품명 자동완성/추천", description = "입력 키워드를 기반으로 공동구매 상품명 리스트를 추천합니다.")
   public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitles(
       @ModelAttribute @Valid GroupBuySearchTitleRequest request
@@ -71,7 +71,7 @@ public class GroupBuyController {
     );
   }
 
-  @GetMapping("/{postId}")
+  @GetMapping("/v1/posts/{postId}")
   @Operation(summary = "분철글 상세 조회", description = "일반 사용자가 분철글에 대한 정보를 상세 조회합니다.")
   public ResponseEntity<ApiResponse<GroupBuyDetailResponse>> getGroupBuyPostDetail(
       @PathVariable Long postId,
@@ -84,7 +84,7 @@ public class GroupBuyController {
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyDetail));
   }
 
-  @GetMapping("/pots")
+  @GetMapping("/v1/posts/pots")
   @Operation(summary = "상품별 분철 팟 목록 조회", description = "특정 아티스트의 특정 상품명에 해당하는 분철 팟(게시글) 목록을 필터링 및 정렬하여 조회합니다. (남아있는 멤버 필터링, 평점순, 마감임박순 정렬)")
   public ResponseEntity<ApiResponse<GroupBuyListResponse>> getGroupBuyPotList(
       @ModelAttribute @Valid GroupBuyListRequest request,
@@ -96,7 +96,7 @@ public class GroupBuyController {
     );
   }
 
-  @GetMapping("/{postId}/options")
+  @GetMapping("/v1/posts/{postId}/options")
   @Operation(summary = "분철글 선택 가능한 분철 멤버 옵션과 배송 방법 조회", description = "특정 분철글에 참여(구매) 가능한 멤버 옵션과 배송 방법들을 조회합니다.")
   public ResponseEntity<ApiResponse<GroupBuyPostOptionResponse>> getGroupBuyOptionList(
       @PathVariable(name = "postId") Long postId
@@ -106,7 +106,7 @@ public class GroupBuyController {
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyPostOptionResponse));
   }
 
-  @GetMapping("/artists")
+  @GetMapping("/v1/posts/artists")
   @Operation(summary = "아티스트 실시간 검색 자동완성/추천", description = "입력 키워드를 기반으로 아티스트명을 추천합니다.")
   public ApiResponse<ArtistTitlesResponse> searchArtists(
       @ModelAttribute @Valid ArtistSearchRequest request
@@ -118,7 +118,7 @@ public class GroupBuyController {
   }
 
 
-  @GetMapping("/me")
+  @GetMapping("/v1/posts/me")
   @Operation(summary = "판매자 - 내 판매 내역 리스트 조회", description =
       "총대로 진행했던 내역들을 조회합니다. 상태값은 IN_PROGRESS (진행중) \n"
           + "또는\n"
@@ -132,7 +132,7 @@ public class GroupBuyController {
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, response));
   }
 
-  @GetMapping("/{postId}/participants")
+  @GetMapping("/v1/posts/{postId}/participants")
   @Operation(summary = "판매자 - 특정 분철글의 참여자 목록 조회", description = "특정 분철글의 참여자 목록을 조회합니다."
       + "\nOrderStatus별로 주는 값이 달라집니다. 컬럼이 사라지진 않고, null로 반환합니다.")
   public ResponseEntity<ApiResponse<PostParticipantListResponse>> getGroupBuyParticipantList(
@@ -144,7 +144,7 @@ public class GroupBuyController {
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyParticipantList));
   }
 
-  @GetMapping("/sale/{postId}")
+  @GetMapping("/v1/posts/sale/{postId}")
   @Operation(summary = "판매자 - 분철글 상세 조회", description = "특정 분철글을 상세 조회합니다.")
   public ResponseEntity<ApiResponse<GroupBuySaleDetailResponse>> getGroupBuySaleDetail(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -154,6 +154,18 @@ public class GroupBuyController {
         userPrincipal.getUserId(), postId);
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK, groupBuyPostDetailForSale)
+    );
+  }
+
+  @GetMapping("/v2/posts/titles")
+  @Operation(summary = "상품명 자동완성/추천", description = "입력 키워드를 기반으로 공동구매 상품명 리스트를 추천합니다.")
+  public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitlesV2(
+      @ModelAttribute @Valid GroupBuySearchTitleRequest request
+  ) {
+    List<String> titles = groupBuyService.searchTitlesNgram(request.artistId(), request.keyword());
+
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles))
     );
   }
 }
