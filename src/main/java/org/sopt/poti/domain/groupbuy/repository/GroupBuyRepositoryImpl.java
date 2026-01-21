@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.domain.feed.dto.request.FeedSearchCondition;
 import org.sopt.poti.domain.feed.dto.response.FeedGroupItem;
 import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyListRequest;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
+@Slf4j
 @RequiredArgsConstructor
 public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
 
@@ -250,13 +252,16 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
 
   private OrderSpecifier<?> sortCondition(String sort) {
     if ("HOT".equalsIgnoreCase(sort)) {
+      log.info("HOT SORT");
       return groupBuyPost.id.count().desc();
     }
     if ("RANDOM".equalsIgnoreCase(sort)) {
+      log.info("RANDOM SORT");
       LocalDate today = LocalDate.now();
       int seed = Integer.parseInt(today.format(DateTimeFormatter.ofPattern("yyyyMMdd")));
       return Expressions.numberTemplate(Double.class, "function('rand', {0})", seed).asc();
     }
+    log.info("LATEST SORT");
     return groupBuyPost.createdAt.max().desc();
   }
 }
