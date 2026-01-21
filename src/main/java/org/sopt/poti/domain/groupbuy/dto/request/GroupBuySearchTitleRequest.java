@@ -1,4 +1,4 @@
-package org.sopt.poti.domain.order.dto.request;
+package org.sopt.poti.domain.groupbuy.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
