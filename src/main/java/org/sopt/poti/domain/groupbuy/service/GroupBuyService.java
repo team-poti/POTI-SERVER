@@ -493,4 +493,8 @@ public class GroupBuyService {
     return orderService.findParticipantsForPostDetail(
         groupBuyPost);
   }
+
+  public List<String> searchTitlesNgram(Long artistId, String keyword) {
+    return groupBuyRepository.findTitlesByNgram(artistId, keyword, 5);
+  }
 }

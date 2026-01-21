@@ -12,8 +12,10 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.feed.dto.request.FeedSearchCondition;
@@ -30,6 +32,7 @@ import org.springframework.data.domain.SliceImpl;
 public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
+  private final EntityManager em;
 
   @Override
   public List<String> findTitlesByKeyword(Long artistId, String keyword, int limit) {
@@ -173,6 +176,39 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
     }
 
     return new SliceImpl<>(content, pageable, hasNext);
+  }
+
+  @Override
+  public List<String> findTitlesByNgram(Long artistId, String keyword, int limit) {
+    // 키워드 전처리: "공구 뉴진스" -> "공구* 뉴진스*" (Boolean Mode 부분 일치)
+    // 각 단어 뒤에 *를 붙여서 Prefix 검색이 가능하게 함
+    // 특수문자 제거 (MySQL Boolean Mode 연산자들)
+    String sanitized = keyword.replaceAll("[+\\-<>~*()\"@]", " ").trim();
+
+    if (sanitized.isBlank()) {
+      return Collections.emptyList(); // 특수문자만 입력한 경우 빈 결과 반환
+    }
+
+    String[] words = sanitized.split("\\s+");
+    StringBuilder sb = new StringBuilder();
+    for (String word : words) {
+      if (!word.isBlank()) { // 빈 문자열 체크 추가
+        sb.append("+").append(word).append("* ");
+      }
+    }
+    String searchKeyword = sb.toString().trim();
+
+    // Native Query 사용 (Hibernate로 우회)
+    String sql = "SELECT DISTINCT title FROM group_buy_posts " +
+        "WHERE artist_id = :artistId " +
+        "AND MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) " +
+        "LIMIT :limit";
+
+    return em.createNativeQuery(sql)
+        .setParameter("artistId", artistId)
+        .setParameter("keyword", searchKeyword)
+        .setParameter("limit", limit)
+        .getResultList();
   }
 
   // 멤버 필터링: 선택한 멤버들이 '남아있는(주문되지 않은)' 상태여야 함

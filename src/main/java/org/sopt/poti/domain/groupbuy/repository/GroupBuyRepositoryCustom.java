@@ -20,4 +20,6 @@ public interface GroupBuyRepositoryCustom {
   Slice<FeedGroupItem> findFeedItems(FeedSearchCondition condition, Pageable pageable);
 
   Slice<GroupBuyPost> findGroupBuyList(GroupBuyListRequest request, Pageable pageable);
+
+  List<String> findTitlesByNgram(Long artistId, String keyword, int limit);
 }
