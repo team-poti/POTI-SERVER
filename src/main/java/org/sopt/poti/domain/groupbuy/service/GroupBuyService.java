@@ -146,7 +146,7 @@ public class GroupBuyService {
   }
 
   public List<String> searchTitles(Long artistId, String keyword) {
-    Pageable pageable = PageRequest.of(0, 5);
+    Pageable pageable = PageRequest.of(0, 50);
     return groupBuyRepository.findTitlesByKeyword(artistId, keyword, pageable.getPageSize());
   }
 
@@ -495,6 +495,6 @@ public class GroupBuyService {
   }
 
   public List<String> searchTitlesNgram(Long artistId, String keyword) {
-    return groupBuyRepository.findTitlesByNgram(artistId, keyword, 5);
+    return groupBuyRepository.findTitlesByNgram(artistId, keyword, 50);
   }
 }
