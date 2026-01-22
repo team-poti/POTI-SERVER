@@ -229,7 +229,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
             groupBuyOption.member.id.in(memberIds),
             orderItem.isNull() // 주문 내역이 없어야 함 (남은 멤버)
         )
-        .exists();
+        .eq((int) memberIds.size());
   }
 
   private OrderSpecifier<?> listSortCondition(String sort) {
