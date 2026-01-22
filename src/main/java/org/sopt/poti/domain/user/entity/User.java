@@ -115,10 +115,6 @@ public class User extends BaseSoftDeleteEntity {
     this.favoriteArtist = artist;
   }
 
-  public void updateRatingAvg(double avg) {
-    this.ratingAvg = avg;
-  }
-
   public void withdraw() {
     this.status = UserStatus.WITHDRAWN;
     this.deletedAt = LocalDateTime.now();
@@ -127,4 +123,20 @@ public class User extends BaseSoftDeleteEntity {
     this.profileImageUrl = null;
     this.socialId = "deleted_" + this.id + "_" + UUID.randomUUID(); // 유니크 제약 회피
   }
+
+  public void addRatingWeightedDelta(double deltaWeightedSum, double deltaWeight) {
+    this.ratingWeightedSum += deltaWeightedSum;
+    this.ratingWeightTotal += deltaWeight;
+
+    if (this.ratingWeightTotal <= 0.0) {
+      this.ratingWeightedSum = 0.0;
+      this.ratingWeightTotal = 0.0;
+      this.ratingAvg = 0.0;
+      return;
+    }
+
+    double avg = this.ratingWeightedSum / this.ratingWeightTotal;
+    this.ratingAvg = Math.round(avg * 10) / 10.0;
+  }
+
 }
