@@ -86,7 +86,7 @@ public class ParticipationService {
       }
     }
 
-    return new LeaderUserIdResponse(postId, leaderUserId);
+    return new LeaderUserIdResponse(leaderUserId);
   }
 
 
