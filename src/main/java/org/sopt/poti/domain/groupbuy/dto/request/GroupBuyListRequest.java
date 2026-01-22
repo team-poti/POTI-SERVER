@@ -25,5 +25,10 @@ public record GroupBuyListRequest(
     if (title != null) {
       title = title.trim(); // 여기서 앞뒤 공백 제거
     }
+
+    // Sort 디폴트 값 설정 (null이거나 빈 문자열이면 DEADLINE)
+    if (sort == null || sort.isBlank()) {
+      sort = "DEADLINE";
+    }
   }
 }
