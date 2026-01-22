@@ -36,7 +36,7 @@ public class AesUtils {
     byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
     if (keyBytes.length != 32) {
       log.error("암호화 키(security.encryption-key)는 32바이트(256비트)여야 합니다. 현재 길이: {}", keyBytes.length);
-      throw new IllegalArgumentException("암호화 키는 32바이트여야 합니다.");
+      throw new BusinessException(ErrorStatus.AES_KEY_LENGTH);
     }
     this.keySpec = new SecretKeySpec(keyBytes, "AES");
   }
