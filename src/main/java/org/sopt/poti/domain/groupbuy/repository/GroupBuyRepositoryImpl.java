@@ -221,7 +221,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
     }
 
     // 서브쿼리: 이 게시글의 옵션 중에, memberId가 일치하면서, OrderItem이 없는(주문 안 된) 옵션이 존재하는가?
-    return JPAExpressions.selectOne()
+    return JPAExpressions.select(groupBuyOption.count()) // selectOne -> count
         .from(groupBuyOption)
         .leftJoin(orderItem).on(orderItem.groupBuyOption.eq(groupBuyOption))
         .where(
@@ -229,7 +229,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
             groupBuyOption.member.id.in(memberIds),
             orderItem.isNull() // 주문 내역이 없어야 함 (남은 멤버)
         )
-        .eq((int) memberIds.size());
+        .eq((long) memberIds.size()); // int -> long 형변환
   }
 
   private OrderSpecifier<?> listSortCondition(String sort) {
