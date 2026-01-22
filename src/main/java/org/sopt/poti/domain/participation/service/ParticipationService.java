@@ -73,6 +73,7 @@ public class ParticipationService {
 
     // 2 해당 공구글의 모든 주문(OrderStatus)이 배송완료인지 검사
     Long postId = order.getGroupBuyPost().getId();
+    Long leaderUserId = order.getGroupBuyPost().getLeader().getId();
     long remaining = orderService.countByGroupBuyPostIdAndStatusNot(postId, OrderStatus.DELIVERED);
 
     // 3) 남은 주문이 0개 -> GroupBuyPostStatus도 배송완료로 변경
@@ -85,7 +86,7 @@ public class ParticipationService {
       }
     }
 
-    return new LeaderUserIdResponse(postId);
+    return new LeaderUserIdResponse(postId, leaderUserId);
   }
 
 
