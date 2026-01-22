@@ -51,3 +51,6 @@ logging:
 
 discord:
   webhook-url: test
+
+security:
+  encryption-key: 12345678901234567890123456789012

@@ -32,7 +32,9 @@ public class AccountNumberConverter implements AttributeConverter<String, String
       return aesUtils.decrypt(dbData); // 복호화 시도
     } catch (Exception e) {
       // 복호화 실패 시 (기존 평문 데이터일 가능성)
-      log.warn("데이터 복호화 실패. 평문으로 간주하고 반환합니다: {}", dbData);
+      String masked =
+          dbData.length() <= 4 ? "****" : "****" + dbData.substring(dbData.length() - 4);
+      log.warn("데이터 복호화 실패. 평문으로 간주하고 반환합니다: {}", masked);
       return dbData;
     }
   }
