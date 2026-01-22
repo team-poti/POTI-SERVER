@@ -7,6 +7,7 @@ import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.order.entity.OrderStatus;
 import org.sopt.poti.domain.order.service.OrderService;
+import org.sopt.poti.domain.participation.dto.response.LeaderUserIdResponse;
 import org.sopt.poti.domain.participation.dto.response.ParticipationListResponse;
 import org.sopt.poti.domain.participation.dto.response.ParticipationSummaryResponse;
 import org.sopt.poti.domain.participation.entity.ParticipationStatus;
@@ -52,7 +53,7 @@ public class ParticipationService {
 
   //배송 완료 처리
   @Transactional
-  public void confirmDelivered(Long userId, Long participationId) {
+  public LeaderUserIdResponse confirmDelivered(Long userId, Long participationId) {
 
     Order order = orderService.findWithDetailsById(participationId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.ORDER_NOT_FOUND));
@@ -83,6 +84,8 @@ public class ParticipationService {
         post.completePostDelivery();
       }
     }
+
+    return new LeaderUserIdResponse(postId);
   }
 
 
