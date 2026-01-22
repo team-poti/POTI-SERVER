@@ -96,3 +96,6 @@ logging:
 
 discord:
   webhook-url: ${DISCORD_WEBHOOK}
+
+security:
+  encryption-key: ${ENCRYPTION_KEY}

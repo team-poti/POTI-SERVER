@@ -2,6 +2,7 @@ package org.sopt.poti.domain.groupbuy.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -22,6 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
+import org.sopt.poti.domain.groupbuy.converter.AccountNumberConverter;
 import org.sopt.poti.domain.item.entity.Item;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.user.entity.User;
@@ -57,7 +59,8 @@ public class GroupBuyPost extends BaseTimeEntity {
   @Column(name = "bank_name", length = 50, nullable = false) // 은행명 필수
   private String bankName;
 
-  @Column(name = "account_number", length = 50, nullable = false) // 계좌번호 필수
+  @Convert(converter = AccountNumberConverter.class) // 컨버터 적용
+  @Column(name = "account_number", length = 500, nullable = false) // 계좌번호 필수
   private String accountNumber;
 
   @Column(name = "representative_image_url") // 대표 이미지 URL (성능 최적화용)
