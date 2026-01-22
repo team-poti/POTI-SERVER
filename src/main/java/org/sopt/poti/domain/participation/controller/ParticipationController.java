@@ -3,6 +3,7 @@ package org.sopt.poti.domain.participation.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.participation.dto.response.LeaderUserIdResponse;
 import org.sopt.poti.domain.participation.dto.response.ParticipationDetailResponse;
 import org.sopt.poti.domain.participation.dto.response.ParticipationSummaryResponse;
 import org.sopt.poti.domain.participation.entity.ParticipationStatus;
@@ -59,14 +60,15 @@ public class ParticipationController {
 
   @PatchMapping("/{participationId}/delivered")
   @Operation(summary = "참여자- 배송 완료 등록", description = "참여한 분철의 배송 완료 여부를 등록합니다.")
-  public ResponseEntity<ApiResponse<Void>> confirmDelivered(
+  public ResponseEntity<ApiResponse<LeaderUserIdResponse>> confirmDelivered(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
       @PathVariable Long participationId
   ) {
     Long userId = userPrincipal.getUserId();
 
-    participationService.confirmDelivered(userId, participationId);
+    LeaderUserIdResponse leaderUserIdResponse = participationService.confirmDelivered(userId,
+        participationId);
 
-    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, null));
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, leaderUserIdResponse));
   }
 }
