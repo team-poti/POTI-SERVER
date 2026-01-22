@@ -229,18 +229,29 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
             groupBuyOption.member.id.in(memberIds),
             orderItem.isNull() // 주문 내역이 없어야 함 (남은 멤버)
         )
-        .eq((long) memberIds.size()); // int -> long 형변환
+        .eq((long) memberIds.size());
   }
 
-  private OrderSpecifier<?> listSortCondition(String sort) {
+  private OrderSpecifier<?>[] listSortCondition(String sort) {
+    List<OrderSpecifier<?>> orders = new ArrayList<>();
+
+    // 1순위: 모집 중인 글 우선 (RECRUITING = 1, 나머지 = 2)
+    orders.add(new CaseBuilder()
+        .when(groupBuyPost.status.eq(org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus.RECRUITING)).then(1)
+        .otherwise(2)
+        .asc());
+
+    // 2순위: 사용자 선택 정렬
     if ("DEADLINE".equalsIgnoreCase(sort)) {
-      return groupBuyPost.recruitDeadline.asc();
+      orders.add(groupBuyPost.recruitDeadline.asc());
+    } else if ("RATING".equalsIgnoreCase(sort)) {
+      orders.add(groupBuyPost.leader.ratingAvg.desc());
     }
-    if ("RATING".equalsIgnoreCase(sort)) {
-      return groupBuyPost.leader.ratingAvg.desc();
-    }
-    // 기본값: 최신순
-    return groupBuyPost.createdAt.desc();
+    
+    // 3순위 (기본): 최신순
+    orders.add(groupBuyPost.createdAt.desc());
+
+    return orders.toArray(new OrderSpecifier[0]);
   }
 
   private BooleanExpression artistIdNe(Long artistId, QGroupBuyPost post) {
