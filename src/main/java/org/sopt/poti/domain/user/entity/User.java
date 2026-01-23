@@ -56,18 +56,6 @@ public class User extends BaseSoftDeleteEntity {
   @Column(name = "rating_avg")
   private Double ratingAvg;
 
-  @Column(name = "rating_sum", nullable = false)
-  private long ratingSum = 0L;
-
-  @Column(name = "rating_count", nullable = false)
-  private int ratingCount = 0;
-
-  @Column(name = "rating_weighted_sum", nullable = false)
-  private double ratingWeightedSum = 0.0;
-
-  @Column(name = "rating_weight_total", nullable = false)
-  private double ratingWeightTotal = 0.0;
-
   @Enumerated(EnumType.STRING)
   private UserStatus status;
 
@@ -115,6 +103,10 @@ public class User extends BaseSoftDeleteEntity {
     this.favoriteArtist = artist;
   }
 
+  public void updateRatingAvg(double avg) {
+    this.ratingAvg = avg;
+  }
+
   public void withdraw() {
     this.status = UserStatus.WITHDRAWN;
     this.deletedAt = LocalDateTime.now();
@@ -123,20 +115,4 @@ public class User extends BaseSoftDeleteEntity {
     this.profileImageUrl = null;
     this.socialId = "deleted_" + this.id + "_" + UUID.randomUUID(); // 유니크 제약 회피
   }
-
-  public void addRatingWeightedDelta(double deltaWeightedSum, double deltaWeight) {
-    this.ratingWeightedSum += deltaWeightedSum;
-    this.ratingWeightTotal += deltaWeight;
-
-    if (this.ratingWeightTotal <= 0.0) {
-      this.ratingWeightedSum = 0.0;
-      this.ratingWeightTotal = 0.0;
-      this.ratingAvg = 0.0;
-      return;
-    }
-
-    double avg = this.ratingWeightedSum / this.ratingWeightTotal;
-    this.ratingAvg = Math.round(avg * 10) / 10.0;
-  }
-
 }

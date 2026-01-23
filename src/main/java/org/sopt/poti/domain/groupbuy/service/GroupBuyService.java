@@ -497,22 +497,4 @@ public class GroupBuyService {
   public List<String> searchTitlesNgram(Long artistId, String keyword) {
     return groupBuyRepository.findTitlesByNgram(artistId, keyword, 50);
   }
-
-  @Transactional
-  public void addPostRating(Long postId, int score) {
-    GroupBuyPost post = groupBuyRepository.findByIdWithLock(postId)
-        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
-
-    post.addRating(score);
-  }
-
-  @Transactional
-  public GroupBuyPost getPostWithLock(Long postId) {
-    return groupBuyRepository.findByIdWithLock(postId)
-        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
-  }
-
-  public int countPostsByLeader(Long leaderId) {
-    return groupBuyRepository.countByLeader_Id(leaderId);
-  }
 }

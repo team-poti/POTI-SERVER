@@ -72,15 +72,6 @@ public class GroupBuyPost extends BaseTimeEntity {
   @Column(name = "current_quantity", nullable = false)
   private int currentQuantity;  // 현재 인원
 
-  @Column(name = "rating_avg", nullable = true)
-  private double ratingAvg = 0.0; //공구 글 당 평점
-
-  @Column(name = "rating_sum", nullable = true)
-  private long ratingSum = 0L;
-
-  @Column(name = "rating_count", nullable = true)
-  private int ratingCount = 0;
-
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 30)
   private GroupBuyPostStatus status;
@@ -205,22 +196,6 @@ public class GroupBuyPost extends BaseTimeEntity {
   // 분철글 상태 변경 메서드 (참여자 모두의 OrderStatus가 배송완료일때, GroupBuyPostStatus도 배송완료로 변경)
   public void completePostDelivery() {
     this.status = GroupBuyPostStatus.DELIVERED;
-  }
-
-  public void addRating(int score) {
-    validateScore(score);
-
-    this.ratingSum += score;
-    this.ratingCount += 1;
-
-    double avg = (double) this.ratingSum / this.ratingCount;
-    this.ratingAvg = Math.round(avg * 10) / 10.0;
-  }
-
-  private void validateScore(int score) {
-    if (score < 1 || score > 5) {
-      throw new BusinessException(ErrorStatus.INVALID_RATING_SCORE);
-    }
   }
 
 }
