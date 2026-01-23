@@ -31,6 +31,7 @@ public enum ErrorStatus {
   GROUP_BUY_POST_INVALID_INCREASE_COUNT(40016, HttpStatus.BAD_REQUEST, "증가 수량은 1 이상이어야 합니다."),
   ORDER_NOT_SHIPPED(40017, HttpStatus.BAD_REQUEST, "배송 시작 상태에서만 배송 완료로 변경할 수 있습니다."),
   POST_NOT_SHIPPING(40018, HttpStatus.BAD_REQUEST, "배송 중인 공구글만 배송 완료로 변경할 수 있습니다."),
+  INVALID_RATING_SCORE(40019, HttpStatus.BAD_REQUEST, "별점은 1~5 사이여야 합니다."),
 
   /**
    * 401 Unauthorized
