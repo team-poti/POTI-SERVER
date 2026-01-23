@@ -41,11 +41,11 @@ public class ParticipationDetailService {
     GroupBuyPost post = order.getGroupBuyPost();
     OrderStatus orderStatus = order.getStatus();
 
-    // 상단부 상태값 -> OrderStatus 기준으로 가공
-    String topStatus = mapTopStatus(orderStatus);
+    // 상단부 상태값 -> GroupBuyPostStatus가 Recruting일때는 이를 반영 -> CLOSED 이후에는 OrderStatus 기준으로 가공
+    String topStatus = mapTopStatus(post.getStatus(), orderStatus);
 
     // 상단 진행 멘트
-    String statusMessage = determineStatusMessage(orderStatus);
+    String statusMessage = determineStatusMessage(post.getStatus(), orderStatus);
 
     // 1. 계좌 및 입금기한 노출 제어
     // 전부 OrderStatus 기준으로 제어
@@ -125,8 +125,15 @@ public class ParticipationDetailService {
         .toList();
   }
 
-  // OrderStatus 기반으로 GroupBuyPostStatus 값 재사용 (상단 상태값 전용)
-  private String mapTopStatus(OrderStatus orderStatus) {
+  // GroupBuyPostStatus 우선 반영(RECRUTING까지) -> CLOSED 이후에는 OrderStatus 기준
+  private String mapTopStatus(GroupBuyPostStatus groupBuyPostStatus, OrderStatus orderStatus) {
+
+    // 1 분철글이 모집중이면 무조건 RECRUITING 고정
+    if (groupBuyPostStatus == GroupBuyPostStatus.RECRUITING) {
+      return GroupBuyPostStatus.RECRUITING.name();
+    }
+
+    // 2 분철글 모집 마감(CLOSED)부터는 OrderStatus 기준으로 기존 매핑
     if (orderStatus == null) {
       return null;
     }
@@ -140,11 +147,18 @@ public class ParticipationDetailService {
     };
   }
 
-  // 상단 진행 멘트 (OrderStatus 기반)
-  private String determineStatusMessage(OrderStatus orderStatus) {
-    if (orderStatus == OrderStatus.RECRUITING) {
+
+  // 상단 진행 멘트 (OrderStatus 기반, RECRUTING시에는 공구글 우선)
+  private String determineStatusMessage(
+      GroupBuyPostStatus postStatus,
+      OrderStatus orderStatus
+  ) {
+    // 1 모집중이면 무조건 모집중 멘트를 띄움
+    if (postStatus == GroupBuyPostStatus.RECRUITING) {
       return "다른 참여자들을 기다리고 있어요";
     }
+
+    // 2 모집 마감 이후부터는 OrderStatus 기준으로 멘트를 띄움
     return switch (orderStatus) {
       case WAIT_PAY -> "지금 입금해주세요";
       case WAIT_PAY_CHECK -> "모집자가 입금 내역을 확인하고 있어요";
