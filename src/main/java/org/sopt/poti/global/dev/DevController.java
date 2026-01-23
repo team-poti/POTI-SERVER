@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.auth.entity.RefreshToken;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
+import org.sopt.poti.domain.order.entity.OrderStatus;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.common.ApiResponse;
@@ -18,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,6 +71,18 @@ public class DevController {
       @AuthenticationPrincipal UserPrincipal userPrincipal
   ) {
     devService.hardDeleteUser(userPrincipal.getUserId());
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK)
+    );
+  }
+
+  @PatchMapping("/orders/{orderId}/status")
+  @Operation(summary = "주문 상태 강제 변경", description = "테스트를 위해 특정 주문의 상태를 강제로 변경합니다. (WAIT_PAY로 변경 시 연관 데이터 삭제됨)")
+  public ResponseEntity<ApiResponse<Void>> resetOrderStatus(
+      @PathVariable Long orderId,
+      @RequestParam OrderStatus status
+  ) {
+    devService.resetOrderStatus(orderId, status);
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK)
     );

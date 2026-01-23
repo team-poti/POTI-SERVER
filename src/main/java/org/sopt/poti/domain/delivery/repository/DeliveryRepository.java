@@ -14,4 +14,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
   boolean existsDeliveryByOrderId(Long orderId);
 
   Optional<Delivery> findTopByOrder_IdOrderByIdDesc(Long orderId);
+
+  void deleteByOrder_Id(Long orderId);
 }
