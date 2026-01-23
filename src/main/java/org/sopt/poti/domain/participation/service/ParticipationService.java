@@ -35,8 +35,7 @@ public class ParticipationService {
     int completedCount = 0;
 
     for (Order order : orders) {
-      GroupBuyPostStatus postStatus = order.getGroupBuyPost().getStatus();
-      if (isCompleted(postStatus)) {
+      if (isCompleted(order.getStatus())) {
         completedCount++;
       } else {
         inProgressCount++;
@@ -90,26 +89,40 @@ public class ParticipationService {
   }
 
 
-  private boolean isCompleted(GroupBuyPostStatus status) {
-    return status == GroupBuyPostStatus.DELIVERED;
+  // OrderStatus가 DELIVERED면 COMPLETED로 봄
+  private boolean isCompleted(OrderStatus status) {
+    return status == OrderStatus.DELIVERED;
   }
 
+  // 분기 기준 = OrderStatus
   private boolean matchParticipationStatus(Order order, ParticipationStatus status) {
-    GroupBuyPostStatus postStatus = order.getGroupBuyPost().getStatus();
+    OrderStatus orderStatus = order.getStatus();
 
     return switch (status) {
-      case IN_PROGRESS -> postStatus == GroupBuyPostStatus.RECRUITING
-          || postStatus == GroupBuyPostStatus.CLOSED
-          || postStatus == GroupBuyPostStatus.PAYMENT_DONE
-          || postStatus == GroupBuyPostStatus.SHIPPING;
-
-      case COMPLETED -> postStatus == GroupBuyPostStatus.DELIVERED;
+      case IN_PROGRESS -> !isCompleted(orderStatus);
+      case COMPLETED -> isCompleted(orderStatus);
     };
   }
 
+  // OrderStatus를 GroupBuyPostStatus처럼 내려줌
+  private String mapToClientPostStatus(OrderStatus orderStatus) {
+    return switch (orderStatus) {
+      case RECRUITING -> GroupBuyPostStatus.RECRUITING.name();
+
+      case WAIT_PAY, WAIT_PAY_CHECK -> GroupBuyPostStatus.CLOSED.name();
+
+      case PAID, READY -> GroupBuyPostStatus.PAYMENT_DONE.name();
+
+      case SHIPPED -> GroupBuyPostStatus.SHIPPING.name();
+
+      case DELIVERED -> GroupBuyPostStatus.DELIVERED.name();
+    };
+  }
+
+
+  // 응답 Status를 OrderStatus로 내려줌
   private ParticipationListResponse toResponse(Order order) {
-    GroupBuyPost post = order.getGroupBuyPost();
-    GroupBuyPostStatus postStatus = post.getStatus();
+    var post = order.getGroupBuyPost();
 
     return new ParticipationListResponse(
         order.getId(),
@@ -117,11 +130,7 @@ public class ParticipationService {
         post.getArtist().getName(),
         post.getTitle(),
         post.getRepresentativeImageUrl(),
-        postStatus.name()
+        mapToClientPostStatus(order.getStatus())
     );
-  }
-
-  private String mapToClientStatus(GroupBuyPostStatus postStatus) {
-    return isCompleted(postStatus) ? "COMPLETED" : "IN_PROGRESS";
   }
 }
