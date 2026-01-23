@@ -72,13 +72,13 @@ public class GroupBuyPost extends BaseTimeEntity {
   @Column(name = "current_quantity", nullable = false)
   private int currentQuantity;  // 현재 인원
 
-  @Column(name = "rating_avg", nullable = false)
+  @Column(name = "rating_avg", nullable = true)
   private double ratingAvg = 0.0; //공구 글 당 평점
 
-  @Column(name = "rating_sum", nullable = false)
+  @Column(name = "rating_sum", nullable = true)
   private long ratingSum = 0L;
 
-  @Column(name = "rating_count", nullable = false)
+  @Column(name = "rating_count", nullable = true)
   private int ratingCount = 0;
 
   @Enumerated(EnumType.STRING)
