@@ -9,7 +9,8 @@ server:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-
+  forward-headers-strategy: framework
+  
 spring:
   application:
     name: poti-server
@@ -93,6 +94,18 @@ logging:
   level:
     root: INFO
     org.sopt: DEBUG
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs   # JSON 데이터 경로
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui/index.html # UI 접속 경로
+    enabled: true
+    groups-order: DESC   # 그룹 정렬 순서
+    operations-sorter: method # 메소드 순서대로 정렬
+    disable-swagger-default-url: true # 기본 petstore URL 끄기
+    display-request-duration: true # 요청 소요 시간 표시
 
 discord:
   webhook-url: ${DISCORD_WEBHOOK}
