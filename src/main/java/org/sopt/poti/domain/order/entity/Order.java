@@ -151,4 +151,8 @@ public class Order extends BaseTimeEntity {
     this.status = OrderStatus.DELIVERED;
   }
 
+  public void updateStatus(OrderStatus status) {
+    this.status = status;
+  }
+
 }
