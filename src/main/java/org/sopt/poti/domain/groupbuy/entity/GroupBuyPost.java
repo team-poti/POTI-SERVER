@@ -73,13 +73,13 @@ public class GroupBuyPost extends BaseTimeEntity {
   private int currentQuantity;  // 현재 인원
 
   @Column(name = "rating_avg", nullable = true)
-  private double ratingAvg = 0.0; //공구 글 당 평점
+  private Double ratingAvg = 0.0; //공구 글 당 평점
 
   @Column(name = "rating_sum", nullable = true)
-  private long ratingSum = 0L;
+  private Long ratingSum = 0L;
 
   @Column(name = "rating_count", nullable = true)
-  private int ratingCount = 0;
+  private Integer ratingCount = 0;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 30)
@@ -213,7 +213,7 @@ public class GroupBuyPost extends BaseTimeEntity {
     this.ratingSum += score;
     this.ratingCount += 1;
 
-    double avg = (double) this.ratingSum / this.ratingCount;
+    Double avg = (double) this.ratingSum / this.ratingCount;
     this.ratingAvg = Math.round(avg * 10) / 10.0;
   }
 

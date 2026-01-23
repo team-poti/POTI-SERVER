@@ -56,11 +56,11 @@ public class User extends BaseSoftDeleteEntity {
   @Column(name = "rating_avg")
   private Double ratingAvg;
 
-  @Column(name = "rating_sum", nullable = false)
-  private long ratingSum = 0L;
+  @Column(name = "rating_sum", nullable = true)
+  private Long ratingSum = 0L;
 
-  @Column(name = "rating_count", nullable = false)
-  private int ratingCount = 0;
+  @Column(name = "rating_count", nullable = true)
+  private Integer ratingCount = 0;
 
   @Column(name = "rating_weighted_sum", nullable = false)
   private double ratingWeightedSum = 0.0;

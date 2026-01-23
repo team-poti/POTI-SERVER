@@ -41,8 +41,8 @@ public class ReviewApplicationService {
 
     // 2 최신 팟 상태 조회 및 데이터 수집
     GroupBuyPost post = groupBuyService.getPostWithLock(postId);
-    int reviewCount = post.getRatingCount();
-    double postAvg = post.getRatingAvg();
+    Integer reviewCount = post.getRatingCount();
+    Double postAvg = post.getRatingAvg();
 
     int postCount = groupBuyService.countPostsByLeader(sellerId);
 
