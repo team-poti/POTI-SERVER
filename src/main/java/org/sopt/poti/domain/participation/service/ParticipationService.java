@@ -74,7 +74,7 @@ public class ParticipationService {
     Long leaderUserId = order.getGroupBuyPost().getLeader().getId();
     long remaining = orderService.countByGroupBuyPostIdAndStatusNot(postId, OrderStatus.DELIVERED);
 
-    // 3) 남은 주문이 0개 -> GroupBuyPostStatus도 배송완료로 변경
+    // 3 남은 주문이 0개 -> GroupBuyPostStatus도 배송완료로 변경
     if (remaining == 0) {
       GroupBuyPost post = order.getGroupBuyPost();
 
@@ -117,7 +117,7 @@ public class ParticipationService {
       case SHIPPED -> GroupBuyPostStatus.SHIPPING.name();
       case DELIVERED -> GroupBuyPostStatus.DELIVERED.name();
 
-      // (방어) 데이터가 꼬여서 RECRUITING이 내려오면 RECRUITING 그대로 반환
+      // 데이터가 꼬여 RECRUITING이 내려오는 경우, RECRUITING 그대로 반환
       case RECRUITING -> GroupBuyPostStatus.RECRUITING.name();
     };
   }
