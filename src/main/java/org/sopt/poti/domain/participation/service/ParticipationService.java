@@ -63,8 +63,7 @@ public class ParticipationService {
 
     // OrderStatus기준 배송중(SHIPPED)일 때만 배송완료 확정 가능
     if (order.getStatus() != OrderStatus.SHIPPED) {
-      throw new BusinessException(
-          ErrorStatus.ORDER_NOT_SHIPPED);
+      throw new BusinessException(ErrorStatus.ORDER_NOT_SHIPPED);
     }
 
     // 1 내 주문 배송완료 처리 (OrderStatus)
@@ -75,7 +74,7 @@ public class ParticipationService {
     Long leaderUserId = order.getGroupBuyPost().getLeader().getId();
     long remaining = orderService.countByGroupBuyPostIdAndStatusNot(postId, OrderStatus.DELIVERED);
 
-    // 3) 남은 주문이 0개 -> GroupBuyPostStatus도 배송완료로 변경
+    // 3 남은 주문이 0개 -> GroupBuyPostStatus도 배송완료로 변경
     if (remaining == 0) {
       GroupBuyPost post = order.getGroupBuyPost();
 
@@ -87,7 +86,6 @@ public class ParticipationService {
 
     return new LeaderUserIdResponse(leaderUserId);
   }
-
 
   // OrderStatus가 DELIVERED면 COMPLETED로 봄
   private boolean isCompleted(OrderStatus status) {
@@ -105,20 +103,24 @@ public class ParticipationService {
   }
 
   // OrderStatus를 GroupBuyPostStatus처럼 내려줌
-  private String mapToClientPostStatus(OrderStatus orderStatus) {
+  // GroupBuyPostStatus 우선 반영(RECRUITING까지) -> CLOSED 이후에는 OrderStatus 기준
+  private String mapToClientPostStatus(GroupBuyPostStatus postStatus, OrderStatus orderStatus) {
+
+    // 1 분철글이 모집중이면 무조건 RECRUITING 고정
+    if (postStatus == GroupBuyPostStatus.RECRUITING) {
+      return GroupBuyPostStatus.RECRUITING.name();
+    }
+
     return switch (orderStatus) {
-      case RECRUITING -> GroupBuyPostStatus.RECRUITING.name();
-
       case WAIT_PAY, WAIT_PAY_CHECK -> GroupBuyPostStatus.CLOSED.name();
-
       case PAID, READY -> GroupBuyPostStatus.PAYMENT_DONE.name();
-
       case SHIPPED -> GroupBuyPostStatus.SHIPPING.name();
-
       case DELIVERED -> GroupBuyPostStatus.DELIVERED.name();
+
+      // 데이터가 꼬여 RECRUITING이 내려오는 경우, RECRUITING 그대로 반환
+      case RECRUITING -> GroupBuyPostStatus.RECRUITING.name();
     };
   }
-
 
   // 응답 Status를 OrderStatus로 내려줌
   private ParticipationListResponse toResponse(Order order) {
@@ -130,7 +132,7 @@ public class ParticipationService {
         post.getArtist().getName(),
         post.getTitle(),
         post.getRepresentativeImageUrl(),
-        mapToClientPostStatus(order.getStatus())
+        mapToClientPostStatus(post.getStatus(), order.getStatus())
     );
   }
 }
