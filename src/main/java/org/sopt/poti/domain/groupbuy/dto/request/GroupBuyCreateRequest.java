@@ -1,7 +1,7 @@
 package org.sopt.poti.domain.groupbuy.dto.request;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +20,7 @@ public record GroupBuyCreateRequest(
     String content,
 
     @NotNull(message = "모집 마감일은 필수입니다.")
-    @Future(message = "모집 마감일은 현재보다 미래여야 합니다.")
+    @FutureOrPresent(message = "모집 마감일은 현재보다 미래여야 합니다.")
     LocalDate deadline, // yyyy-MM-dd 형식
 
     @NotBlank(message = "은행명은 필수입니다.")
