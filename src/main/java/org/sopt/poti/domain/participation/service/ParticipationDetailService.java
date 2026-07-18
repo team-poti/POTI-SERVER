@@ -139,9 +139,8 @@ public class ParticipationDetailService {
     }
 
     return switch (orderStatus) {
-      case RECRUITING -> GroupBuyPostStatus.RECRUITING.name();
       case WAIT_PAY, WAIT_PAY_CHECK -> GroupBuyPostStatus.CLOSED.name();
-      case PAID, READY -> GroupBuyPostStatus.PAYMENT_DONE.name();
+      case PAID -> GroupBuyPostStatus.PAYMENT_DONE.name();
       case SHIPPED -> GroupBuyPostStatus.SHIPPING.name();
       case DELIVERED -> GroupBuyPostStatus.DELIVERED.name();
     };
@@ -162,10 +161,9 @@ public class ParticipationDetailService {
     return switch (orderStatus) {
       case WAIT_PAY -> "지금 입금해주세요";
       case WAIT_PAY_CHECK -> "모집자가 입금 내역을 확인하고 있어요";
-      case PAID, READY -> "모집자가 배송을 준비 중이에요";
+      case PAID -> "모집자가 배송을 준비 중이에요";
       case SHIPPED -> "모집자가 배송을 시작했어요";
       case DELIVERED -> "거래가 종료되었어요";
-      default -> null;
     };
   }
 }
