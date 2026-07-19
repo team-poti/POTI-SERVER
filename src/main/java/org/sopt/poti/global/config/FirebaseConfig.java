@@ -5,6 +5,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -28,10 +29,12 @@ public class FirebaseConfig {
   public void initialize() throws IOException {
     if (FirebaseApp.getApps().isEmpty()) {
       Resource resource = resourceLoader.getResource(credentialsPath);
-      FirebaseOptions options = FirebaseOptions.builder()
-          .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
-          .build();
-      FirebaseApp.initializeApp(options);
+      try (InputStream is = resource.getInputStream()) {
+        FirebaseOptions options = FirebaseOptions.builder()
+            .setCredentials(GoogleCredentials.fromStream(is))
+            .build();
+        FirebaseApp.initializeApp(options);
+      }
     }
   }
 }

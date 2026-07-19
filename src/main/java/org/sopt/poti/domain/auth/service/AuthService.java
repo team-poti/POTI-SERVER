@@ -160,7 +160,7 @@ public class AuthService {
     }
     refreshTokenRepository.deleteById(userId);
     if (fcmToken != null && !fcmToken.isBlank()) {
-      fcmTokenService.deleteByToken(fcmToken);
+      fcmTokenService.deleteByToken(userId, fcmToken);
     }
   }
 

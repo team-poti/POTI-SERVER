@@ -48,7 +48,7 @@ public class FcmTokenController {
       @AuthenticationPrincipal UserPrincipal userPrincipal,
       @RequestParam String token
   ) {
-    fcmTokenService.deleteByToken(token);
+    fcmTokenService.deleteByToken(userPrincipal.getUserId(), token);
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK));
   }
 }

@@ -29,8 +29,10 @@ public class FcmTokenService {
   }
 
   @Transactional
-  public void deleteByToken(String token) {
-    fcmTokenRepository.deleteByToken(token);
+  public void deleteByToken(Long userId, String token) {
+    fcmTokenRepository.findByToken(token)
+        .filter(fcmToken -> fcmToken.getUser().getId().equals(userId))
+        .ifPresent(fcmTokenRepository::delete);
   }
 
   @Transactional
