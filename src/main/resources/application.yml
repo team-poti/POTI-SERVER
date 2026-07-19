@@ -105,6 +105,13 @@ springdoc:
     disable-swagger-default-url: true # 기본 petstore URL 끄기
     display-request-duration: true # 요청 소요 시간 표시
 
+
+firebase:
+  credentials-path: classpath:firebase-service-account.json
+
+gemini:
+  api-key: ${GEMINI_KEY}
+
 discord:
   webhook-url: ${DISCORD_WEBHOOK}
 

@@ -5,7 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.auth.dto.request.AuthRequest;
+import org.sopt.poti.domain.auth.dto.request.LogoutRequest;
 import org.sopt.poti.domain.auth.dto.request.TokenReissueRequest;
+import org.sopt.poti.domain.auth.dto.request.WithdrawRequest;
 import org.sopt.poti.domain.auth.dto.response.AuthResponse;
 import org.sopt.poti.domain.auth.dto.response.TokenReissueResponse;
 import org.sopt.poti.domain.auth.service.AuthService;
@@ -52,27 +54,29 @@ public class AuthController {
     );
   }
 
-  @PostMapping("/logout") // 로그아웃 API 추가
-  @Operation(summary = "로그아웃", description = "Access Token을 블랙리스트 처리하고 Refresh Token을 삭제합니다.")
+  @PostMapping("/logout")
+  @Operation(summary = "로그아웃", description = "Access Token을 블랙리스트 처리하고 Refresh Token을 삭제합니다. fcmToken을 보내면 해당 토큰도 삭제합니다.")
   public ResponseEntity<ApiResponse<Void>> logout(
-      @RequestHeader("Authorization") String accessToken, // Access Token을 헤더에서 받음
-      @AuthenticationPrincipal UserPrincipal userPrincipal
+      @RequestHeader("Authorization") String accessToken,
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @RequestBody(required = false) LogoutRequest request
   ) {
-    authService.logout(extractToken(accessToken),
-        userPrincipal.getUserId());
+    String fcmToken = (request != null) ? request.fcmToken() : null;
+    authService.logout(extractToken(accessToken), userPrincipal.getUserId(), fcmToken);
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK)
     );
   }
 
   @DeleteMapping("/withdrawal")
-  @Operation(summary = "회원탈퇴", description = "회원탈퇴 시 SoftDelete 방향으로 처리되며, email, socialId, nickname 등이 탈퇴처리 됩니다. 본인이 작성한 글과 리뷰는 남아있습니다. (앱잼 이후 재가입은 90일 내에 불가능하게 만들어야 합니다.)")
+  @Operation(summary = "회원탈퇴", description = "회원탈퇴 시 SoftDelete 방향으로 처리되며, email, socialId, nickname 등이 탈퇴처리 됩니다. 진행 중인 거래가 있으면 탈퇴할 수 없습니다.")
   public ResponseEntity<ApiResponse<Void>> withdrawal(
       @RequestHeader("Authorization") String accessToken,
-      @AuthenticationPrincipal UserPrincipal userPrincipal
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @RequestBody(required = false) WithdrawRequest request
   ) {
-    authService.withdraw(extractToken(accessToken),
-        userPrincipal.getUserId());
+    String reason = (request != null) ? request.reason() : null;
+    authService.withdraw(extractToken(accessToken), userPrincipal.getUserId(), reason);
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK)
     );
