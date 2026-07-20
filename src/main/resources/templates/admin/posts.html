@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::section}, 'posts')}">
+<body>
+<section>
+  <h4 class="mb-4 fw-bold">분철글 관리</h4>
+
+  <!-- Status Filter -->
+  <div class="mb-3 d-flex gap-2 flex-wrap">
+    <a th:href="@{/admin/posts}" class="btn btn-sm"
+       th:classappend="${selectedStatus == null} ? 'btn-dark' : 'btn-outline-secondary'">전체</a>
+    <a th:each="s : ${statuses}"
+       th:href="@{/admin/posts(status=${s})}"
+       class="btn btn-sm"
+       th:classappend="${s == selectedStatus} ? 'btn-dark' : 'btn-outline-secondary'"
+       th:text="${s.sellerMessage}"></a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+        <tr>
+          <th class="ps-3">ID</th>
+          <th>제목</th>
+          <th>아티스트</th>
+          <th>모집자</th>
+          <th>상태</th>
+          <th>등록일</th>
+          <th class="pe-3">관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="post : ${posts.content}">
+          <td class="ps-3 text-muted small" th:text="${post.id}"></td>
+          <td th:text="${post.title}"></td>
+          <td class="small" th:text="${post.artist.name}"></td>
+          <td class="small" th:text="${post.leader.nickname}"></td>
+          <td>
+            <span class="badge bg-secondary" th:text="${post.status.sellerMessage}"></span>
+          </td>
+          <td class="small text-muted" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></td>
+          <td class="pe-3">
+            <form th:action="@{/admin/posts/{id}/delete(id=${post.id})}" method="post">
+              <button type="submit" class="btn btn-sm btn-outline-danger"
+                      onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${posts.content.empty}">
+          <td colspan="7" class="text-center text-muted py-4">분철글이 없습니다.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <nav th:if="${posts.totalPages > 1}" class="mt-3">
+    <ul class="pagination pagination-sm justify-content-center">
+      <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
+        <a class="page-link" th:href="@{/admin/posts(status=${selectedStatus}, page=${posts.number - 1})}">이전</a>
+      </li>
+      <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
+          th:classappend="${i == posts.number} ? 'active'">
+        <a class="page-link" th:href="@{/admin/posts(status=${selectedStatus}, page=${i})}" th:text="${i + 1}"></a>
+      </li>
+      <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
+        <a class="page-link" th:href="@{/admin/posts(status=${selectedStatus}, page=${posts.number + 1})}">다음</a>
+      </li>
+    </ul>
+  </nav>
+</section>
+</body>
+</html>

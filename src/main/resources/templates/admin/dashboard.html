@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::section}, 'dashboard')}">
+<body>
+<section>
+  <h4 class="mb-4 fw-bold">대시보드</h4>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small mb-1">총 유저 수</div>
+          <div class="fs-3 fw-bold" th:text="${userCount}">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small mb-1">분철글 수</div>
+          <div class="fs-3 fw-bold" th:text="${postCount}">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body">
+          <div class="text-muted small mb-1">총 주문 수</div>
+          <div class="fs-3 fw-bold" th:text="${orderCount}">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

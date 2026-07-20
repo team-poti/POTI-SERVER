@@ -63,6 +63,9 @@ public class User extends BaseSoftDeleteEntity {
   @JoinColumn(name = "favorite_artist_id", nullable = true)
   private Artist favoriteArtist;
 
+  @Column(name = "withdrawal_reason", length = 500)
+  private String withdrawalReason;
+
   @Builder
   private User(String socialId, SocialType socialType, String email, String nickname,
       String profileImageUrl, Artist favoriteArtist, Role role) {
@@ -107,12 +110,21 @@ public class User extends BaseSoftDeleteEntity {
     this.ratingAvg = avg;
   }
 
-  public void withdraw() {
+  public void suspend() {
+    this.status = UserStatus.SUSPENDED;
+  }
+
+  public void unsuspend() {
+    this.status = UserStatus.ACTIVE;
+  }
+
+  public void withdraw(String reason) {
     this.status = UserStatus.WITHDRAWN;
     this.deletedAt = LocalDateTime.now();
+    this.withdrawalReason = reason;
     this.nickname = "탈퇴한 사용자";
     this.email = null;
     this.profileImageUrl = null;
-    this.socialId = "deleted_" + this.id + "_" + UUID.randomUUID(); // 유니크 제약 회피
+    this.socialId = "deleted_" + this.id + "_" + UUID.randomUUID();
   }
 }

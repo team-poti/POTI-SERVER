@@ -155,7 +155,7 @@ public class AuthService {
   @Transactional
   public void withdraw(String accessToken, Long userId) {
     User user = userService.getUserById(userId);
-    user.withdraw(); // 유저 상태 변경, 개인 정보 마스킹, deletedAt 설정
+    user.withdraw(null);
 
     // 로그아웃 처리 (refresh token 삭제, access token 블랙리스트 추가)
     logout(accessToken, userId);
