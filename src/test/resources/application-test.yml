@@ -54,3 +54,10 @@ discord:
 
 security:
   encryption-key: 12345678901234567890123456789012
+
+admin:
+  username: test-admin
+  password: test-password
+
+gemini:
+  api-key: test-gemini-key
