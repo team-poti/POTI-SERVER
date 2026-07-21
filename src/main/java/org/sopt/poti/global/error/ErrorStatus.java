@@ -53,6 +53,7 @@ public enum ErrorStatus {
    * 404 Not Found
    */
   USER_NOT_FOUND(40400, HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
+  USER_SUSPENDED(40302, HttpStatus.FORBIDDEN, "이용 정지된 계정입니다."),
   ITEM_NOT_FOUND(40401, HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다."),
   ARTIST_NOT_FOUND(40402, HttpStatus.NOT_FOUND, "존재하지 않는 아티스트입니다."),
   NOT_FOUND_HANDLER(40403, HttpStatus.NOT_FOUND, "존재하지 않는 API 경로입니다."),

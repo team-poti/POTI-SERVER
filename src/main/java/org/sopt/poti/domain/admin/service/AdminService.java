@@ -2,6 +2,7 @@ package org.sopt.poti.domain.admin.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
@@ -24,6 +25,7 @@ public class AdminService {
   private final UserRepository userRepository;
   private final GroupBuyRepository groupBuyRepository;
   private final OrderRepository orderRepository;
+  private final RefreshTokenRepository refreshTokenRepository;
 
   public long countUsers() {
     return userRepository.count();
@@ -53,6 +55,7 @@ public class AdminService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
     user.suspend();
+    refreshTokenRepository.deleteById(userId);
   }
 
   @Transactional
@@ -67,6 +70,7 @@ public class AdminService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
     user.withdraw(null);
+    refreshTokenRepository.deleteById(userId);
   }
 
   @Transactional
