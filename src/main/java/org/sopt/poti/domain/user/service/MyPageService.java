@@ -37,8 +37,6 @@ public class MyPageService {
         ? user.getFavoriteArtist().getName()
         : null;
 
-    int pTotal = orderService.countByUser_Id(userId);
-
     List<OrderStatus> pInProgressStatuses = List.of(
         OrderStatus.WAIT_PAY,
         OrderStatus.WAIT_PAY_CHECK,
@@ -51,10 +49,7 @@ public class MyPageService {
     List<OrderStatus> pCompletedStatuses = List.of(OrderStatus.DELIVERED);
     int pCompleted = orderService.countByUser_IdAndStatusIn(userId, pCompletedStatuses);
 
-    MyPageResponse.Summary participation = new MyPageResponse.Summary(pTotal, pInProgress,
-        pCompleted);
-
-    int rTotal = groupBuyService.countByLeader_Id(userId);
+    MyPageResponse.Summary participation = new MyPageResponse.Summary(pInProgress, pCompleted);
 
     List<GroupBuyPostStatus> rInProgressStatuses = List.of(
         GroupBuyPostStatus.RECRUITING,
@@ -69,7 +64,7 @@ public class MyPageService {
     );
     int rCompleted = groupBuyService.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
 
-    MyPageResponse.Summary recruit = new MyPageResponse.Summary(rTotal, rInProgress, rCompleted);
+    MyPageResponse.Summary recruit = new MyPageResponse.Summary(rInProgress, rCompleted);
 
     return new MyPageResponse(
         user.getId(),
