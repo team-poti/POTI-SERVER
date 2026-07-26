@@ -178,7 +178,7 @@ public class AuthService {
   private void validateNoActiveTransaction(Long userId) {
     List<OrderStatus> activeOrderStatuses = List.of(
         OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK, OrderStatus.PAID,
-        OrderStatus.READY, OrderStatus.SHIPPED
+        OrderStatus.SHIPPED
     );
     if (orderService.countByUser_IdAndStatusIn(userId, activeOrderStatuses) > 0) {
       throw new BusinessException(ErrorStatus.ACTIVE_TRANSACTION_EXISTS);
