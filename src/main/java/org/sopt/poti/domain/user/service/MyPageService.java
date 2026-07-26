@@ -43,7 +43,6 @@ public class MyPageService {
         OrderStatus.WAIT_PAY,
         OrderStatus.WAIT_PAY_CHECK,
         OrderStatus.PAID,
-        OrderStatus.READY,
         OrderStatus.SHIPPED
     );
     int pInProgress = orderService.countByUser_IdAndStatusIn(userId, pInProgressStatuses);
