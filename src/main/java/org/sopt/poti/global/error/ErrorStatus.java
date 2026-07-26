@@ -80,8 +80,7 @@ public enum ErrorStatus {
   EXTERNAL_API_ERROR(50001, HttpStatus.INTERNAL_SERVER_ERROR, "외부 API 호출 중 오류가 발생했습니다."),
   ENCRYPTION_ERROR(50002, HttpStatus.INTERNAL_SERVER_ERROR, "데이터 암호화 중 오류가 발생했습니다."),
   DECRYPTION_ERROR(50003, HttpStatus.INTERNAL_SERVER_ERROR, "데이터 복호화 중 오류가 발생했습니다."),
-  AES_KEY_LENGTH(50004, HttpStatus.INTERNAL_SERVER_ERROR, "암호화 키는 32바이트여야 합니다."),
-  PROMPT_ERROR(50005, HttpStatus.INTERNAL_SERVER_ERROR, "프롬프트 파일을 읽을 수 없습니다.");
+  AES_KEY_LENGTH(50004, HttpStatus.INTERNAL_SERVER_ERROR, "암호화 키는 32바이트여야 합니다.");
 
 
   private final int code;
