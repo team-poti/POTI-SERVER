@@ -137,7 +137,7 @@ public class Order extends BaseTimeEntity {
 
   public void startDelivery() {
     if (this.status != OrderStatus.PAID) {
-      throw new BusinessException(ErrorStatus.ORDER_NOT_PAID_OR_READY);
+      throw new BusinessException(ErrorStatus.ORDER_NOT_PAID);
     }
     this.status = OrderStatus.SHIPPED;
   }
