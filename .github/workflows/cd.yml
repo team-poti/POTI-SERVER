@@ -50,6 +50,15 @@ jobs:
           source: "deploy.sh,docker-compose.yml"
           target: "/home/ubuntu/app"
 
+      - name: Firebase 크리덴셜 복원
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > ~/app/firebase-service-account.json
+
       - name: 배포 파일 검증
         uses: appleboy/ssh-action@master
         with:
@@ -92,6 +101,15 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           source: "deploy.sh,docker-compose.yml"
           target: "/home/ubuntu/app"
+
+      - name: Firebase 크리덴셜 복원
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > ~/app/firebase-service-account.json
 
       - name: 배포 파일 검증
         uses: appleboy/ssh-action@master
