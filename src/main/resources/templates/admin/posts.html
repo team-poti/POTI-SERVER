@@ -43,7 +43,9 @@
           <td class="pe-3">
             <form th:action="@{/admin/posts/{id}/delete(id=${post.id})}" method="post">
               <button type="submit" class="btn btn-sm btn-outline-danger"
-                      onclick="return confirm('삭제하시겠습니까?')">삭제</button>
+                      th:attr="onclick=${post.status.name() == 'RECRUITING'}
+                        ? 'return confirm(\'「' + ${post.title} + '」을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.\')'
+                        : 'return confirm(\'「' + ${post.title} + '」은 현재 진행 중인 분철글입니다.\n정말 삭제하시겠습니까?\')'">삭제</button>
             </form>
           </td>
         </tr>

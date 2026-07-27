@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.admin.service;
 
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
@@ -73,10 +74,19 @@ public class AdminService {
     refreshTokenRepository.deleteById(userId);
   }
 
+  private static final Set<GroupBuyPostStatus> UNDELETABLE_STATUSES = Set.of(
+      GroupBuyPostStatus.CLOSED,
+      GroupBuyPostStatus.PAYMENT_DONE,
+      GroupBuyPostStatus.SHIPPING
+  );
+
   @Transactional
   public void deletePost(Long postId) {
     GroupBuyPost post = groupBuyRepository.findById(postId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+    if (UNDELETABLE_STATUSES.contains(post.getStatus())) {
+      throw new BusinessException(ErrorStatus.POST_IN_PROGRESS);
+    }
     if (orderRepository.existsByGroupBuyPost_Id(postId)) {
       throw new BusinessException(ErrorStatus.POST_HAS_ORDERS);
     }
