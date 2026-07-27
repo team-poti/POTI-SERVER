@@ -2,10 +2,12 @@ package org.sopt.poti.domain.participation.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.fcmtoken.service.FcmNotificationService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.order.entity.OrderStatus;
+import org.sopt.poti.domain.order.repository.OrderRepository;
 import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.participation.dto.response.LeaderUserIdResponse;
 import org.sopt.poti.domain.participation.dto.response.ParticipationListResponse;
@@ -14,6 +16,7 @@ import org.sopt.poti.domain.participation.entity.ParticipationStatus;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,10 @@ public class ParticipationService {
 
   private final OrderService orderService;
   private final UserService userService;
+  private final OrderRepository orderRepository;
+
+  @Autowired(required = false)
+  private FcmNotificationService fcmNotificationService;
 
   public ParticipationSummaryResponse getMyParticipations(Long userId, ParticipationStatus status) {
 
@@ -69,6 +76,10 @@ public class ParticipationService {
     // 1 내 주문 배송완료 처리 (OrderStatus)
     order.completeDelivery();
 
+    if (fcmNotificationService != null) {
+      fcmNotificationService.notifyDeliveryComplete(order);
+    }
+
     // 2 해당 공구글의 모든 주문(OrderStatus)이 배송완료인지 검사
     Long postId = order.getGroupBuyPost().getId();
     Long leaderUserId = order.getGroupBuyPost().getLeader().getId();
@@ -81,6 +92,10 @@ public class ParticipationService {
       // 이미 DELIVERED면 종료처리
       if (post.getStatus() != GroupBuyPostStatus.DELIVERED) {
         post.completePostDelivery();
+        if (fcmNotificationService != null) {
+          List<Long> participantIds = orderRepository.findUserIdsByGroupBuyPost_Id(postId);
+          fcmNotificationService.notifyPostStatusChanged(post, participantIds);
+        }
       }
     }
 
