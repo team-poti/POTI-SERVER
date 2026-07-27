@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
   private static final String SECURITY_SCHEME_NAME = "authorization";
+  private static final String LOCAL_URL = "http://localhost:8080";
 
   @Value("${swagger.server-url}")
   private String serverUrl;
@@ -28,9 +30,15 @@ public class SwaggerConfig {
     currentServer.setUrl(serverUrl);
     currentServer.setDescription(serverDescription);
 
-    Server localServer = new Server();
-    localServer.setUrl("http://localhost:8080");
-    localServer.setDescription("로컬 서버 (Local)");
+    List<Server> servers = new ArrayList<>();
+    servers.add(currentServer);
+
+    if (!LOCAL_URL.equals(serverUrl)) {
+      Server localServer = new Server();
+      localServer.setUrl(LOCAL_URL);
+      localServer.setDescription("로컬 서버 (Local)");
+      servers.add(localServer);
+    }
 
     return new OpenAPI()
         .components(new Components()
@@ -44,6 +52,6 @@ public class SwaggerConfig {
             .title("POTI Server API")
             .description("POTI 서비스 API 명세서")
             .version("1.0.0"))
-        .servers(List.of(currentServer, localServer));
+        .servers(servers);
   }
 }

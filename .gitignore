@@ -59,3 +59,4 @@ application-real.yml
 application-local.yml
 .env
 secrets.properties
+src/main/resources/firebase-service-account.json
