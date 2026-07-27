@@ -77,6 +77,9 @@ public class AdminService {
   public void deletePost(Long postId) {
     GroupBuyPost post = groupBuyRepository.findById(postId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+    if (orderRepository.existsByGroupBuyPost_Id(postId)) {
+      throw new BusinessException(ErrorStatus.POST_HAS_ORDERS);
+    }
     groupBuyRepository.delete(post);
   }
 }

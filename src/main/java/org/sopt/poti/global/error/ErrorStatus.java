@@ -32,6 +32,7 @@ public enum ErrorStatus {
   ORDER_NOT_SHIPPED(40017, HttpStatus.BAD_REQUEST, "배송 시작 상태에서만 배송 완료로 변경할 수 있습니다."),
   POST_NOT_SHIPPING(40018, HttpStatus.BAD_REQUEST, "배송 중인 공구글만 배송 완료로 변경할 수 있습니다."),
   ACTIVE_TRANSACTION_EXISTS(40019, HttpStatus.BAD_REQUEST, "진행 중인 거래가 있어 탈퇴할 수 없습니다."),
+  POST_HAS_ORDERS(40020, HttpStatus.BAD_REQUEST, "주문이 존재하는 분철글은 삭제할 수 없습니다."),
 
   /**
    * 401 Unauthorized
