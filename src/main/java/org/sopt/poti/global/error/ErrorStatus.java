@@ -26,11 +26,12 @@ public enum ErrorStatus {
   ORDER_ITEM_INVALID_COUNT(40011, HttpStatus.BAD_REQUEST, "주문 수량은 1 이상이어야 합니다."),
   GROUP_BUY_OPTION_NOT_IN_POST(40012, HttpStatus.BAD_REQUEST, "해당 분철글에 속하지 않은 옵션이 포함되어 있습니다."),
   DUPLICATE_ORDER_OPTION(40013, HttpStatus.BAD_REQUEST, "중복된 옵션은 한 주문에서 선택할 수 없습니다."),
-  ORDER_NOT_PAID_OR_READY(40014, HttpStatus.BAD_REQUEST, "입금 완료 상태 또는 배송 대기 상태에서만 배송 중 처리가 가능합니다."),
+  ORDER_NOT_PAID(40014, HttpStatus.BAD_REQUEST, "입금 완료 상태에서만 배송 중 처리가 가능합니다."),
   ORDER_EXISTS_SHIPPINGS(40015, HttpStatus.BAD_REQUEST, "이미 배송처리된 주문입니다."),
   GROUP_BUY_POST_INVALID_INCREASE_COUNT(40016, HttpStatus.BAD_REQUEST, "증가 수량은 1 이상이어야 합니다."),
   ORDER_NOT_SHIPPED(40017, HttpStatus.BAD_REQUEST, "배송 시작 상태에서만 배송 완료로 변경할 수 있습니다."),
   POST_NOT_SHIPPING(40018, HttpStatus.BAD_REQUEST, "배송 중인 공구글만 배송 완료로 변경할 수 있습니다."),
+  ACTIVE_TRANSACTION_EXISTS(40019, HttpStatus.BAD_REQUEST, "진행 중인 거래가 있어 탈퇴할 수 없습니다."),
 
   /**
    * 401 Unauthorized
@@ -82,6 +83,7 @@ public enum ErrorStatus {
   DECRYPTION_ERROR(50003, HttpStatus.INTERNAL_SERVER_ERROR, "데이터 복호화 중 오류가 발생했습니다."),
   AES_KEY_LENGTH(50004, HttpStatus.INTERNAL_SERVER_ERROR, "암호화 키는 32바이트여야 합니다."),
   PROMPT_ERROR(50005, HttpStatus.INTERNAL_SERVER_ERROR, "AI 프롬프트 처리 중 오류가 발생했습니다.");
+
 
   private final int code;
   private final HttpStatus httpStatus;

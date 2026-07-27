@@ -113,8 +113,7 @@ public class OrderService {
 
     long notShippedCount = orderRepository.countByGroupBuyPostIdAndStatusIn(
         groupBuyPost.getId(),
-        List.of(OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK, OrderStatus.PAID,
-            OrderStatus.READY)
+        List.of(OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK, OrderStatus.PAID)
     );
 
     if (notShippedCount == 0) { // 모두 배송 시작(SHIPPED) 이상
@@ -152,7 +151,7 @@ public class OrderService {
 
     String message = groupBuyPost.getStatus().getSellerMessage();
     if (groupBuyPost.getStatus().equals(GroupBuyPostStatus.CLOSED)
-        && allOrdersWaitingPayCheck(orders)) {
+        && hasWaitPayCheckWithoutWaitPay(orders)) {
       message = "입금 확인을 기다리는 참여자가 있어요";
     }
 
@@ -173,10 +172,13 @@ public class OrderService {
         .build();
   }
 
-  // 분철글이 모집완료된 상태인데, 입금 확인 대기중인 주문이 있으면
-  private boolean allOrdersWaitingPayCheck(List<Order> orders) {
-    return !orders.isEmpty() && orders.stream()
-        .allMatch(order -> order.getStatus().equals(OrderStatus.WAIT_PAY_CHECK));
+  // WAIT_PAY 주문이 없고 WAIT_PAY_CHECK 주문이 하나라도 있으면 (모두 입금했고 일부 확인 대기 중)
+  private boolean hasWaitPayCheckWithoutWaitPay(List<Order> orders) {
+    boolean hasWaitPay = orders.stream()
+        .anyMatch(order -> order.getStatus() == OrderStatus.WAIT_PAY);
+    boolean hasWaitPayCheck = orders.stream()
+        .anyMatch(order -> order.getStatus() == OrderStatus.WAIT_PAY_CHECK);
+    return !hasWaitPay && hasWaitPayCheck;
   }
 
   // 단일 주문을 응답 DTO로 변환하는 메인 로직

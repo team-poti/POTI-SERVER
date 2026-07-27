@@ -113,12 +113,9 @@ public class ParticipationService {
 
     return switch (orderStatus) {
       case WAIT_PAY, WAIT_PAY_CHECK -> GroupBuyPostStatus.CLOSED.name();
-      case PAID, READY -> GroupBuyPostStatus.PAYMENT_DONE.name();
+      case PAID -> GroupBuyPostStatus.PAYMENT_DONE.name();
       case SHIPPED -> GroupBuyPostStatus.SHIPPING.name();
       case DELIVERED -> GroupBuyPostStatus.DELIVERED.name();
-
-      // 데이터가 꼬여 RECRUITING이 내려오는 경우, RECRUITING 그대로 반환
-      case RECRUITING -> GroupBuyPostStatus.RECRUITING.name();
     };
   }
 

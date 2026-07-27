@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.auth.service;
 
 import feign.FeignException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,11 @@ import org.sopt.poti.domain.auth.dto.response.AuthResponse;
 import org.sopt.poti.domain.auth.dto.response.TokenReissueResponse;
 import org.sopt.poti.domain.auth.entity.RefreshToken;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
+import org.sopt.poti.domain.fcmtoken.service.FcmTokenService;
+import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
+import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
+import org.sopt.poti.domain.order.entity.OrderStatus;
+import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.user.entity.SocialType;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.entity.UserStatus;
@@ -35,7 +41,10 @@ public class AuthService {
   private final JwtTokenProvider jwtTokenProvider;
   private final KakaoFeignClient kakaoFeignClient;
   private final RefreshTokenRepository refreshTokenRepository;
-  private final RedisTemplate<String, String> redisTemplate; // RedisTemplate 주입
+  private final RedisTemplate<String, String> redisTemplate;
+  private final FcmTokenService fcmTokenService;
+  private final OrderService orderService;
+  private final GroupBuyRepository groupBuyRepository;
 
   private final static String DEFAULT_PROFILE_IMAGE = "https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/users/img-basic-profile.png";
 
@@ -146,21 +155,44 @@ public class AuthService {
   }
 
   @Transactional
-  public void logout(String accessToken, Long userId) {
+  public void logout(String accessToken, Long userId, String fcmToken) {
     Long expiration = jwtTokenProvider.getExpiration(accessToken);
     if (expiration > 0) {
       redisTemplate.opsForValue().set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
     }
     refreshTokenRepository.deleteById(userId);
+    if (fcmToken != null && !fcmToken.isBlank()) {
+      fcmTokenService.deleteByToken(userId, fcmToken);
+    }
   }
 
   @Transactional
-  public void withdraw(String accessToken, Long userId) {
-    User user = userService.getUserById(userId);
-    user.withdraw(null);
+  public void withdraw(String accessToken, Long userId, String reason) {
+    validateNoActiveTransaction(userId);
 
-    // 로그아웃 처리 (refresh token 삭제, access token 블랙리스트 추가)
-    logout(accessToken, userId);
+    User user = userService.getUserById(userId);
+    user.withdraw(reason);
+
+    fcmTokenService.deleteAllByUserId(userId);
+    logout(accessToken, userId, null);
+  }
+
+  private void validateNoActiveTransaction(Long userId) {
+    List<OrderStatus> activeOrderStatuses = List.of(
+        OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK, OrderStatus.PAID,
+        OrderStatus.SHIPPED
+    );
+    if (orderService.countByUser_IdAndStatusIn(userId, activeOrderStatuses) > 0) {
+      throw new BusinessException(ErrorStatus.ACTIVE_TRANSACTION_EXISTS);
+    }
+
+    List<GroupBuyPostStatus> activePostStatuses = List.of(
+        GroupBuyPostStatus.RECRUITING, GroupBuyPostStatus.CLOSED,
+        GroupBuyPostStatus.PAYMENT_DONE, GroupBuyPostStatus.SHIPPING
+    );
+    if (groupBuyRepository.countByLeader_IdAndStatusIn(userId, activePostStatuses) > 0) {
+      throw new BusinessException(ErrorStatus.ACTIVE_TRANSACTION_EXISTS);
+    }
   }
 
   private KakaoUserResponse getKakaoUserResponse(String kakaoAccessToken) {
