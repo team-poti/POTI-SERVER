@@ -55,6 +55,9 @@ public class AdminService {
   public void suspendUser(Long userId) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+    if (user.getStatus() == UserStatus.WITHDRAWN) {
+      throw new BusinessException(ErrorStatus.USER_NOT_FOUND);
+    }
     user.suspend();
     refreshTokenRepository.deleteById(userId);
   }
@@ -63,6 +66,9 @@ public class AdminService {
   public void unsuspendUser(Long userId) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+    if (user.getStatus() == UserStatus.WITHDRAWN) {
+      throw new BusinessException(ErrorStatus.USER_NOT_FOUND);
+    }
     user.unsuspend();
   }
 
