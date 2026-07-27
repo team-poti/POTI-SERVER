@@ -58,6 +58,9 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > ~/app/firebase-service-account.json
+            chmod 600 ~/app/firebase-service-account.json
+            test -s ~/app/firebase-service-account.json || { echo "Firebase 크리덴셜 파일이 비어 있습니다"; exit 1; }
+            python3 -c "import json,sys; json.load(open('$HOME/app/firebase-service-account.json'))" || { echo "Firebase 크리덴셜 JSON 형식이 잘못됐습니다"; exit 1; }
 
       - name: 배포 파일 검증
         uses: appleboy/ssh-action@master
@@ -110,6 +113,9 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > ~/app/firebase-service-account.json
+            chmod 600 ~/app/firebase-service-account.json
+            test -s ~/app/firebase-service-account.json || { echo "Firebase 크리덴셜 파일이 비어 있습니다"; exit 1; }
+            python3 -c "import json,sys; json.load(open('$HOME/app/firebase-service-account.json'))" || { echo "Firebase 크리덴셜 JSON 형식이 잘못됐습니다"; exit 1; }
 
       - name: 배포 파일 검증
         uses: appleboy/ssh-action@master
