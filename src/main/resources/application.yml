@@ -105,6 +105,10 @@ springdoc:
     disable-swagger-default-url: true # 기본 petstore URL 끄기
     display-request-duration: true # 요청 소요 시간 표시
 
+swagger:
+  server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
+  server-description: ${SWAGGER_SERVER_DESC:로컬 서버 (Local)}
+
 discord:
   webhook-url: ${DISCORD_WEBHOOK}
 
