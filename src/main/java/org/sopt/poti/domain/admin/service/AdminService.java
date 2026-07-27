@@ -70,6 +70,9 @@ public class AdminService {
   public void forceWithdrawUser(Long userId) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+    if (user.getStatus() == UserStatus.WITHDRAWN) {
+      throw new BusinessException(ErrorStatus.USER_NOT_FOUND);
+    }
     user.withdraw(null);
     refreshTokenRepository.deleteById(userId);
   }

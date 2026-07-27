@@ -3,6 +3,7 @@ package org.sopt.poti.domain.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.admin.service.AdminService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
+import org.sopt.poti.global.error.BusinessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
@@ -44,20 +46,32 @@ public class AdminController {
   }
 
   @PostMapping("/users/{userId}/suspend")
-  public String suspend(@PathVariable Long userId) {
-    adminService.suspendUser(userId);
+  public String suspend(@PathVariable Long userId, RedirectAttributes ra) {
+    try {
+      adminService.suspendUser(userId);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
     return "redirect:/admin/users";
   }
 
   @PostMapping("/users/{userId}/unsuspend")
-  public String unsuspend(@PathVariable Long userId) {
-    adminService.unsuspendUser(userId);
+  public String unsuspend(@PathVariable Long userId, RedirectAttributes ra) {
+    try {
+      adminService.unsuspendUser(userId);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
     return "redirect:/admin/users";
   }
 
   @PostMapping("/users/{userId}/withdraw")
-  public String forceWithdraw(@PathVariable Long userId) {
-    adminService.forceWithdrawUser(userId);
+  public String forceWithdraw(@PathVariable Long userId, RedirectAttributes ra) {
+    try {
+      adminService.forceWithdrawUser(userId);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
     return "redirect:/admin/users";
   }
 
@@ -75,8 +89,12 @@ public class AdminController {
   }
 
   @PostMapping("/posts/{postId}/delete")
-  public String deletePost(@PathVariable Long postId) {
-    adminService.deletePost(postId);
+  public String deletePost(@PathVariable Long postId, RedirectAttributes ra) {
+    try {
+      adminService.deletePost(postId);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
     return "redirect:/admin/posts";
   }
 }

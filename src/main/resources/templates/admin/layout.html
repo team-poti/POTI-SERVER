@@ -42,6 +42,11 @@
     </div>
   </div>
   <div class="main-content">
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <span th:text="${errorMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     <th:block th:replace="${content}"></th:block>
   </div>
 </div>

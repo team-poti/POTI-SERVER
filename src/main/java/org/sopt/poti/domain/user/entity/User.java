@@ -111,10 +111,16 @@ public class User extends BaseSoftDeleteEntity {
   }
 
   public void suspend() {
+    if (this.status == UserStatus.WITHDRAWN) {
+      throw new IllegalStateException("탈퇴한 계정은 정지할 수 없습니다.");
+    }
     this.status = UserStatus.SUSPENDED;
   }
 
   public void unsuspend() {
+    if (this.status == UserStatus.WITHDRAWN) {
+      throw new IllegalStateException("탈퇴한 계정은 활성화할 수 없습니다.");
+    }
     this.status = UserStatus.ACTIVE;
   }
 
