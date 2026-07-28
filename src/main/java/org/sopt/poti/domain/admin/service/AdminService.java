@@ -14,6 +14,7 @@ import org.sopt.poti.domain.user.entity.UserStatus;
 import org.sopt.poti.domain.user.repository.UserRepository;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -102,6 +103,11 @@ public class AdminService {
     if (orderRepository.existsByGroupBuyPost_Id(postId)) {
       throw new BusinessException(ErrorStatus.POST_HAS_ORDERS);
     }
-    groupBuyRepository.delete(post);
+    try {
+      groupBuyRepository.delete(post);
+      groupBuyRepository.flush();
+    } catch (DataIntegrityViolationException e) {
+      throw new BusinessException(ErrorStatus.POST_HAS_ORDERS);
+    }
   }
 }

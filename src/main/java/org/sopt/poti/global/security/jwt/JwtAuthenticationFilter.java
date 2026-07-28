@@ -8,6 +8,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.domain.user.entity.User;
+import org.sopt.poti.domain.user.entity.UserStatus;
 import org.sopt.poti.domain.user.repository.UserRepository;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
@@ -40,6 +41,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       // User 엔티티 조회 (UserPrincipal 생성을 위해 필요)
       User user = userRepository.findById(userId)
           .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+
+      if (user.getStatus() == UserStatus.SUSPENDED) {
+        throw new BusinessException(ErrorStatus.USER_SUSPENDED);
+      }
 
       UserPrincipal userPrincipal = UserPrincipal.create(user);
       UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
