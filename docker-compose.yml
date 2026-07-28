@@ -12,6 +12,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     env_file:
       - .env  # DB 비밀번호 등은 여기서 가져옴
+    volumes:
+      - ./firebase-service-account.json:/app/resources/firebase-service-account.json:ro
     networks:
       - poti-net
     restart: always
@@ -27,6 +29,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     env_file:
       - .env
+    volumes:
+      - ./firebase-service-account.json:/app/resources/firebase-service-account.json:ro
     networks:
       - poti-net
     restart: always
