@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
+import org.sopt.poti.domain.fcmtoken.service.FcmTokenService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
@@ -13,6 +14,7 @@ import org.sopt.poti.domain.user.entity.UserStatus;
 import org.sopt.poti.domain.user.repository.UserRepository;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class AdminService {
   private final GroupBuyRepository groupBuyRepository;
   private final OrderRepository orderRepository;
   private final RefreshTokenRepository refreshTokenRepository;
+  private final FcmTokenService fcmTokenService;
 
   public long countUsers() {
     return userRepository.count();
@@ -55,6 +58,9 @@ public class AdminService {
   public void suspendUser(Long userId) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+    if (user.getStatus() == UserStatus.WITHDRAWN) {
+      throw new BusinessException(ErrorStatus.USER_NOT_FOUND);
+    }
     user.suspend();
     refreshTokenRepository.deleteById(userId);
   }
@@ -63,6 +69,9 @@ public class AdminService {
   public void unsuspendUser(Long userId) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+    if (user.getStatus() == UserStatus.WITHDRAWN) {
+      throw new BusinessException(ErrorStatus.USER_NOT_FOUND);
+    }
     user.unsuspend();
   }
 
@@ -75,6 +84,7 @@ public class AdminService {
     }
     user.withdraw(null);
     refreshTokenRepository.deleteById(userId);
+    fcmTokenService.deleteAllByUserId(userId);
   }
 
   private static final Set<GroupBuyPostStatus> UNDELETABLE_STATUSES = Set.of(
@@ -93,6 +103,11 @@ public class AdminService {
     if (orderRepository.existsByGroupBuyPost_Id(postId)) {
       throw new BusinessException(ErrorStatus.POST_HAS_ORDERS);
     }
-    groupBuyRepository.delete(post);
+    try {
+      groupBuyRepository.delete(post);
+      groupBuyRepository.flush();
+    } catch (DataIntegrityViolationException e) {
+      throw new BusinessException(ErrorStatus.POST_HAS_ORDERS);
+    }
   }
 }
