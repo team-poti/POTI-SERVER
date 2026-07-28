@@ -3,78 +3,67 @@
       th:replace="~{admin/layout :: layout(~{::section}, 'dashboard')}">
 <body>
 <section>
-  <div class="row g-4 mb-4">
-    <!-- 총 유저 수 -->
+  <div class="row g-3 mb-3">
     <div class="col-md-4">
-      <div class="card border-0 shadow-sm h-100" style="border-radius:14px; overflow:hidden;">
-        <div class="card-body p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <span class="text-muted fw-semibold" style="font-size:0.82rem;">총 유저 수</span>
-            <div class="rounded-3 d-flex align-items-center justify-content-center"
-                 style="width:40px;height:40px;background:#ede9fe;">
-              <i class="bi bi-people-fill" style="color:#7c3aed;font-size:1.1rem;"></i>
+      <div class="stat-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="stat-label">총 유저 수</span>
+            <div class="stat-icon" style="background:#ede9fe;">
+              <i class="bi bi-people-fill" style="color:#7c3aed;"></i>
             </div>
           </div>
-          <div class="fw-bold" style="font-size:2rem;color:#0f172a;" th:text="${userCount}">0</div>
-          <div class="text-muted mt-1" style="font-size:0.78rem;">가입된 전체 유저</div>
+          <div class="stat-value" th:text="${userCount}">0</div>
+          <div class="stat-desc">가입된 전체 유저</div>
         </div>
-        <div style="height:4px;background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div>
+        <div class="stat-bar" style="background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div>
       </div>
     </div>
 
     <!-- 분철글 수 -->
     <div class="col-md-4">
-      <div class="card border-0 shadow-sm h-100" style="border-radius:14px; overflow:hidden;">
-        <div class="card-body p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <span class="text-muted fw-semibold" style="font-size:0.82rem;">분철글 수</span>
-            <div class="rounded-3 d-flex align-items-center justify-content-center"
-                 style="width:40px;height:40px;background:#dbeafe;">
-              <i class="bi bi-card-list" style="color:#1d4ed8;font-size:1.1rem;"></i>
+      <div class="stat-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="stat-label">분철글 수</span>
+            <div class="stat-icon" style="background:#dbeafe;">
+              <i class="bi bi-card-list" style="color:#1d4ed8;"></i>
             </div>
           </div>
-          <div class="fw-bold" style="font-size:2rem;color:#0f172a;" th:text="${postCount}">0</div>
-          <div class="text-muted mt-1" style="font-size:0.78rem;">등록된 전체 분철글</div>
+          <div class="stat-value" th:text="${postCount}">0</div>
+          <div class="stat-desc">등록된 전체 분철글</div>
         </div>
-        <div style="height:4px;background:linear-gradient(90deg,#1d4ed8,#60a5fa);"></div>
+        <div class="stat-bar" style="background:linear-gradient(90deg,#1d4ed8,#60a5fa);"></div>
       </div>
     </div>
 
     <!-- 총 주문 수 -->
     <div class="col-md-4">
-      <div class="card border-0 shadow-sm h-100" style="border-radius:14px; overflow:hidden;">
-        <div class="card-body p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <span class="text-muted fw-semibold" style="font-size:0.82rem;">총 주문 수</span>
-            <div class="rounded-3 d-flex align-items-center justify-content-center"
-                 style="width:40px;height:40px;background:#dcfce7;">
-              <i class="bi bi-bag-check-fill" style="color:#15803d;font-size:1.1rem;"></i>
+      <div class="stat-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="stat-label">총 주문 수</span>
+            <div class="stat-icon" style="background:#dcfce7;">
+              <i class="bi bi-bag-check-fill" style="color:#15803d;"></i>
             </div>
           </div>
-          <div class="fw-bold" style="font-size:2rem;color:#0f172a;" th:text="${orderCount}">0</div>
-          <div class="text-muted mt-1" style="font-size:0.78rem;">전체 주문 건수</div>
+          <div class="stat-value" th:text="${orderCount}">0</div>
+          <div class="stat-desc">전체 주문 건수</div>
         </div>
-        <div style="height:4px;background:linear-gradient(90deg,#15803d,#4ade80);"></div>
+        <div class="stat-bar" style="background:linear-gradient(90deg,#15803d,#4ade80);"></div>
       </div>
     </div>
   </div>
 
-  <!-- 바로가기 -->
-  <div class="card border-0 shadow-sm" style="border-radius:14px;">
-    <div class="card-body p-4">
-      <div class="fw-semibold mb-3" style="font-size:0.9rem;color:#374151;">빠른 이동</div>
-      <div class="d-flex gap-3">
-        <a th:href="@{/admin/users}"
-           class="btn btn-sm d-flex align-items-center gap-2"
-           style="background:#f8fafc;border:1px solid #e2e8f0;color:#374151;border-radius:8px;padding:8px 16px;font-size:0.85rem;font-weight:500;">
-          <i class="bi bi-people-fill" style="color:#7c3aed;"></i> 유저 관리
-        </a>
-        <a th:href="@{/admin/posts}"
-           class="btn btn-sm d-flex align-items-center gap-2"
-           style="background:#f8fafc;border:1px solid #e2e8f0;color:#374151;border-radius:8px;padding:8px 16px;font-size:0.85rem;font-weight:500;">
-          <i class="bi bi-card-list" style="color:#1d4ed8;"></i> 분철글 관리
-        </a>
-      </div>
+  <div class="quick-card">
+    <div class="section-title">빠른 이동</div>
+    <div class="d-flex gap-2">
+      <a th:href="@{/admin/users}" class="quick-link">
+        <i class="bi bi-people-fill" style="color:#7c3aed;"></i> 유저 관리
+      </a>
+      <a th:href="@{/admin/posts}" class="quick-link">
+        <i class="bi bi-card-list" style="color:#1d4ed8;"></i> 분철글 관리
+      </a>
     </div>
   </div>
 </section>
