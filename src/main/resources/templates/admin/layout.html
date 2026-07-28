@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POTI 어드민</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .sidebar { width: 220px; min-height: 100vh; background: #212529; }
+    .sidebar a { color: #adb5bd; text-decoration: none; padding: 10px 20px; display: block; }
+    .sidebar a:hover, .sidebar a.active { color: #fff; background: #343a40; }
+    .sidebar .brand { color: #fff; font-size: 1.2rem; font-weight: bold; padding: 20px; border-bottom: 1px solid #343a40; }
+    .main-content { flex: 1; padding: 30px; }
+    .stat-card { border-radius: 12px; border: none; }
+  </style>
+</head>
+<body>
+
+<th:block th:fragment="layout(content, currentPage)">
+<div class="d-flex">
+  <div class="sidebar">
+    <div class="brand">🍵 POTI Admin</div>
+    <nav class="mt-2">
+      <a th:href="@{/admin/dashboard}" th:classappend="${currentPage == 'dashboard'} ? 'active'">
+        <i class="bi bi-speedometer2 me-2"></i>대시보드
+      </a>
+      <a th:href="@{/admin/users}" th:classappend="${currentPage == 'users'} ? 'active'">
+        <i class="bi bi-people me-2"></i>유저 관리
+      </a>
+      <a th:href="@{/admin/posts}" th:classappend="${currentPage == 'posts'} ? 'active'">
+        <i class="bi bi-card-list me-2"></i>분철글 관리
+      </a>
+    </nav>
+    <div style="position: absolute; bottom: 20px; width: 220px;">
+      <form th:action="@{/admin/logout}" method="post">
+        <button type="submit" class="btn btn-link w-100 text-start" style="color: #adb5bd; padding: 10px 20px;">
+          <i class="bi bi-box-arrow-left me-2"></i>로그아웃
+        </button>
+      </form>
+    </div>
+  </div>
+  <div class="main-content">
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <span th:text="${errorMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <th:block th:replace="${content}"></th:block>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</th:block>
+
+</body>
+</html>

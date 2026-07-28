@@ -48,4 +48,9 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
 
   // 특정 게시글에서, 주어진 상태 목록에 해당하는 주문이 몇 개인지 조회
   long countByGroupBuyPostIdAndStatusIn(Long postId, Collection<OrderStatus> statuses);
+
+  boolean existsByGroupBuyPost_Id(Long postId);
+
+  @Query("SELECT o.user.id FROM Order o WHERE o.groupBuyPost.id = :postId")
+  List<Long> findUserIdsByGroupBuyPost_Id(@Param("postId") Long postId);
 }

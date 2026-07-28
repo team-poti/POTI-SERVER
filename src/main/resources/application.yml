@@ -109,6 +109,10 @@ springdoc:
 firebase:
   credentials-path: classpath:firebase-service-account.json
 
+admin:
+  username: ${ADMIN_USERNAME}
+  password: ${ADMIN_PASSWORD}
+
 gemini:
   api-key: ${GEMINI_KEY}
 

@@ -32,6 +32,8 @@ public enum ErrorStatus {
   ORDER_NOT_SHIPPED(40017, HttpStatus.BAD_REQUEST, "배송 시작 상태에서만 배송 완료로 변경할 수 있습니다."),
   POST_NOT_SHIPPING(40018, HttpStatus.BAD_REQUEST, "배송 중인 공구글만 배송 완료로 변경할 수 있습니다."),
   ACTIVE_TRANSACTION_EXISTS(40019, HttpStatus.BAD_REQUEST, "진행 중인 거래가 있어 탈퇴할 수 없습니다."),
+  POST_HAS_ORDERS(40020, HttpStatus.BAD_REQUEST, "주문이 존재하는 분철글은 삭제할 수 없습니다."),
+  POST_IN_PROGRESS(40021, HttpStatus.BAD_REQUEST, "진행 중인 분철글은 삭제할 수 없습니다."),
 
   /**
    * 401 Unauthorized
@@ -54,6 +56,7 @@ public enum ErrorStatus {
    * 404 Not Found
    */
   USER_NOT_FOUND(40400, HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
+  USER_SUSPENDED(40302, HttpStatus.FORBIDDEN, "이용 정지된 계정입니다."),
   ITEM_NOT_FOUND(40401, HttpStatus.NOT_FOUND, "존재하지 않는 상품입니다."),
   ARTIST_NOT_FOUND(40402, HttpStatus.NOT_FOUND, "존재하지 않는 아티스트입니다."),
   NOT_FOUND_HANDLER(40403, HttpStatus.NOT_FOUND, "존재하지 않는 API 경로입니다."),

@@ -110,6 +110,20 @@ public class User extends BaseSoftDeleteEntity {
     this.ratingAvg = avg;
   }
 
+  public void suspend() {
+    if (this.status == UserStatus.WITHDRAWN) {
+      throw new IllegalStateException("탈퇴한 계정은 정지할 수 없습니다.");
+    }
+    this.status = UserStatus.SUSPENDED;
+  }
+
+  public void unsuspend() {
+    if (this.status == UserStatus.WITHDRAWN) {
+      throw new IllegalStateException("탈퇴한 계정은 활성화할 수 없습니다.");
+    }
+    this.status = UserStatus.ACTIVE;
+  }
+
   public void withdraw(String reason) {
     this.status = UserStatus.WITHDRAWN;
     this.deletedAt = LocalDateTime.now();
@@ -117,6 +131,6 @@ public class User extends BaseSoftDeleteEntity {
     this.nickname = "탈퇴한 사용자";
     this.email = null;
     this.profileImageUrl = null;
-    this.socialId = "deleted_" + this.id + "_" + UUID.randomUUID(); // 유니크 제약 회피
+    this.socialId = "deleted_" + this.id + "_" + UUID.randomUUID();
   }
 }

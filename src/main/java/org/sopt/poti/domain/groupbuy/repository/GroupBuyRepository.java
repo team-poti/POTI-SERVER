@@ -2,6 +2,8 @@ package org.sopt.poti.domain.groupbuy.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,4 +30,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuyPost, Long>,
       List<GroupBuyPostStatus> statuses);
 
   boolean existsByOrderNumber(String orderNumber);
+
+  Page<GroupBuyPost> findByStatus(GroupBuyPostStatus status, Pageable pageable);
 }
