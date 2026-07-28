@@ -3,6 +3,7 @@ package org.sopt.poti.domain.fcmtoken.service;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.MessagingErrorCode;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +71,9 @@ public class FcmNotificationService {
           .build();
       FirebaseMessaging.getInstance().send(message);
     } catch (FirebaseMessagingException e) {
+      if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+        fcmTokenRepository.deleteByToken(token);
+      }
       log.warn("FCM 발송 실패: token={}, error={}", token, e.getMessage());
     }
   }
