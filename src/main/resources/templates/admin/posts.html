@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{admin/layout :: layout(~{::section}, 'posts')}">
-<head>
+<body>
+<section>
   <style>
     .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
     .filter-tab {
@@ -38,20 +39,17 @@
     .post-table tbody tr:hover { background: #f8fafc; }
     .post-table tbody tr:last-child td { border-bottom: none; }
 
-    .post-title { font-weight: 600; color: #0f172a; max-width: 260px; }
-    .post-title small { display: block; font-weight: 400; color: #94a3b8; font-size: 0.75rem; margin-top: 2px; }
-
     .badge-status {
       font-size: 0.72rem;
       font-weight: 600;
       padding: 4px 10px;
       border-radius: 20px;
     }
-    .s-recruiting  { background: #dbeafe; color: #1d4ed8; }
-    .s-closed      { background: #fef9c3; color: #854d0e; }
+    .s-recruiting   { background: #dbeafe; color: #1d4ed8; }
+    .s-closed       { background: #fef9c3; color: #854d0e; }
     .s-payment_done { background: #dcfce7; color: #15803d; }
-    .s-shipping    { background: #ede9fe; color: #6d28d9; }
-    .s-delivered   { background: #f1f5f9; color: #475569; }
+    .s-shipping     { background: #ede9fe; color: #6d28d9; }
+    .s-delivered    { background: #f1f5f9; color: #475569; }
 
     .btn-delete {
       font-size: 0.78rem;
@@ -71,10 +69,9 @@
 
     .page-link { font-size: 0.82rem; color: #6366f1; }
     .page-item.active .page-link { background: #6366f1; border-color: #6366f1; }
+    .page-item.disabled .page-link { pointer-events: none; }
   </style>
-</head>
-<body>
-<section>
+
   <!-- 상태 필터 -->
   <div class="filter-tabs">
     <a th:href="@{/admin/posts}"
@@ -104,17 +101,9 @@
         <tbody>
         <tr th:each="post : ${posts.content}">
           <td class="text-muted" style="font-size:0.78rem;" th:text="${post.id}"></td>
-          <td>
-            <div class="post-title">
-              <span th:text="${post.title}"></span>
-            </div>
-          </td>
-          <td>
-            <span class="text-muted" style="font-size:0.82rem;" th:text="${post.artist.name}"></span>
-          </td>
-          <td>
-            <span style="font-size:0.82rem;" th:text="${post.leader.nickname}"></span>
-          </td>
+          <td><span class="fw-semibold" th:text="${post.title}"></span></td>
+          <td class="text-muted" style="font-size:0.82rem;" th:text="${post.artist.name}"></td>
+          <td style="font-size:0.82rem;" th:text="${post.leader.nickname}"></td>
           <td>
             <span class="badge-status"
                   th:classappend="'s-' + ${post.status.name().toLowerCase()}"
@@ -149,7 +138,7 @@
     <ul class="pagination pagination-sm justify-content-center mb-0">
       <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
         <a class="page-link rounded-start-3"
-           th:href="@{/admin/posts(status=${selectedStatus}, page=${posts.number - 1})}">
+           th:href="${posts.first} ? '#' : @{/admin/posts(status=${selectedStatus}, page=${posts.number - 1})}">
           <i class="bi bi-chevron-left" style="font-size:0.7rem;"></i>
         </a>
       </li>
@@ -162,26 +151,25 @@
       </li>
       <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
         <a class="page-link rounded-end-3"
-           th:href="@{/admin/posts(status=${selectedStatus}, page=${posts.number + 1})}">
+           th:href="${posts.last} ? '#' : @{/admin/posts(status=${selectedStatus}, page=${posts.number + 1})}">
           <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
         </a>
       </li>
     </ul>
   </nav>
-</section>
 
-<script>
-  function confirmDelete(btn) {
-    const title = btn.dataset.title;
-    const status = btn.dataset.status;
-    const isRecruiting = status === 'RECRUITING';
-    const msg = isRecruiting
-      ? `「${title}」을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`
-      : `「${title}」은 현재 진행 중인 분철글입니다.\n정말 삭제하시겠습니까?`;
-    if (confirm(msg)) {
-      btn.closest('form').querySelector('.confirm-submit').click();
+  <script>
+    function confirmDelete(btn) {
+      const title = btn.dataset.title;
+      const status = btn.dataset.status;
+      const msg = status === 'RECRUITING'
+        ? `「${title}」을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`
+        : `「${title}」은 현재 진행 중인 분철글입니다.\n정말 삭제하시겠습니까?`;
+      if (confirm(msg)) {
+        btn.closest('form').querySelector('.confirm-submit').click();
+      }
     }
-  }
-</script>
+  </script>
+</section>
 </body>
 </html>

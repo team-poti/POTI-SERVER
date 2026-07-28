@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{admin/layout :: layout(~{::section}, 'users')}">
-<head>
+<body>
+<section>
   <style>
     .user-table th {
       font-size: 0.75rem;
@@ -29,7 +30,7 @@
       padding: 4px 10px;
       border-radius: 20px;
     }
-    .badge-active   { background: #dcfce7; color: #15803d; }
+    .badge-active    { background: #dcfce7; color: #15803d; }
     .badge-suspended { background: #fee2e2; color: #b91c1c; }
     .badge-withdrawn { background: #f1f5f9; color: #94a3b8; }
 
@@ -52,11 +53,11 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    .btn-suspend   { background: #fee2e2; color: #b91c1c; }
+    .btn-suspend    { background: #fee2e2; color: #b91c1c; }
     .btn-suspend:hover { background: #fecaca; }
-    .btn-unsuspend { background: #dcfce7; color: #15803d; }
+    .btn-unsuspend  { background: #dcfce7; color: #15803d; }
     .btn-unsuspend:hover { background: #bbf7d0; }
-    .btn-withdraw  { background: #f1f5f9; color: #64748b; }
+    .btn-withdraw   { background: #f1f5f9; color: #64748b; }
     .btn-withdraw:hover { background: #e2e8f0; }
 
     .empty-state { padding: 60px 0; text-align: center; color: #94a3b8; }
@@ -64,10 +65,9 @@
 
     .page-link { font-size: 0.82rem; color: #6366f1; }
     .page-item.active .page-link { background: #6366f1; border-color: #6366f1; }
+    .page-item.disabled .page-link { pointer-events: none; }
   </style>
-</head>
-<body>
-<section>
+
   <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden;">
     <div class="card-body p-0">
       <table class="table user-table mb-0">
@@ -85,13 +85,9 @@
         <tbody>
         <tr th:each="user : ${users.content}">
           <td class="text-muted" style="font-size:0.78rem;" th:text="${user.id}"></td>
-          <td>
-            <span class="fw-semibold" th:text="${user.nickname}"></span>
-          </td>
+          <td><span class="fw-semibold" th:text="${user.nickname}"></span></td>
           <td class="text-muted" th:text="${user.email}"></td>
-          <td>
-            <span class="badge-social" th:text="${user.socialType}"></span>
-          </td>
+          <td><span class="badge-social" th:text="${user.socialType}"></span></td>
           <td>
             <span th:if="${user.status.name() == 'ACTIVE'}"    class="badge-status badge-active">활성</span>
             <span th:if="${user.status.name() == 'SUSPENDED'}" class="badge-status badge-suspended">정지</span>
@@ -140,7 +136,7 @@
     <ul class="pagination pagination-sm justify-content-center mb-0">
       <li class="page-item" th:classappend="${users.first} ? 'disabled'">
         <a class="page-link rounded-start-3"
-           th:href="@{/admin/users(page=${users.number - 1})}">
+           th:href="${users.first} ? '#' : @{/admin/users(page=${users.number - 1})}">
           <i class="bi bi-chevron-left" style="font-size:0.7rem;"></i>
         </a>
       </li>
@@ -153,27 +149,27 @@
       </li>
       <li class="page-item" th:classappend="${users.last} ? 'disabled'">
         <a class="page-link rounded-end-3"
-           th:href="@{/admin/users(page=${users.number + 1})}">
+           th:href="${users.last} ? '#' : @{/admin/users(page=${users.number + 1})}">
           <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
         </a>
       </li>
     </ul>
   </nav>
-</section>
 
-<script>
-  function confirmSuspend(btn) {
-    const name = btn.dataset.name;
-    if (confirm(`"${name}" 유저를 이용 정지하시겠습니까?`)) {
-      btn.closest('form').querySelector('.confirm-submit').click();
+  <script>
+    function confirmSuspend(btn) {
+      const name = btn.dataset.name;
+      if (confirm(`"${name}" 유저를 이용 정지하시겠습니까?`)) {
+        btn.closest('form').querySelector('.confirm-submit').click();
+      }
     }
-  }
-  function confirmWithdraw(btn) {
-    const name = btn.dataset.name;
-    if (confirm(`"${name}" 유저를 강제 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
-      btn.closest('form').querySelector('.confirm-submit').click();
+    function confirmWithdraw(btn) {
+      const name = btn.dataset.name;
+      if (confirm(`"${name}" 유저를 강제 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+        btn.closest('form').querySelector('.confirm-submit').click();
+      }
     }
-  }
-</script>
+  </script>
+</section>
 </body>
 </html>

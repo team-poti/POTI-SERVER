@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
+import org.sopt.poti.domain.fcmtoken.service.FcmTokenService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
@@ -27,6 +28,7 @@ public class AdminService {
   private final GroupBuyRepository groupBuyRepository;
   private final OrderRepository orderRepository;
   private final RefreshTokenRepository refreshTokenRepository;
+  private final FcmTokenService fcmTokenService;
 
   public long countUsers() {
     return userRepository.count();
@@ -81,6 +83,7 @@ public class AdminService {
     }
     user.withdraw(null);
     refreshTokenRepository.deleteById(userId);
+    fcmTokenService.deleteAllByUserId(userId);
   }
 
   private static final Set<GroupBuyPostStatus> UNDELETABLE_STATUSES = Set.of(

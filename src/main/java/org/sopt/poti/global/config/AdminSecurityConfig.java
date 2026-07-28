@@ -55,7 +55,7 @@ public class AdminSecurityConfig {
         )
         .logout(logout -> logout
             .logoutUrl("/admin/logout")
-            .logoutSuccessUrl("/admin/login")
+            .logoutSuccessUrl("/admin/login?logout")
             .invalidateHttpSession(true)
         )
         .userDetailsService(adminUserDetailsService());
