@@ -33,6 +33,7 @@ public class SecurityConfig {
       "/swagger-ui/**", // Swagger 문서 관련
       "/v3/api-docs/**",
       "/favicon.ico",
+      "/css/**",
       "/dev/login", // 개발자용 자동 로그인 (토큰 발급)
   };
 

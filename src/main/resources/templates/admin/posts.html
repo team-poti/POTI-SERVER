@@ -3,120 +3,48 @@
       th:replace="~{admin/layout :: layout(~{::section}, 'posts')}">
 <body>
 <section>
-  <style>
-    .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-    .filter-tab {
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1.5px solid #e2e8f0;
-      background: #fff;
-      color: #64748b;
-      text-decoration: none;
-      transition: all 0.15s;
-    }
-    .filter-tab:hover { border-color: #6366f1; color: #6366f1; }
-    .filter-tab.active { background: #6366f1; border-color: #6366f1; color: #fff; }
-
-    .post-table th {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #64748b;
-      background: #f8fafc;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 12px 16px;
-    }
-    .post-table td {
-      padding: 14px 16px;
-      font-size: 0.875rem;
-      color: #1e293b;
-      vertical-align: middle;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .post-table tbody tr:hover { background: #f8fafc; }
-    .post-table tbody tr:last-child td { border-bottom: none; }
-
-    .badge-status {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-    .s-recruiting   { background: #dbeafe; color: #1d4ed8; }
-    .s-closed       { background: #fef9c3; color: #854d0e; }
-    .s-payment_done { background: #dcfce7; color: #15803d; }
-    .s-shipping     { background: #ede9fe; color: #6d28d9; }
-    .s-delivered    { background: #f1f5f9; color: #475569; }
-
-    .btn-delete {
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 7px;
-      border: none;
-      background: #fee2e2;
-      color: #b91c1c;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn-delete:hover { background: #fecaca; }
-
-    .empty-state { padding: 60px 0; text-align: center; color: #94a3b8; }
-    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; display: block; }
-
-    .page-link { font-size: 0.82rem; color: #6366f1; }
-    .page-item.active .page-link { background: #6366f1; border-color: #6366f1; }
-    .page-item.disabled .page-link { pointer-events: none; }
-  </style>
-
-  <!-- 상태 필터 -->
   <div class="filter-tabs">
     <a th:href="@{/admin/posts}"
        class="filter-tab"
-       th:classappend="${selectedStatus == null} ? ' active'">전체</a>
+       th:classappend="${selectedStatus == null} ? ' is-active'">전체</a>
     <a th:each="s : ${statuses}"
        th:href="@{/admin/posts(status=${s})}"
        class="filter-tab"
-       th:classappend="${s == selectedStatus} ? ' active'"
+       th:classappend="${s == selectedStatus} ? ' is-active'"
        th:text="${s.sellerMessage}"></a>
   </div>
 
-  <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden;">
-    <div class="card-body p-0">
-      <table class="table post-table mb-0">
-        <thead>
+  <div class="table-card">
+    <table class="table admin-table mb-0">
+      <thead>
         <tr>
-          <th style="width:60px;">ID</th>
+          <th style="width:56px;">ID</th>
           <th>제목</th>
-          <th style="width:100px;">아티스트</th>
-          <th style="width:100px;">모집자</th>
-          <th style="width:110px;">상태</th>
-          <th style="width:100px;">등록일</th>
-          <th style="width:80px;">관리</th>
+          <th style="width:96px;">아티스트</th>
+          <th style="width:96px;">모집자</th>
+          <th style="width:104px;">상태</th>
+          <th style="width:96px;">등록일</th>
+          <th style="width:72px;">관리</th>
         </tr>
-        </thead>
-        <tbody>
+      </thead>
+      <tbody>
         <tr th:each="post : ${posts.content}">
-          <td class="text-muted" style="font-size:0.78rem;" th:text="${post.id}"></td>
-          <td><span class="fw-semibold" th:text="${post.title}"></span></td>
-          <td class="text-muted" style="font-size:0.82rem;" th:text="${post.artist.name}"></td>
-          <td style="font-size:0.82rem;" th:text="${post.leader.nickname}"></td>
+          <td class="cell-id" th:text="${post.id}"></td>
+          <td><strong th:text="${post.title}"></strong></td>
+          <td class="cell-sub" th:text="${post.artist.name}"></td>
+          <td class="cell-sub" th:text="${post.leader.nickname}"></td>
           <td>
-            <span class="badge-status"
-                  th:classappend="'s-' + ${post.status.name().toLowerCase()}"
+            <span class="badge-pill"
+                  th:classappend="'status-' + ${post.status.name().toLowerCase()}"
                   th:text="${post.status.sellerMessage}"></span>
           </td>
-          <td class="text-muted" style="font-size:0.78rem;"
-              th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd')}"></td>
+          <td class="cell-sub" th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd')}"></td>
           <td>
             <form th:action="@{/admin/posts/{id}/delete(id=${post.id})}" method="post">
-              <button type="button" class="btn-delete"
+              <button type="button" class="btn-action btn-delete"
                       th:attr="data-title=${post.title}, data-status=${post.status.name()}"
                       onclick="confirmDelete(this)">삭제</button>
-              <button type="submit" class="d-none confirm-submit"></button>
+              <button type="submit" class="d-none js-submit"></button>
             </form>
           </td>
         </tr>
@@ -124,22 +52,20 @@
           <td colspan="7">
             <div class="empty-state">
               <i class="bi bi-card-list"></i>
-              <div style="font-size:0.9rem;">분철글이 없습니다.</div>
+              <p>분철글이 없습니다.</p>
             </div>
           </td>
         </tr>
-        </tbody>
-      </table>
-    </div>
+      </tbody>
+    </table>
   </div>
 
-  <!-- Pagination -->
-  <nav th:if="${posts.totalPages > 1}" class="mt-4">
-    <ul class="pagination pagination-sm justify-content-center mb-0">
+  <nav th:if="${posts.totalPages > 1}" class="mt-3 d-flex justify-content-center">
+    <ul class="pagination pagination-sm mb-0">
       <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
-        <a class="page-link rounded-start-3"
+        <a class="page-link"
            th:href="${posts.first} ? '#' : @{/admin/posts(status=${selectedStatus}, page=${posts.number - 1})}">
-          <i class="bi bi-chevron-left" style="font-size:0.7rem;"></i>
+          <i class="bi bi-chevron-left" style="font-size:0.65rem;"></i>
         </a>
       </li>
       <li class="page-item"
@@ -150,9 +76,9 @@
            th:text="${i + 1}"></a>
       </li>
       <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
-        <a class="page-link rounded-end-3"
+        <a class="page-link"
            th:href="${posts.last} ? '#' : @{/admin/posts(status=${selectedStatus}, page=${posts.number + 1})}">
-          <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
+          <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
         </a>
       </li>
     </ul>
@@ -160,13 +86,11 @@
 
   <script>
     function confirmDelete(btn) {
-      const title = btn.dataset.title;
-      const status = btn.dataset.status;
-      const msg = status === 'RECRUITING'
-        ? `「${title}」을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`
-        : `「${title}」은 현재 진행 중인 분철글입니다.\n정말 삭제하시겠습니까?`;
+      const msg = btn.dataset.status === 'RECRUITING'
+        ? '「' + btn.dataset.title + '」을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.'
+        : '「' + btn.dataset.title + '」은 현재 진행 중인 분철글입니다.\n정말 삭제하시겠습니까?';
       if (confirm(msg)) {
-        btn.closest('form').querySelector('.confirm-submit').click();
+        btn.closest('form').querySelector('.js-submit').click();
       }
     }
   </script>

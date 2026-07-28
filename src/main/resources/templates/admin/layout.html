@@ -6,152 +6,19 @@
   <title>POTI 어드민</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    :root {
-      --sidebar-bg: #0f172a;
-      --sidebar-hover: #1e293b;
-      --sidebar-active: #1e293b;
-      --accent: #6366f1;
-      --accent-light: #818cf8;
-    }
-
-    * { box-sizing: border-box; }
-    body { background: #f1f5f9; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-
-    .sidebar {
-      width: 240px;
-      min-height: 100vh;
-      background: var(--sidebar-bg);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0; left: 0;
-      z-index: 100;
-    }
-
-    .sidebar-brand {
-      padding: 24px 20px 20px;
-      border-bottom: 1px solid #1e293b;
-    }
-    .sidebar-brand .brand-title {
-      color: #fff;
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-    .sidebar-brand .brand-sub {
-      color: #64748b;
-      font-size: 0.72rem;
-      margin-top: 2px;
-    }
-
-    .sidebar-nav { flex: 1; padding: 12px 12px 0; }
-
-    .nav-label {
-      color: #475569;
-      font-size: 0.65rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 12px 8px 6px;
-    }
-
-    .sidebar-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #94a3b8;
-      text-decoration: none;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 500;
-      transition: all 0.15s;
-      margin-bottom: 2px;
-    }
-    .sidebar-link i { font-size: 1rem; flex-shrink: 0; }
-    .sidebar-link:hover { background: var(--sidebar-hover); color: #e2e8f0; }
-    .sidebar-link.active {
-      background: var(--accent);
-      color: #fff;
-    }
-    .sidebar-link.active i { color: #fff; }
-
-    .sidebar-footer {
-      padding: 12px;
-      border-top: 1px solid #1e293b;
-    }
-    .sidebar-footer form button {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      background: none;
-      border: none;
-      color: #64748b;
-      font-size: 0.85rem;
-      font-weight: 500;
-      padding: 10px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.15s;
-    }
-    .sidebar-footer form button:hover { background: #1e293b; color: #94a3b8; }
-
-    .main-wrapper {
-      margin-left: 240px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .topbar {
-      background: #fff;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .topbar-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #0f172a;
-    }
-    .topbar-badge {
-      background: #f1f5f9;
-      color: #64748b;
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-weight: 500;
-    }
-
-    .main-content { padding: 28px 32px; flex: 1; }
-
-    .alert-flash {
-      border: none;
-      border-radius: 10px;
-      font-size: 0.875rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-  </style>
+  <link th:href="@{/css/admin.css}" rel="stylesheet">
 </head>
 <body>
 
 <th:block th:fragment="layout(content, currentPage)">
 <div class="d-flex">
+
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-title">🍵 POTI Admin</div>
       <div class="brand-sub">관리자 패널</div>
     </div>
-
     <nav class="sidebar-nav">
       <div class="nav-label">메뉴</div>
       <a th:href="@{/admin/dashboard}"
@@ -170,7 +37,6 @@
         <i class="bi bi-card-list"></i> 분철글 관리
       </a>
     </nav>
-
     <div class="sidebar-footer">
       <form th:action="@{/admin/logout}" method="post">
         <button type="submit">
@@ -184,11 +50,11 @@
   <div class="main-wrapper">
     <div class="topbar">
       <span class="topbar-title"
-            th:text="${currentPage == 'dashboard'} ? '대시보드' : (${currentPage == 'users'} ? '유저 관리' : '분철글 관리')">
+        th:text="${currentPage == 'dashboard'} ? '대시보드' :
+                 (${currentPage == 'users'} ? '유저 관리' : '분철글 관리')">
       </span>
       <span class="topbar-badge">POTI Admin</span>
     </div>
-
     <div class="main-content">
       <div th:if="${errorMessage}"
            class="alert alert-danger alert-flash alert-dismissible fade show" role="alert">
@@ -199,6 +65,7 @@
       <th:block th:replace="${content}"></th:block>
     </div>
   </div>
+
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </th:block>

@@ -3,117 +3,52 @@
       th:replace="~{admin/layout :: layout(~{::section}, 'users')}">
 <body>
 <section>
-  <style>
-    .user-table th {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #64748b;
-      background: #f8fafc;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 12px 16px;
-    }
-    .user-table td {
-      padding: 14px 16px;
-      font-size: 0.875rem;
-      color: #1e293b;
-      vertical-align: middle;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .user-table tbody tr:hover { background: #f8fafc; }
-    .user-table tbody tr:last-child td { border-bottom: none; }
-
-    .badge-status {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-    .badge-active    { background: #dcfce7; color: #15803d; }
-    .badge-suspended { background: #fee2e2; color: #b91c1c; }
-    .badge-withdrawn { background: #f1f5f9; color: #94a3b8; }
-
-    .badge-social {
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: #fef9c3;
-      color: #854d0e;
-    }
-
-    .action-btn {
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 7px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .btn-suspend    { background: #fee2e2; color: #b91c1c; }
-    .btn-suspend:hover { background: #fecaca; }
-    .btn-unsuspend  { background: #dcfce7; color: #15803d; }
-    .btn-unsuspend:hover { background: #bbf7d0; }
-    .btn-withdraw   { background: #f1f5f9; color: #64748b; }
-    .btn-withdraw:hover { background: #e2e8f0; }
-
-    .empty-state { padding: 60px 0; text-align: center; color: #94a3b8; }
-    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; display: block; }
-
-    .page-link { font-size: 0.82rem; color: #6366f1; }
-    .page-item.active .page-link { background: #6366f1; border-color: #6366f1; }
-    .page-item.disabled .page-link { pointer-events: none; }
-  </style>
-
-  <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden;">
-    <div class="card-body p-0">
-      <table class="table user-table mb-0">
-        <thead>
+  <div class="table-card">
+    <table class="table admin-table mb-0">
+      <thead>
         <tr>
-          <th style="width:60px;">ID</th>
+          <th style="width:56px;">ID</th>
           <th>닉네임</th>
           <th>이메일</th>
-          <th style="width:80px;">소셜</th>
-          <th style="width:90px;">상태</th>
-          <th style="width:100px;">가입일</th>
-          <th style="width:160px;">관리</th>
+          <th style="width:72px;">소셜</th>
+          <th style="width:80px;">상태</th>
+          <th style="width:96px;">가입일</th>
+          <th style="width:156px;">관리</th>
         </tr>
-        </thead>
-        <tbody>
+      </thead>
+      <tbody>
         <tr th:each="user : ${users.content}">
-          <td class="text-muted" style="font-size:0.78rem;" th:text="${user.id}"></td>
-          <td><span class="fw-semibold" th:text="${user.nickname}"></span></td>
-          <td class="text-muted" th:text="${user.email}"></td>
-          <td><span class="badge-social" th:text="${user.socialType}"></span></td>
+          <td class="cell-id" th:text="${user.id}"></td>
+          <td><strong th:text="${user.nickname}"></strong></td>
+          <td class="cell-sub" th:text="${user.email}"></td>
           <td>
-            <span th:if="${user.status.name() == 'ACTIVE'}"    class="badge-status badge-active">활성</span>
-            <span th:if="${user.status.name() == 'SUSPENDED'}" class="badge-status badge-suspended">정지</span>
-            <span th:if="${user.status.name() == 'WITHDRAWN'}" class="badge-status badge-withdrawn">탈퇴</span>
+            <span class="badge-pill badge-kakao" th:text="${user.socialType}"></span>
           </td>
-          <td class="text-muted" style="font-size:0.78rem;"
-              th:text="${#temporals.format(user.createdAt, 'yyyy.MM.dd')}"></td>
+          <td>
+            <span th:if="${user.status.name() == 'ACTIVE'}"    class="badge-pill badge-active">활성</span>
+            <span th:if="${user.status.name() == 'SUSPENDED'}" class="badge-pill badge-suspended">정지</span>
+            <span th:if="${user.status.name() == 'WITHDRAWN'}" class="badge-pill badge-withdrawn">탈퇴</span>
+          </td>
+          <td class="cell-sub" th:text="${#temporals.format(user.createdAt, 'yyyy.MM.dd')}"></td>
           <td>
             <div class="d-flex gap-1">
               <form th:if="${user.status.name() == 'ACTIVE'}"
                     th:action="@{/admin/users/{id}/suspend(id=${user.id})}" method="post">
-                <button type="button" class="action-btn btn-suspend"
+                <button type="button" class="btn-action btn-suspend"
                         th:attr="data-name=${user.nickname}"
                         onclick="confirmSuspend(this)">정지</button>
-                <button type="submit" class="d-none confirm-submit"></button>
+                <button type="submit" class="d-none js-submit"></button>
               </form>
               <form th:if="${user.status.name() == 'SUSPENDED'}"
                     th:action="@{/admin/users/{id}/unsuspend(id=${user.id})}" method="post">
-                <button type="submit" class="action-btn btn-unsuspend">정지 해제</button>
+                <button type="submit" class="btn-action btn-release">정지 해제</button>
               </form>
               <form th:if="${user.status.name() != 'WITHDRAWN'}"
                     th:action="@{/admin/users/{id}/withdraw(id=${user.id})}" method="post">
-                <button type="button" class="action-btn btn-withdraw"
+                <button type="button" class="btn-action btn-withdraw"
                         th:attr="data-name=${user.nickname}"
                         onclick="confirmWithdraw(this)">강제 탈퇴</button>
-                <button type="submit" class="d-none confirm-submit"></button>
+                <button type="submit" class="d-none js-submit"></button>
               </form>
             </div>
           </td>
@@ -122,22 +57,20 @@
           <td colspan="7">
             <div class="empty-state">
               <i class="bi bi-people"></i>
-              <div style="font-size:0.9rem;">유저가 없습니다.</div>
+              <p>유저가 없습니다.</p>
             </div>
           </td>
         </tr>
-        </tbody>
-      </table>
-    </div>
+      </tbody>
+    </table>
   </div>
 
-  <!-- Pagination -->
-  <nav th:if="${users.totalPages > 1}" class="mt-4">
-    <ul class="pagination pagination-sm justify-content-center mb-0">
+  <nav th:if="${users.totalPages > 1}" class="mt-3 d-flex justify-content-center">
+    <ul class="pagination pagination-sm mb-0">
       <li class="page-item" th:classappend="${users.first} ? 'disabled'">
-        <a class="page-link rounded-start-3"
+        <a class="page-link"
            th:href="${users.first} ? '#' : @{/admin/users(page=${users.number - 1})}">
-          <i class="bi bi-chevron-left" style="font-size:0.7rem;"></i>
+          <i class="bi bi-chevron-left" style="font-size:0.65rem;"></i>
         </a>
       </li>
       <li class="page-item"
@@ -148,9 +81,9 @@
            th:text="${i + 1}"></a>
       </li>
       <li class="page-item" th:classappend="${users.last} ? 'disabled'">
-        <a class="page-link rounded-end-3"
+        <a class="page-link"
            th:href="${users.last} ? '#' : @{/admin/users(page=${users.number + 1})}">
-          <i class="bi bi-chevron-right" style="font-size:0.7rem;"></i>
+          <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
         </a>
       </li>
     </ul>
@@ -158,15 +91,13 @@
 
   <script>
     function confirmSuspend(btn) {
-      const name = btn.dataset.name;
-      if (confirm(`"${name}" 유저를 이용 정지하시겠습니까?`)) {
-        btn.closest('form').querySelector('.confirm-submit').click();
+      if (confirm('"' + btn.dataset.name + '" 유저를 이용 정지하시겠습니까?')) {
+        btn.closest('form').querySelector('.js-submit').click();
       }
     }
     function confirmWithdraw(btn) {
-      const name = btn.dataset.name;
-      if (confirm(`"${name}" 유저를 강제 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
-        btn.closest('form').querySelector('.confirm-submit').click();
+      if (confirm('"' + btn.dataset.name + '" 유저를 강제 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+        btn.closest('form').querySelector('.js-submit').click();
       }
     }
   </script>
