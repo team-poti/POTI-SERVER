@@ -13,7 +13,6 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@Order(1)
 public class AdminSecurityConfig {
 
   @Value("${admin.username}")
@@ -38,6 +37,7 @@ public class AdminSecurityConfig {
   }
 
   @Bean
+  @Order(1)
   public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
     http
         .securityMatcher("/admin/**")

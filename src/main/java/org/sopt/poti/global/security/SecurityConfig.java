@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Order(2)
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -38,6 +37,7 @@ public class SecurityConfig {
   };
 
   @Bean
+  @Order(2)
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화 (Stateless)
