@@ -6,7 +6,9 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,19 +16,29 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
   private static final String SECURITY_SCHEME_NAME = "authorization";
+  private static final String LOCAL_URL = "http://localhost:8080";
+
+  @Value("${swagger.server-url}")
+  private String serverUrl;
+
+  @Value("${swagger.server-description}")
+  private String serverDescription;
 
   @Bean
   public OpenAPI openAPI() {
+    Server currentServer = new Server();
+    currentServer.setUrl(serverUrl);
+    currentServer.setDescription(serverDescription);
 
-    // 운영 서버 (HTTPS 필수)
-    Server prodServer = new Server();
-    prodServer.setUrl("https://poti.kr");
-    prodServer.setDescription("운영 서버 (Production)");
+    List<Server> servers = new ArrayList<>();
+    servers.add(currentServer);
 
-    // 로컬 서버 (개발용)
-    Server localServer = new Server();
-    localServer.setUrl("http://localhost:8080");
-    localServer.setDescription("로컬 서버 (Local)");
+    if (!LOCAL_URL.equals(serverUrl)) {
+      Server localServer = new Server();
+      localServer.setUrl(LOCAL_URL);
+      localServer.setDescription("로컬 서버 (Local)");
+      servers.add(localServer);
+    }
 
     return new OpenAPI()
         .components(new Components()
@@ -40,6 +52,6 @@ public class SwaggerConfig {
             .title("POTI Server API")
             .description("POTI 서비스 API 명세서")
             .version("1.0.0"))
-        .servers(List.of(prodServer, localServer));
+        .servers(servers);
   }
 }
