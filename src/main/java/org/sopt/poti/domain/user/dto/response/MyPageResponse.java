@@ -17,7 +17,6 @@ public record MyPageResponse(
 ) {
 
   public record Summary(
-      Integer total,
       Integer inProgress,
       Integer completed
   ) {
