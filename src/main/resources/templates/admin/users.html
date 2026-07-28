@@ -24,6 +24,8 @@
           <td>
             <span class="badge-pill badge-kakao" th:text="${user.socialType}"></span>
           </td>
+          <td class="text-muted" style="font-size:0.78rem;"
+              th:text="${#temporals.format(user.createdAt, 'yyyy.MM.dd')}"></td>
           <td>
             <span th:if="${user.status.name() == 'ACTIVE'}"    class="badge-pill badge-active">활성</span>
             <span th:if="${user.status.name() == 'SUSPENDED'}" class="badge-pill badge-suspended">정지</span>
