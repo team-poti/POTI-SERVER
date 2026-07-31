@@ -74,7 +74,7 @@ public class FcmNotificationService {
       if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
         fcmTokenRepository.deleteByToken(token);
       }
-      log.warn("FCM 발송 실패: token={}, error={}", token, e.getMessage());
+      log.warn("FCM 발송 실패: error={}", e.getMessage());
     }
   }
 
