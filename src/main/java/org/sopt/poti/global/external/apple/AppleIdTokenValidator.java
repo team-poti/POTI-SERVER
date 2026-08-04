@@ -1,5 +1,7 @@
 package org.sopt.poti.global.external.apple;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.math.BigInteger;
@@ -20,13 +22,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AppleIdTokenValidator {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private final ApplePublicKeyFeignClient applePublicKeyFeignClient;
 
     public Claims validate(String idToken) {
         try {
             String kid = extractKid(idToken);
 
-            ApplePublicKeyResponse keysResponse = applePublicKeyFeignClient.getPublicKeys();
+            ApplePublicKeyResponse keysResponse = fetchApplePublicKeys();
             ApplePublicKeyResponse.Key matchingKey = keysResponse.getKeys().stream()
                 .filter(key -> key.getKid().equals(kid))
                 .findFirst()
@@ -48,13 +52,20 @@ public class AppleIdTokenValidator {
         }
     }
 
+    private ApplePublicKeyResponse fetchApplePublicKeys() {
+        try {
+            return applePublicKeyFeignClient.getPublicKeys();
+        } catch (FeignException e) {
+            log.error("Apple 공개키 조회 실패 (status={}): {}", e.status(), e.getMessage());
+            throw new BusinessException(ErrorStatus.EXTERNAL_API_ERROR);
+        }
+    }
+
     private String extractKid(String idToken) {
         try {
             String headerBase64 = idToken.split("\\.")[0];
             String headerJson = new String(Base64.getUrlDecoder().decode(headerBase64));
-            // {"alg":"RS256","kid":"abc123"} 형태에서 kid 추출
-            Map<?, ?> header = new com.fasterxml.jackson.databind.ObjectMapper()
-                .readValue(headerJson, Map.class);
+            Map<?, ?> header = objectMapper.readValue(headerJson, Map.class);
             return (String) header.get("kid");
         } catch (Exception e) {
             throw new BusinessException(ErrorStatus.INVALID_TOKEN);

@@ -139,8 +139,8 @@ public class AuthService {
     try {
       GoogleTokenInfoResponse response = googleTokenFeignClient.getTokenInfo(idToken);
       return new SocialUserInfo(response.getSub(), response.getEmail(), response.getName(), response.getProfileImageUrl());
-    } catch (FeignException.BadRequest e) {
-      log.warn("Google ID Token 검증 실패: {}", e.getMessage());
+    } catch (FeignException.BadRequest | FeignException.Unauthorized | FeignException.Forbidden e) {
+      log.warn("Google ID Token 검증 실패 (status={}): {}", e.status(), e.getMessage());
       throw new BusinessException(ErrorStatus.INVALID_TOKEN);
     } catch (FeignException e) {
       log.error("Google API 호출 실패 (status={}): {}", e.status(), e.getMessage());
