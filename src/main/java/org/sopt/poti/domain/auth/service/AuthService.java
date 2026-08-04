@@ -1,6 +1,7 @@
 package org.sopt.poti.domain.auth.service;
 
 import feign.FeignException;
+import io.jsonwebtoken.Claims;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,9 @@ import org.sopt.poti.domain.user.entity.UserStatus;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.sopt.poti.global.external.apple.AppleIdTokenValidator;
+import org.sopt.poti.global.external.google.GoogleTokenFeignClient;
+import org.sopt.poti.global.external.google.dto.GoogleTokenInfoResponse;
 import org.sopt.poti.global.external.kakao.KakaoFeignClient;
 import org.sopt.poti.global.external.kakao.dto.KakaoUserResponse;
 import org.sopt.poti.global.security.jwt.JwtTokenProvider;
@@ -40,6 +44,8 @@ public class AuthService {
   private final UserService userService;
   private final JwtTokenProvider jwtTokenProvider;
   private final KakaoFeignClient kakaoFeignClient;
+  private final GoogleTokenFeignClient googleTokenFeignClient;
+  private final AppleIdTokenValidator appleIdTokenValidator;
   private final RefreshTokenRepository refreshTokenRepository;
   private final RedisTemplate<String, String> redisTemplate;
   private final FcmTokenService fcmTokenService;
@@ -53,18 +59,17 @@ public class AuthService {
 
   @Transactional
   public AuthResponse socialLogin(AuthRequest request) {
-    if (request.socialType() != SocialType.KAKAO) {
-      throw new BusinessException(ErrorStatus.INVALID_SOCIAL_TYPE);
-    }
-
-    KakaoUserResponse kakaoUserResponse = getKakaoUserResponse(request.token());
-    String socialId = String.valueOf(kakaoUserResponse.getId());
+    SocialUserInfo socialUserInfo = switch (request.socialType()) {
+      case KAKAO -> getKakaoUserInfo(request.token());
+      case GOOGLE -> getGoogleUserInfo(request.token());
+      case APPLE -> getAppleUserInfo(request.token(), request.name());
+    };
 
     boolean isNewUser;
     User user;
 
-    Optional<User> existingUser = userService.findUserBySocialIdAndSocialType(socialId,
-        request.socialType());
+    Optional<User> existingUser = userService.findUserBySocialIdAndSocialType(
+        socialUserInfo.socialId(), request.socialType());
 
     if (existingUser.isPresent()) {
       user = existingUser.get();
@@ -75,30 +80,15 @@ public class AuthService {
         throw new BusinessException(ErrorStatus.USER_SUSPENDED);
       }
       isNewUser = (user.getNickname() == null);
-      // TODO: 기존 유저의 정보(닉네임, 프로필 이미지 등)가 변경되었다면 업데이트 로직 추가
     } else {
-      KakaoUserResponse.KakaoAccount kakaoAccount = kakaoUserResponse.getKakaoAccount();
-      String email = null;
-      String nickname = null;
-      String profileImageUrl = null;
-
-      if (kakaoAccount != null) {
-        email = kakaoAccount.getEmail();
-        KakaoUserResponse.Profile profile = kakaoAccount.getProfile();
-        if (profile != null) {
-          nickname = profile.getNickname();
-          profileImageUrl = profile.getProfileImageUrl();
-        }
-      }
-
       user = User.createSocialUser(
-          socialId,
+          socialUserInfo.socialId(),
           request.socialType(),
-          email,
-          nickname,
-          (profileImageUrl == null || profileImageUrl.isBlank())
+          socialUserInfo.email(),
+          socialUserInfo.nickname(),
+          (socialUserInfo.profileImageUrl() == null || socialUserInfo.profileImageUrl().isBlank())
               ? DEFAULT_PROFILE_IMAGE
-              : profileImageUrl,
+              : socialUserInfo.profileImageUrl(),
           null
       );
       userService.registerUser(user);
@@ -122,6 +112,47 @@ public class AuthService {
         .isNewUser(isNewUser)
         .userId(user.getId())
         .build();
+  }
+
+  private record SocialUserInfo(String socialId, String email, String nickname, String profileImageUrl) {}
+
+  private SocialUserInfo getKakaoUserInfo(String token) {
+    KakaoUserResponse response = getKakaoUserResponse(token);
+    String socialId = String.valueOf(response.getId());
+    String email = null;
+    String nickname = null;
+    String profileImageUrl = null;
+
+    KakaoUserResponse.KakaoAccount account = response.getKakaoAccount();
+    if (account != null) {
+      email = account.getEmail();
+      KakaoUserResponse.Profile profile = account.getProfile();
+      if (profile != null) {
+        nickname = profile.getNickname();
+        profileImageUrl = profile.getProfileImageUrl();
+      }
+    }
+    return new SocialUserInfo(socialId, email, nickname, profileImageUrl);
+  }
+
+  private SocialUserInfo getGoogleUserInfo(String idToken) {
+    try {
+      GoogleTokenInfoResponse response = googleTokenFeignClient.getTokenInfo(idToken);
+      return new SocialUserInfo(response.getSub(), response.getEmail(), response.getName(), response.getProfileImageUrl());
+    } catch (FeignException.BadRequest e) {
+      log.warn("Google ID Token 검증 실패: {}", e.getMessage());
+      throw new BusinessException(ErrorStatus.INVALID_TOKEN);
+    } catch (FeignException e) {
+      log.error("Google API 호출 실패 (status={}): {}", e.status(), e.getMessage());
+      throw new BusinessException(ErrorStatus.EXTERNAL_API_ERROR);
+    }
+  }
+
+  private SocialUserInfo getAppleUserInfo(String idToken, String name) {
+    Claims claims = appleIdTokenValidator.validate(idToken);
+    String socialId = claims.getSubject();
+    String email = claims.get("email", String.class);
+    return new SocialUserInfo(socialId, email, name, null);
   }
 
   @Transactional
