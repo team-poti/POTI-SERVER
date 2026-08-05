@@ -42,6 +42,14 @@ public class FcmNotificationService {
     sendToUser(post.getLeader().getId(), title, body, deeplink);
   }
 
+  // 모든 참여자 입금 완료(PAYMENT_DONE) → 모집자에게 배송 시작 요청
+  public void notifyNeedStartDelivery(GroupBuyPost post) {
+    String title = "배송 시작이 필요해요 ⏳";
+    String body = post.getTitle() + " 모든 참여자의 입금이 완료되었어요. 배송을 시작해주세요!";
+    String deeplink = deeplinkHost + "/participant-manage/" + post.getId();
+    sendToUser(post.getLeader().getId(), title, body, deeplink);
+  }
+
   // 분철글 상태 변경 → 모집자 + 참여자 전원 (딥링크 수신자별 상이)
   public void notifyPostStatusChanged(GroupBuyPost post, List<Order> participantOrders) {
     String emoji = resolveEmoji(post.getStatus());

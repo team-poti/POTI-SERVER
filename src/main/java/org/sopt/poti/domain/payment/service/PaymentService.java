@@ -93,6 +93,7 @@ public class PaymentService {
       if (fcmNotificationService != null) {
         List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(groupBuyPost.getId());
         fcmNotificationService.notifyPostStatusChanged(groupBuyPost, participantOrders);
+        fcmNotificationService.notifyNeedStartDelivery(groupBuyPost);
       }
     }
 
