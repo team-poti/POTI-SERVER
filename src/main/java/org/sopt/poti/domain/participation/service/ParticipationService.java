@@ -76,10 +76,6 @@ public class ParticipationService {
     // 1 내 주문 배송완료 처리 (OrderStatus)
     order.completeDelivery();
 
-    if (fcmNotificationService != null) {
-      fcmNotificationService.notifyDeliveryComplete(order);
-    }
-
     // 2 해당 공구글의 모든 주문(OrderStatus)이 배송완료인지 검사
     Long postId = order.getGroupBuyPost().getId();
     Long leaderUserId = order.getGroupBuyPost().getLeader().getId();
@@ -93,8 +89,8 @@ public class ParticipationService {
       if (post.getStatus() != GroupBuyPostStatus.DELIVERED) {
         post.completePostDelivery();
         if (fcmNotificationService != null) {
-          List<Long> participantIds = orderRepository.findUserIdsByGroupBuyPost_Id(postId);
-          fcmNotificationService.notifyPostStatusChanged(post, participantIds);
+          List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(postId);
+          fcmNotificationService.notifyPostStatusChanged(post, participantOrders);
         }
       }
     }

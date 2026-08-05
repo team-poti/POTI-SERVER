@@ -91,8 +91,8 @@ public class PaymentService {
     if (unpaidCount == 0) { // 모두 입금 완료(PAID) 이상
       groupBuyPost.updateStatus(GroupBuyPostStatus.PAYMENT_DONE);
       if (fcmNotificationService != null) {
-        List<Long> participantIds = orderRepository.findUserIdsByGroupBuyPost_Id(groupBuyPost.getId());
-        fcmNotificationService.notifyPostStatusChanged(groupBuyPost, participantIds);
+        List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(groupBuyPost.getId());
+        fcmNotificationService.notifyPostStatusChanged(groupBuyPost, participantOrders);
       }
     }
 

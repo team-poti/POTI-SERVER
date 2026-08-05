@@ -11,6 +11,7 @@ import org.sopt.poti.domain.fcmtoken.repository.FcmTokenRepository;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.order.entity.Order;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -22,52 +23,55 @@ public class FcmNotificationService {
 
   private final FcmTokenRepository fcmTokenRepository;
 
+  @Value("${app.deeplink.host}")
+  private String deeplinkHost;
+
   // 새 참여자 참여 → 모집자에게
   public void notifyNewParticipant(GroupBuyPost post, String participantNickname) {
     String title = "새로운 참여자가 생겼어요 👥";
     String body = participantNickname + "님이 " + post.getTitle() + "에 참여했어요";
-    sendToUser(post.getLeader().getId(), title, body);
+    String deeplink = deeplinkHost + "/recruiter-detail/" + post.getId();
+    sendToUser(post.getLeader().getId(), title, body, deeplink);
   }
 
   // 참여자 입금 정보 제출(WAIT_PAY_CHECK) → 모집자에게
   public void notifyWaitPayCheck(GroupBuyPost post) {
     String title = "입금 확인이 필요해요 ⏳";
     String body = post.getTitle() + " 입금 확인을 기다리는 참여자가 있어요";
-    sendToUser(post.getLeader().getId(), title, body);
+    String deeplink = deeplinkHost + "/participant-manage/" + post.getId();
+    sendToUser(post.getLeader().getId(), title, body, deeplink);
   }
 
-  // 분철글 상태 변경 → 모집자 + 참여자 전원
-  public void notifyPostStatusChanged(GroupBuyPost post, List<Long> participantUserIds) {
+  // 분철글 상태 변경 → 모집자 + 참여자 전원 (딥링크 수신자별 상이)
+  public void notifyPostStatusChanged(GroupBuyPost post, List<Order> participantOrders) {
     String emoji = resolveEmoji(post.getStatus());
     String statusMsg = resolveStatusMessage(post.getStatus());
     String title = emoji + " " + post.getTitle();
     String body = post.getTitle() + " " + statusMsg;
 
-    sendToUser(post.getLeader().getId(), title, body);
-    participantUserIds.forEach(userId -> sendToUser(userId, title, body));
+    String leaderDeeplink = deeplinkHost + "/recruiter-detail/" + post.getId();
+    sendToUser(post.getLeader().getId(), title, body, leaderDeeplink);
+
+    participantOrders.forEach(order -> {
+      String participantDeeplink = deeplinkHost + "/participant-detail/" + order.getId();
+      sendToUser(order.getUser().getId(), title, body, participantDeeplink);
+    });
   }
 
-  // 거래 완료 → 참여자에게 후기 유도
-  public void notifyDeliveryComplete(Order order) {
-    String title = "후기를 남겨주세요 ⭐️";
-    String body = order.getGroupBuyPost().getTitle() + " 거래는 어떠셨나요? 상대방에게 후기를 남겨주세요";
-    sendToUser(order.getUser().getId(), title, body);
-  }
-
-  private void sendToUser(Long userId, String title, String body) {
+  private void sendToUser(Long userId, String title, String body, String deeplink) {
     List<String> tokens = fcmTokenRepository.findAllByUser_Id(userId).stream()
         .map(fcmToken -> fcmToken.getToken())
         .toList();
-    tokens.forEach(token -> send(token, title, body));
+    tokens.forEach(token -> send(token, title, body, deeplink));
   }
 
-  private void send(String token, String title, String body) {
+  private void send(String token, String title, String body, String deeplink) {
     try {
       Message message = Message.builder()
           .setToken(token)
           .putData("title", title)
           .putData("body", body)
-          .putData("deeplink", "") // TODO: iOS/Android 딥링크 형식 확정 후 채울 것
+          .putData("deeplink", deeplink)
           .build();
       FirebaseMessaging.getInstance().send(message);
     } catch (FirebaseMessagingException e) {

@@ -134,8 +134,8 @@ public class OrderCreateService {
     if (fcmNotificationService != null) {
       fcmNotificationService.notifyNewParticipant(post, user.getNickname());
       if (post.getStatus() == GroupBuyPostStatus.CLOSED) {
-        List<Long> participantIds = orderRepository.findUserIdsByGroupBuyPost_Id(post.getId());
-        fcmNotificationService.notifyPostStatusChanged(post, participantIds);
+        List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(post.getId());
+        fcmNotificationService.notifyPostStatusChanged(post, participantOrders);
       }
     }
 
