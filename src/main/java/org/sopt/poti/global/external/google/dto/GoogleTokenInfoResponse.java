@@ -10,8 +10,6 @@ public class GoogleTokenInfoResponse {
 
     private String sub;
     private String email;
-    private String name;
-
-    @JsonProperty("picture")
-    private String profileImageUrl;
+    // /tokeninfo 엔드포인트는 aud만 반환. name/picture는 미포함
+    private String aud;
 }

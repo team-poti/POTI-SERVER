@@ -57,6 +57,9 @@ public class AuthService {
   @Value("${jwt.refresh-token-validity}")
   private long refreshTokenValidity;
 
+  @Value("${google.client-id}")
+  private String googleClientId;
+
   @Transactional
   public AuthResponse socialLogin(AuthRequest request) {
     SocialUserInfo socialUserInfo = switch (request.socialType()) {
@@ -138,13 +141,21 @@ public class AuthService {
   private SocialUserInfo getGoogleUserInfo(String idToken) {
     try {
       GoogleTokenInfoResponse response = googleTokenFeignClient.getTokenInfo(idToken);
-      return new SocialUserInfo(response.getSub(), response.getEmail(), response.getName(), response.getProfileImageUrl());
+      if (!googleClientId.equals(response.getAud())) {
+        throw new BusinessException(ErrorStatus.INVALID_TOKEN);
+      }
+      return new SocialUserInfo(response.getSub(), response.getEmail(), null, null);
+    } catch (BusinessException e) {
+      throw e;
     } catch (FeignException.BadRequest | FeignException.Unauthorized | FeignException.Forbidden e) {
       log.warn("Google ID Token 검증 실패 (status={}): {}", e.status(), e.getMessage());
       throw new BusinessException(ErrorStatus.INVALID_TOKEN);
     } catch (FeignException e) {
       log.error("Google API 호출 실패 (status={}): {}", e.status(), e.getMessage());
       throw new BusinessException(ErrorStatus.EXTERNAL_API_ERROR);
+    } catch (Exception e) {
+      log.error("Google Login 내부 오류: {}", e.getMessage());
+      throw new BusinessException(ErrorStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

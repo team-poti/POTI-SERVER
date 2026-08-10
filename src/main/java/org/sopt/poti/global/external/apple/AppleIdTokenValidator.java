@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.sopt.poti.global.external.apple.dto.ApplePublicKeyResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -23,8 +24,12 @@ import org.springframework.stereotype.Component;
 public class AppleIdTokenValidator {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String APPLE_ISS = "https://appleid.apple.com";
 
     private final ApplePublicKeyFeignClient applePublicKeyFeignClient;
+
+    @Value("${apple.bundle-id}")
+    private String appleBundleId;
 
     public Claims validate(String idToken) {
         try {
@@ -40,6 +45,9 @@ public class AppleIdTokenValidator {
 
             return Jwts.parser()
                 .verifyWith(publicKey)
+                .requireIssuer(APPLE_ISS)
+                .requireAudience(appleBundleId)
+                .clockSkewSeconds(60)
                 .build()
                 .parseSignedClaims(idToken)
                 .getPayload();

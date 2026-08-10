@@ -124,3 +124,9 @@ discord:
 
 security:
   encryption-key: ${ENCRYPTION_KEY}
+
+google:
+  client-id: ${GOOGLE_CLIENT_ID}
+
+apple:
+  bundle-id: ${APPLE_BUNDLE_ID}
