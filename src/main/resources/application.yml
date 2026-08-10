@@ -125,6 +125,10 @@ discord:
 security:
   encryption-key: ${ENCRYPTION_KEY}
 
+app:
+  deeplink:
+    host: ${APP_DEEPLINK_HOST:https://app.poti.kr}
+
 google:
   client-id: ${GOOGLE_CLIENT_ID}
 

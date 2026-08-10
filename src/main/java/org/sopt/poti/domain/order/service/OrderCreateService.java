@@ -22,10 +22,13 @@ import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.order.entity.OrderItem;
 import org.sopt.poti.domain.order.repository.OrderItemRepository;
 import org.sopt.poti.domain.order.repository.OrderRepository;
+import org.sopt.poti.domain.fcmtoken.service.FcmNotificationService;
+import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +42,9 @@ public class OrderCreateService {
 
   private final GroupBuyService groupBuyService;
   private final UserService userService;
+
+  @Autowired(required = false)
+  private FcmNotificationService fcmNotificationService;
 
   @Transactional
   public CreateOrderResponse createOrder(Long userId, CreateOrderRequest request) {
@@ -124,6 +130,15 @@ public class OrderCreateService {
         .mapToInt(OrderItemRequest::count)
         .sum();
     post.increaseCurrentQuantity(totalCount);
+
+    if (fcmNotificationService != null) {
+      fcmNotificationService.notifyNewParticipant(post, user.getNickname());
+      if (post.getStatus() == GroupBuyPostStatus.CLOSED) {
+        List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(post.getId());
+        fcmNotificationService.notifyPostStatusChanged(post, participantOrders);
+      }
+    }
+
     return new CreateOrderResponse(savedOrder.getId());
   }
 
