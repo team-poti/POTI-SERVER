@@ -121,7 +121,7 @@ public class OrderService {
         List.of(OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK, OrderStatus.PAID)
     );
 
-    if (notShippedCount == 0) { // 모두 배송 시작(SHIPPED) 이상
+    if (notShippedCount == 0 && groupBuyPost.getStatus() != GroupBuyPostStatus.DELIVERED) { // 모두 배송 시작(SHIPPED) 이상
       groupBuyPost.updateStatus(GroupBuyPostStatus.SHIPPING);
       if (fcmNotificationService != null) {
         List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(groupBuyPost.getId());
