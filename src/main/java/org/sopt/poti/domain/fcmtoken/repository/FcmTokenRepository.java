@@ -1,5 +1,6 @@
 package org.sopt.poti.domain.fcmtoken.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.sopt.poti.domain.fcmtoken.entity.FcmToken;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,5 +11,9 @@ public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
 
   Optional<FcmToken> findByToken(String token);
 
+  List<FcmToken> findAllByUser_Id(Long userId);
+
   void deleteAllByUser_Id(Long userId);
+
+  void deleteByToken(String token);
 }

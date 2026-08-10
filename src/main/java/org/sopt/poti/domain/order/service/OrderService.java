@@ -28,8 +28,10 @@ import org.sopt.poti.domain.order.entity.OrderStatus;
 import org.sopt.poti.domain.order.repository.OrderItemRepository;
 import org.sopt.poti.domain.order.repository.OrderRepository;
 import org.sopt.poti.domain.payment.entity.Payment;
+import org.sopt.poti.domain.fcmtoken.service.FcmNotificationService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,9 @@ public class OrderService {
   private final OrderRepository orderRepository;
   private final OrderItemRepository orderItemRepository;
   private final DeliveryService deliveryService;
+
+  @Autowired(required = false)
+  private FcmNotificationService fcmNotificationService;
 
   public int countByUser_Id(Long userId) {
     return orderRepository.countByUser_Id(userId);
@@ -116,10 +121,14 @@ public class OrderService {
         List.of(OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK, OrderStatus.PAID)
     );
 
-    if (notShippedCount == 0) { // 모두 배송 시작(SHIPPED) 이상
+    if (notShippedCount == 0 && groupBuyPost.getStatus() != GroupBuyPostStatus.DELIVERED) { // 모두 배송 시작(SHIPPED) 이상
       groupBuyPost.updateStatus(GroupBuyPostStatus.SHIPPING);
+      if (fcmNotificationService != null) {
+        List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(groupBuyPost.getId());
+        fcmNotificationService.notifyPostStatusChanged(groupBuyPost, participantOrders);
+      }
     }
-    
+
     return new StartDeliveryResponse(orderId, order.getStatus(),
         startDeliveryRequest.trackingNumber(), shippedAt);
   }

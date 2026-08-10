@@ -12,9 +12,12 @@ import org.sopt.poti.domain.payment.dto.request.DepositFormRequest;
 import org.sopt.poti.domain.payment.dto.response.DepositFormResponse;
 import org.sopt.poti.domain.payment.dto.response.OrderConfirmResponse;
 import org.sopt.poti.domain.payment.entity.Payment;
+import org.sopt.poti.domain.fcmtoken.service.FcmNotificationService;
+import org.sopt.poti.domain.order.repository.OrderRepository;
 import org.sopt.poti.domain.payment.repository.PaymentRepository;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,10 @@ public class PaymentService {
 
   private final PaymentRepository paymentRepository;
   private final OrderService orderService;
+  private final OrderRepository orderRepository;
+
+  @Autowired(required = false)
+  private FcmNotificationService fcmNotificationService;
 
   @Transactional
   public DepositFormResponse submitDepositForm(Long userId, DepositFormRequest req) {
@@ -53,6 +60,10 @@ public class PaymentService {
     }
     order.requestPayCheck();
 
+    if (fcmNotificationService != null) {
+      fcmNotificationService.notifyWaitPayCheck(order.getGroupBuyPost());
+    }
+
     return new DepositFormResponse(payment.getId());
   }
 
@@ -79,6 +90,11 @@ public class PaymentService {
     );
     if (unpaidCount == 0) { // 모두 입금 완료(PAID) 이상
       groupBuyPost.updateStatus(GroupBuyPostStatus.PAYMENT_DONE);
+      if (fcmNotificationService != null) {
+        List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(groupBuyPost.getId());
+        fcmNotificationService.notifyPostStatusChanged(groupBuyPost, participantOrders);
+        fcmNotificationService.notifyNeedStartDelivery(groupBuyPost);
+      }
     }
 
     return orderConfirmResponse;
