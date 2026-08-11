@@ -57,8 +57,11 @@ public class AuthService {
   @Value("${jwt.refresh-token-validity}")
   private long refreshTokenValidity;
 
-  @Value("${google.client-id}")
-  private String googleClientId;
+  @Value("${google.client-id-ios}")
+  private String googleClientIdIos;
+
+  @Value("${google.client-id-android}")
+  private String googleClientIdAndroid;
 
   @Transactional
   public AuthResponse socialLogin(AuthRequest request) {
@@ -141,7 +144,8 @@ public class AuthService {
   private SocialUserInfo getGoogleUserInfo(String idToken) {
     try {
       GoogleTokenInfoResponse response = googleTokenFeignClient.getTokenInfo(idToken);
-      if (!googleClientId.equals(response.getAud())) {
+      String aud = response.getAud();
+      if (!googleClientIdIos.equals(aud) && !googleClientIdAndroid.equals(aud)) {
         throw new BusinessException(ErrorStatus.INVALID_TOKEN);
       }
       return new SocialUserInfo(response.getSub(), response.getEmail(), null, null);
