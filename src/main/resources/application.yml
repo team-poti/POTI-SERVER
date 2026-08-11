@@ -128,3 +128,10 @@ security:
 app:
   deeplink:
     host: ${APP_DEEPLINK_HOST:https://app.poti.kr}
+
+google:
+  client-id-ios: ${GOOGLE_CLIENT_ID_IOS}
+  client-id-android: ${GOOGLE_CLIENT_ID_ANDROID}
+
+apple:
+  bundle-id: ${APPLE_BUNDLE_ID}

@@ -61,3 +61,14 @@ admin:
 
 gemini:
   api-key: test-gemini-key
+
+google:
+  client-id-ios: test-google-client-id-ios
+  client-id-android: test-google-client-id-android
+
+apple:
+  bundle-id: test-apple-bundle-id
+
+app:
+  deeplink:
+    host: https://test.poti.kr
