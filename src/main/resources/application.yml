@@ -130,7 +130,8 @@ app:
     host: ${APP_DEEPLINK_HOST:https://app.poti.kr}
 
 google:
-  client-id: ${GOOGLE_CLIENT_ID}
+  client-id-ios: ${GOOGLE_CLIENT_ID_IOS}
+  client-id-android: ${GOOGLE_CLIENT_ID_ANDROID}
 
 apple:
   bundle-id: ${APPLE_BUNDLE_ID}
