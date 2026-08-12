@@ -18,6 +18,7 @@ resource "aws_db_instance" "prod" {
     aws_security_group.rds_to_ec2_7.id,
   ]
 
+  deletion_protection = true # 실수로 destroy해도 AWS가 삭제 거부
   skip_final_snapshot = true
 
   lifecycle {

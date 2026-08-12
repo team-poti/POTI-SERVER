@@ -66,3 +66,6 @@ infra/.terraform/
 infra/terraform.tfvars
 infra/*.tfstate
 infra/*.tfstate.backup
+infra/*.auto.tfvars
+infra/*.auto.tfvars.json
+infra/terraform.tfvars.json
