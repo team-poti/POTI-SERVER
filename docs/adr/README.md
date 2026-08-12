@@ -13,3 +13,4 @@ Architecture Decision Records. 설계 결정의 컨텍스트·결정 내용·이
 | [ADR-007](ADR-007-firebase-credentials-cd.md) | CD 파이프라인에서 Firebase 크리덴셜 복원 | 채택됨 | 2026.07 |
 | [ADR-008](ADR-008-expired-fcm-token-auto-delete.md) | 만료 FCM 토큰 자동 삭제 | 채택됨 | 2026.07 |
 | [ADR-009](ADR-009-address-line-single-field.md) | 배송지 주소 필드 구조 — 단일 addressLine 유지 | 채택됨 | 2026.08 |
+| [ADR-010](ADR-010-terraform-iac.md) | Terraform 기반 IaC 도입 및 기존 인프라 import | 채택됨 | 2026.08 |
