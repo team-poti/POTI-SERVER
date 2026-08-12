@@ -25,6 +25,10 @@ resource "aws_instance" "dev" {
     aws_security_group.dev_ec2.id,
   ]
 
+  lifecycle {                      
+    ignore_changes = [user_data]
+  }
+
   tags = {
     Name = "DEV EC2"
   }

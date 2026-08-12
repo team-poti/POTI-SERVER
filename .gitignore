@@ -60,3 +60,9 @@ application-local.yml
 .env
 secrets.properties
 src/main/resources/firebase-service-account.json
+
+### Terraform ###
+infra/.terraform/
+infra/terraform.tfvars
+infra/*.tfstate
+infra/*.tfstate.backup

@@ -10,6 +10,7 @@ resource "aws_subnet" "ec2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "172.31.32.0/20"
   availability_zone = "ap-northeast-2c"
+  map_public_ip_on_launch = true
 
   tags = {
     Name = "poti-ec2-subnet"
@@ -71,7 +72,7 @@ resource "aws_security_group" "prod_ec2" {
 # DEV EC2 보안그룹
 resource "aws_security_group" "dev_ec2" {
   name        = "launch-wizard-4"
-  description = "launch-wizard-4 created 2026-07-03T06:25:15.687Z"
+  description = "launch-wizard-4 created 2026-07-03T06:25:15.761Z"
   vpc_id      = aws_vpc.main.id
 
   tags = {
@@ -82,26 +83,26 @@ resource "aws_security_group" "dev_ec2" {
 # EC2 → RDS 연결 보안그룹
 resource "aws_security_group" "ec2_to_rds_6" {
   name        = "ec2-rds-6"
-  description = "Security group attached to instances to securely connect to poti-prod-db."
+  description = "Security group attached to instances to securely connect to poti-prod-db. Modification could lead to connection loss."
   vpc_id      = aws_vpc.main.id
 }
 
 resource "aws_security_group" "ec2_to_rds_7" {
   name        = "ec2-rds-7"
-  description = "Security group attached to instances to securely connect to poti-prod-db."
+  description = "Security group attached to instances to securely connect to poti-prod-db. Modification could lead to connection loss."
   vpc_id      = aws_vpc.main.id
 }
 
 # RDS → EC2 연결 보안그룹
 resource "aws_security_group" "rds_to_ec2_6" {
   name        = "rds-ec2-6"
-  description = "Security group attached to poti-prod-db to allow EC2 instances to connect."
+  description = "Security group attached to poti-prod-db to allow EC2 instances with specific security groups attached to connect to the database. Modification could lead to connection loss."
   vpc_id      = aws_vpc.main.id
 }
 
 resource "aws_security_group" "rds_to_ec2_7" {
   name        = "rds-ec2-7"
-  description = "Security group attached to poti-prod-db to allow EC2 instances to connect."
+  description = "Security group attached to poti-prod-db to allow EC2 instances with specific security groups attached to connect to the database. Modification could lead to connection loss."
   vpc_id      = aws_vpc.main.id
 }
 
