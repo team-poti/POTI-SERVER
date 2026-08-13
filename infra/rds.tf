@@ -19,7 +19,8 @@ resource "aws_db_instance" "prod" {
   ]
 
   deletion_protection = true # 실수로 destroy해도 AWS가 삭제 거부
-  skip_final_snapshot = true
+  skip_final_snapshot = false # 삭제 시 스냅샷 생성 여부, true면 스냅샷 생성 안함
+  final_snapshot_identifier = "poti-prod-db-final-snapshot"
 
   lifecycle {
     ignore_changes = [
