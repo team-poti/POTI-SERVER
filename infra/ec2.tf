@@ -13,6 +13,10 @@ resource "aws_instance" "prod" {
   tags = {
     Name = "PROD EC2"
   }
+
+  metadata_options {
+    http_tokens = "required" # IMDSv2 강제 (SSRF 시 자격증명 탈취 방어)
+  }
 }
 
 resource "aws_instance" "dev" {
@@ -31,5 +35,9 @@ resource "aws_instance" "dev" {
 
   tags = {
     Name = "DEV EC2"
+  }
+
+  metadata_options {
+    http_tokens = "required" # IMDSv2 강제 (SSRF 시 자격증명 탈취 방어)
   }
 }
