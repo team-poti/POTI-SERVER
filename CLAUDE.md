@@ -19,7 +19,8 @@
 - `NotificationType`: `TRADE` / `EVENT`
 - DB 저장은 항상 실행, FCM 발송은 유저 설정에 따라 분기
 - `FcmNotificationService`는 `@Profile("!test")`로 조건부 빈 — 테스트 환경에서는 알림이 DB에 저장되지 않음
-- `saveAndSend()` 패턴: DB 저장 → 설정 확인 → FCM 발송 순서
+- `saveAndSend()` 패턴: DB 저장 → 설정 확인 → **커밋 이후** FCM 발송 (AFTER_COMMIT, PR #258)
+  - 트랜잭션 롤백 시 FCM 미발송 보장 (`TransactionSynchronizationManager` 사용)
 - User 테이블에 `trade_notification_enabled`, `event_notification_enabled` 컬럼 (`TINYINT(1) DEFAULT 1`)
 
 ## 소셜 로그인 구현
