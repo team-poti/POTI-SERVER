@@ -259,7 +259,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
         .from(groupBuyPost)
         .join(groupBuyPost.artist, artist)
         .where(titleMatch.or(artistMatch))
-        .groupBy(groupBuyPost.title, artist.name, groupBuyPost.artist.id)
+        .groupBy(groupBuyPost.title, artist.name, artist.id)
         .orderBy(groupBuyPost.createdAt.max().desc())
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize() + 1)
