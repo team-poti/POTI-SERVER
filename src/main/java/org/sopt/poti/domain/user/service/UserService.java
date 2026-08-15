@@ -91,7 +91,6 @@ public class UserService {
   }
 
   // 참여 시 "내 배송지로 등록" 체크박스 처리
-  @Transactional
   public void saveAddressIfRequested(Long userId, boolean save, String receiverName,
       String zipcode, String addressLine, String phone) {
     if (!save) return;
