@@ -21,10 +21,10 @@
 
 - **Terraform**으로 AWS 리소스를 코드 관리한다. 코드는 앱 레포의 `infra/` 디렉토리에 둔다 (1인 운영 규모에서 별도 레포는 과함).
 - 상태 파일은 **S3 백엔드**(`poti-terraform-state` 버킷)에 저장한다.
-- 기존 리소스는 삭제 없이 `terraform import`로 편입하고, `terraform plan`이 **No changes**가 될 때까지 코드를 실제 설정에 맞춘다.
+- 기존 리소스는 삭제 없이 `terraform import`로 편입하고, `terraform plan`이 **No changes**가 될 때까지 코드를 실제 설정에 맞춘다. 단 `lifecycle.ignore_changes`로 선언한 속성(`password`, `engine_version`)은 plan에서 제외되므로 No changes가 해당 속성의 일치를 보장하지는 않는다.
 - 예외로 RDS는 마스터 패스워드 분실로 삭제 후 Terraform으로 재생성했다 (덤프 백업 보유, 엔드포인트 동일).
 - EC2 내부 컨테이너(앱, Redis, DEV MySQL, Dozzle)는 Terraform 대상이 아니며 기존 docker-compose 파일로 관리를 유지한다.
-- DB 패스워드는 `terraform.tfvars`(gitignore)로 분리한다. 추후 Parameter Store 전환 검토.
+- DB 패스워드는 `terraform.tfvars`(gitignore)로 분리한다. `var.db_password`는 `sensitive = true`로 선언했으나 Terraform 상태 파일(S3)에 평문으로 기록된다. 추후 AWS Secrets Manager 또는 Parameter Store 전환 시 상태 파일의 접근 제어(버킷 암호화, 최소 권한 IAM)도 함께 점검한다 (#238 참고).
 
 ---
 
@@ -39,7 +39,7 @@
 
 ## 결과
 
-- `terraform plan` 기준 코드와 실제 인프라 완전 일치 (No changes).
+- `terraform plan` 기준 Terraform이 관리하는 속성에 변경 없음 (No changes). `lifecycle.ignore_changes`로 제외한 `password`, `engine_version`은 별도 확인 필요.
 - 이후 인프라 변경은 콘솔 수동 변경 금지, `.tf` 수정 → `plan` → `apply` 흐름으로만 진행한다.
 - import 과정에서 얻은 교훈: 보안그룹 `description` 불일치는 재생성(destroy)을 유발하므로 plan의 `forces replacement` 표시를 반드시 확인해야 한다. EC2 `user_data`처럼 코드로 관리하지 않을 속성은 `lifecycle.ignore_changes`로 선언한다.
 - 한계: 인프라가 두 레이어(Terraform + docker-compose)로 나뉘며, EC2 재생성 시 컨테이너 기동은 아직 수동이다. EC2 재생성이 필요해지는 시점에 user_data 스크립트로 자동화한다.
