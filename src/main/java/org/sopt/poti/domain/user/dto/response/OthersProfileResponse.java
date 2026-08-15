@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 public record OthersProfileResponse(
         Long userId,
-        String email,
         String nickname,
         String profileImageUrl,
         Double ratingAvg,
