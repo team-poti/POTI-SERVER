@@ -44,7 +44,6 @@ public enum ErrorStatus {
   MALFORMED_JWT_TOKEN(40103, HttpStatus.UNAUTHORIZED, "손상된 토큰입니다."),
   SIGNATURE_INVALID_JWT_TOKEN(40104, HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 서명입니다."),
   MISSING_JWT_TOKEN(40105, HttpStatus.UNAUTHORIZED, "토큰이 누락되었습니다."),
-  UNAUTHORIZED_USER(40106, HttpStatus.UNAUTHORIZED, "로그인이 필요한 요청입니다."),
 
   /**
    * 403 Forbidden
