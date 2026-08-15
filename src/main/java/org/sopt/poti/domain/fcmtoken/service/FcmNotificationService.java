@@ -75,11 +75,14 @@ public class FcmNotificationService {
   private void saveAndSend(Long userId, String title, String body, NotificationType type, String deeplink) {
     notificationService.save(userId, title, body, type, deeplink);
 
-    userRepository.findById(userId).ifPresent(user -> {
-      if (isAllowed(user, type)) {
-        sendToUser(userId, title, body, deeplink);
-      }
-    });
+    User user = userRepository.findById(userId).orElse(null);
+    if (user == null) {
+      log.warn("알림 설정 조회 실패 — FCM 발송 skip: userId={}", userId);
+      return;
+    }
+    if (isAllowed(user, type)) {
+      sendToUser(userId, title, body, deeplink);
+    }
   }
 
   private boolean isAllowed(User user, NotificationType type) {

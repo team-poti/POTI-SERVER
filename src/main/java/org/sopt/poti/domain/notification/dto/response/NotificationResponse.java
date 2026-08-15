@@ -10,7 +10,7 @@ public record NotificationResponse(
     String body,
     NotificationType type,
     String deeplink,
-    boolean isRead,
+    boolean read,
     LocalDateTime createdAt
 ) {
   public static NotificationResponse from(Notification notification) {
@@ -20,7 +20,7 @@ public record NotificationResponse(
         notification.getBody(),
         notification.getType(),
         notification.getDeeplink(),
-        notification.isRead(),
+        notification.isRead(),  // isRead() = getter of field "read"
         notification.getCreatedAt()
     );
   }

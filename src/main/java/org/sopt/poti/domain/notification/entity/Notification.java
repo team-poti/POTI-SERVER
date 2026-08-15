@@ -41,7 +41,7 @@ public class Notification extends BaseTimeEntity {
   private String deeplink;
 
   @Column(name = "is_read", nullable = false)
-  private boolean isRead = false;
+  private boolean read = false;
 
   @Builder
   private Notification(Long userId, String title, String body, NotificationType type, String deeplink) {
