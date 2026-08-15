@@ -10,13 +10,11 @@ public record OthersProfileResponse(
         Double ratingAvg,
         String activityMessage,
         LocalDate joinedAt,
-        Boolean hasFavoriteArtist,
+        Summary participationSummary,
         Summary recruitSummary
 ) {
     public record Summary(
-            Integer total,
             Integer inProgress,
             Integer completed
     ) {}
 }
-

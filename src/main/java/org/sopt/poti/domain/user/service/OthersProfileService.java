@@ -5,6 +5,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
+import org.sopt.poti.domain.order.entity.OrderStatus;
+import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.user.dto.response.OthersProfileResponse;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.repository.UserRepository;
@@ -20,6 +22,7 @@ public class OthersProfileService {
 
   private final UserRepository userRepository;
   private final GroupBuyRepository groupBuyRepository;
+  private final OrderService orderService;
   private final ActivityMessageResolver activityMessageResolver;
 
   public OthersProfileResponse getProfile(Long userId) {
@@ -28,25 +31,25 @@ public class OthersProfileService {
 
     String activityMessage = activityMessageResolver.resolve(user.getLastActiveAt());
     LocalDate joinedAt = user.getCreatedAt().toLocalDate();
-    boolean hasFavoriteArtist = (user.getFavoriteArtist() != null);
 
-    int rTotal = groupBuyRepository.countByLeader_Id(userId);
+    List<OrderStatus> pInProgressStatuses = List.of(
+        OrderStatus.WAIT_PAY,
+        OrderStatus.WAIT_PAY_CHECK,
+        OrderStatus.PAID,
+        OrderStatus.SHIPPED
+    );
+    int pInProgress = orderService.countByUser_IdAndStatusIn(userId, pInProgressStatuses);
+    int pCompleted = orderService.countByUser_IdAndStatusIn(userId, List.of(OrderStatus.DELIVERED));
 
     List<GroupBuyPostStatus> rInProgressStatuses = List.of(
         GroupBuyPostStatus.RECRUITING,
+        GroupBuyPostStatus.CLOSED,
         GroupBuyPostStatus.PAYMENT_DONE,
         GroupBuyPostStatus.SHIPPING
     );
     int rInProgress = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rInProgressStatuses);
-
-    List<GroupBuyPostStatus> rCompletedStatuses = List.of(
-        GroupBuyPostStatus.CLOSED,
-        GroupBuyPostStatus.DELIVERED
-    );
-    int rCompleted = groupBuyRepository.countByLeader_IdAndStatusIn(userId, rCompletedStatuses);
-
-    OthersProfileResponse.Summary recruit = new OthersProfileResponse.Summary(rTotal, rInProgress,
-        rCompleted);
+    int rCompleted = groupBuyRepository.countByLeader_IdAndStatusIn(userId,
+        List.of(GroupBuyPostStatus.DELIVERED));
 
     return new OthersProfileResponse(
         user.getId(),
@@ -56,8 +59,8 @@ public class OthersProfileService {
         user.getRatingAvg(),
         activityMessage,
         joinedAt,
-        hasFavoriteArtist,
-        recruit
+        new OthersProfileResponse.Summary(pInProgress, pCompleted),
+        new OthersProfileResponse.Summary(rInProgress, rCompleted)
     );
   }
 }
