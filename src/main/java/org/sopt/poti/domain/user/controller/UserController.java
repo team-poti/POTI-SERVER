@@ -28,12 +28,12 @@ public class UserController {
 
   @Operation(summary = "최애 아티스트 변경", description = "마이페이지에서 최애 아티스트를 변경합니다. artistId null 시 최애 없음으로 변경됩니다.")
   @PatchMapping("/me/favorite-artist")
-  public ResponseEntity<ApiResponse<Void>> updateFavoriteArtist(
+  public ResponseEntity<ApiResponse<?>> updateFavoriteArtist(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
       @RequestBody UpdateFavoriteArtistRequest request
   ) {
     userService.updateFavoriteArtist(userPrincipal.getUserId(), request.artistId());
-    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, null));
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK));
   }
 
   @Operation(summary = "온보딩", description = "온보딩 정보(닉네임, 최애 설정) 입력")
