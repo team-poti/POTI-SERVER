@@ -53,7 +53,6 @@ public class OthersProfileService {
 
     return new OthersProfileResponse(
         user.getId(),
-        user.getEmail(),
         user.getNickname(),
         user.getProfileImageUrl(),
         user.getRatingAvg(),
