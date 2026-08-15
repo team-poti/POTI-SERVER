@@ -131,6 +131,13 @@ public class OrderCreateService {
         .sum();
     post.increaseCurrentQuantity(totalCount);
 
+    // 11 "내 배송지로 등록" 체크박스 처리
+    userService.saveAddressIfRequested(userId, request.saveAsMyAddress(),
+        request.deliveryInfo().receiverName(),
+        request.deliveryInfo().zipcode(),
+        request.deliveryInfo().addressLine(),
+        request.deliveryInfo().phone());
+
     if (fcmNotificationService != null) {
       fcmNotificationService.notifyNewParticipant(post, user.getNickname());
       if (post.getStatus() == GroupBuyPostStatus.CLOSED) {
