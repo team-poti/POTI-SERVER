@@ -16,8 +16,10 @@ import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.domain.feed.dto.request.FeedSearchCondition;
@@ -183,25 +185,11 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
 
   @Override
   public List<String> findTitlesByNgram(Long artistId, String keyword, int limit) {
-    // 키워드 전처리: "공구 뉴진스" -> "공구* 뉴진스*" (Boolean Mode 부분 일치)
-    // 각 단어 뒤에 *를 붙여서 Prefix 검색이 가능하게 함
-    // 특수문자 제거 (MySQL Boolean Mode 연산자들)
-    String sanitized = keyword.replaceAll("[+\\-<>~*()\"@]", " ").trim();
-
-    if (sanitized.isBlank()) {
-      return Collections.emptyList(); // 특수문자만 입력한 경우 빈 결과 반환
+    String searchKeyword = sanitizeForFulltext(keyword);
+    if (searchKeyword == null) {
+      return Collections.emptyList();
     }
 
-    String[] words = sanitized.split("\\s+");
-    StringBuilder sb = new StringBuilder();
-    for (String word : words) {
-      if (!word.isBlank()) { // 빈 문자열 체크 추가
-        sb.append("+").append(word).append("* ");
-      }
-    }
-    String searchKeyword = sb.toString().trim();
-
-    // Native Query 사용 (Hibernate로 우회)
     String sql = "SELECT DISTINCT title FROM group_buy_posts " +
         "WHERE artist_id = :artistId " +
         "AND MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) " +
@@ -212,6 +200,78 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
         .setParameter("keyword", searchKeyword)
         .setParameter("limit", limit)
         .getResultList();
+  }
+
+  @Override
+  public List<String> findTitlesByNgramGlobal(String keyword, int limit) {
+    String searchKeyword = sanitizeForFulltext(keyword);
+    if (searchKeyword == null) {
+      return Collections.emptyList();
+    }
+
+    String sql = "SELECT DISTINCT title FROM group_buy_posts " +
+        "WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) " +
+        "LIMIT :limit";
+
+    return em.createNativeQuery(sql)
+        .setParameter("keyword", searchKeyword)
+        .setParameter("limit", limit)
+        .getResultList();
+  }
+
+  // MySQL Boolean Mode 연산자 제거 후 prefix 검색 형태로 변환 ("공구 뉴진스" → "+공구* +뉴진스*")
+  private String sanitizeForFulltext(String keyword) {
+    String sanitized = keyword.replaceAll("[+\\-<>~*()\"@]", " ").trim();
+    if (sanitized.isBlank()) {
+      return null;
+    }
+    return Arrays.stream(sanitized.split("\\s+"))
+        .filter(w -> !w.isBlank())
+        .map(w -> "+" + w + "*")
+        .collect(Collectors.joining(" "));
+  }
+
+  @Override
+  public Slice<FeedGroupItem> searchByKeyword(String keyword, Pageable pageable) {
+    QGroupBuyPost subGroupBuyPost = new QGroupBuyPost("subGroupBuyPost");
+
+    BooleanExpression titleMatch = groupBuyPost.title.containsIgnoreCase(keyword);
+    BooleanExpression artistMatch = artist.name.containsIgnoreCase(keyword);
+
+    List<FeedGroupItem> content = queryFactory
+        .select(Projections.constructor(FeedGroupItem.class,
+            artist.name,
+            artist.id,
+            JPAExpressions.select(subGroupBuyPost.representativeImageUrl)
+                .from(subGroupBuyPost)
+                .where(subGroupBuyPost.id.eq(
+                    JPAExpressions.select(subGroupBuyPost.id.max())
+                        .from(subGroupBuyPost)
+                        .where(subGroupBuyPost.title.eq(groupBuyPost.title)
+                            .and(subGroupBuyPost.artist.id.eq(groupBuyPost.artist.id)))
+                )),
+            groupBuyPost.title,
+            groupBuyPost.id.count(),
+            new CaseBuilder()
+                .when(groupBuyPost.id.count().goe(5L)).then("인기")
+                .otherwise("").as("tag")
+        ))
+        .from(groupBuyPost)
+        .join(groupBuyPost.artist, artist)
+        .where(titleMatch.or(artistMatch))
+        .groupBy(groupBuyPost.title, artist.name, artist.id)
+        .orderBy(groupBuyPost.createdAt.max().desc())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize() + 1)
+        .fetch();
+
+    boolean hasNext = false;
+    if (content.size() > pageable.getPageSize()) {
+      content.remove(pageable.getPageSize());
+      hasNext = true;
+    }
+
+    return new SliceImpl<>(content, pageable, hasNext);
   }
 
   // 멤버 필터링: 선택한 멤버들이 '남아있는(주문되지 않은)' 상태여야 함
