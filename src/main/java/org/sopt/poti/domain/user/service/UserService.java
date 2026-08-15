@@ -4,6 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
 import org.sopt.poti.domain.artist.service.ArtistService;
+import org.sopt.poti.domain.user.dto.request.UpdateProfileRequest;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.user.entity.SocialType;
@@ -45,6 +46,13 @@ public class UserService {
         user.getNickname(),
         user.getFavoriteArtist() == null ? null : user.getFavoriteArtist().getId()
     );
+  }
+
+  @Transactional
+  public void updateProfile(Long userId, UpdateProfileRequest request) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+    user.updateProfile(request.nickname(), request.profileImageUrl());
   }
 
   @Transactional

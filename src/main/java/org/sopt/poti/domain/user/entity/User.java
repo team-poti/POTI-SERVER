@@ -108,6 +108,11 @@ public class User extends BaseSoftDeleteEntity {
     this.nickname = nickname;
   }
 
+  public void updateProfile(String nickname, String profileImageUrl) {
+    this.nickname = nickname;
+    this.profileImageUrl = profileImageUrl;
+  }
+
   public void updateFavoriteArtist(Artist artist) {
     this.favoriteArtist = artist;
   }
