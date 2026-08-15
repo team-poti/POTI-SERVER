@@ -7,6 +7,7 @@ import org.sopt.poti.domain.user.dto.request.UpdateAddressRequest;
 import org.sopt.poti.domain.user.dto.request.UpdateFavoriteArtistRequest;
 import org.sopt.poti.domain.user.dto.request.UpdateProfileRequest;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
+import org.sopt.poti.domain.user.dto.response.AccountResponse;
 import org.sopt.poti.domain.user.dto.response.UserAddressResponse;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.user.service.UserService;
@@ -29,6 +30,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
+
+  @Operation(summary = "내 계정 설정 조회", description = "내 계정 설정 화면에 필요한 닉네임, 이메일, 연결된 소셜 계정 정보를 반환합니다.")
+  @GetMapping("/me/account")
+  public ResponseEntity<ApiResponse<AccountResponse>> getMyAccount(
+      @AuthenticationPrincipal UserPrincipal userPrincipal
+  ) {
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK,
+        userService.getMyAccount(userPrincipal.getUserId())));
+  }
 
   @Operation(summary = "내 배송지 조회", description = "저장된 내 배송지를 조회합니다. 저장된 배송지가 없으면 null을 반환합니다.")
   @GetMapping("/me/address")

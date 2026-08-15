@@ -7,6 +7,7 @@ import org.sopt.poti.domain.artist.service.ArtistService;
 import org.sopt.poti.domain.user.dto.request.UpdateAddressRequest;
 import org.sopt.poti.domain.user.dto.request.UpdateProfileRequest;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
+import org.sopt.poti.domain.user.dto.response.AccountResponse;
 import org.sopt.poti.domain.user.dto.response.UserAddressResponse;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.user.entity.SocialType;
@@ -31,6 +32,10 @@ public class UserService {
   public User getUserById(Long userId) {
     return userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+  }
+
+  public AccountResponse getMyAccount(Long userId) {
+    return AccountResponse.from(getUserById(userId));
   }
 
   @Transactional
