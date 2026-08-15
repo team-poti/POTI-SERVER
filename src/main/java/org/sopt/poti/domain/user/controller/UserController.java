@@ -3,9 +3,11 @@ package org.sopt.poti.domain.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.user.dto.request.UpdateAddressRequest;
 import org.sopt.poti.domain.user.dto.request.UpdateFavoriteArtistRequest;
 import org.sopt.poti.domain.user.dto.request.UpdateProfileRequest;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
+import org.sopt.poti.domain.user.dto.response.UserAddressResponse;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.common.ApiResponse;
@@ -14,6 +16,7 @@ import org.sopt.poti.global.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +29,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
+
+  @Operation(summary = "내 배송지 조회", description = "저장된 내 배송지를 조회합니다. 저장된 배송지가 없으면 null을 반환합니다.")
+  @GetMapping("/me/address")
+  public ResponseEntity<ApiResponse<UserAddressResponse>> getMyAddress(
+      @AuthenticationPrincipal UserPrincipal userPrincipal
+  ) {
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK,
+        userService.getMyAddress(userPrincipal.getUserId())));
+  }
+
+  @Operation(summary = "내 배송지 저장/수정", description = "내 배송지를 저장하거나 수정합니다.")
+  @PatchMapping("/me/address")
+  public ResponseEntity<ApiResponse<?>> updateMyAddress(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @RequestBody UpdateAddressRequest request
+  ) {
+    userService.updateMyAddress(userPrincipal.getUserId(), request);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK));
+  }
 
   @Operation(summary = "마이페이지 프로필 편집", description = "닉네임과 프로필 사진 URL을 변경합니다. 프로필 사진은 Presigned URL로 S3 업로드 후 URL을 전달하세요.")
   @PatchMapping("/me/profile")

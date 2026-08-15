@@ -6,5 +6,6 @@ public record CreateOrderRequest (
         Long groupBuyPostId,
         Long shippingId,
         DeliveryInfoRequest deliveryInfo,
-        List<OrderItemRequest> items
+        List<OrderItemRequest> items,
+        boolean saveAsMyAddress
 ){}
