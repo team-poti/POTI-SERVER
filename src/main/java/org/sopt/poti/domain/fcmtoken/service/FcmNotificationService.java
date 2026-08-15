@@ -18,6 +18,8 @@ import org.sopt.poti.domain.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Service
@@ -80,7 +82,18 @@ public class FcmNotificationService {
       log.warn("알림 설정 조회 실패 — FCM 발송 skip: userId={}", userId);
       return;
     }
-    if (isAllowed(user, type)) {
+    if (!isAllowed(user, type)) {
+      return;
+    }
+
+    if (TransactionSynchronizationManager.isActualTransactionActive()) {
+      TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        @Override
+        public void afterCommit() {
+          sendToUser(userId, title, body, deeplink);
+        }
+      });
+    } else {
       sendToUser(userId, title, body, deeplink);
     }
   }
