@@ -10,7 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.domain.fcmtoken.repository.FcmTokenRepository;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
+import org.sopt.poti.domain.notification.entity.NotificationType;
+import org.sopt.poti.domain.notification.service.NotificationService;
 import org.sopt.poti.domain.order.entity.Order;
+import org.sopt.poti.domain.user.entity.User;
+import org.sopt.poti.domain.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,8 @@ import org.springframework.stereotype.Service;
 public class FcmNotificationService {
 
   private final FcmTokenRepository fcmTokenRepository;
+  private final NotificationService notificationService;
+  private final UserRepository userRepository;
 
   @Value("${app.deeplink.host}")
   private String deeplinkHost;
@@ -31,7 +37,7 @@ public class FcmNotificationService {
     String title = "새로운 참여자가 생겼어요 👥";
     String body = participantNickname + "님이 " + post.getTitle() + "에 참여했어요";
     String deeplink = deeplinkHost + "/recruiter-detail/" + post.getId();
-    sendToUser(post.getLeader().getId(), title, body, deeplink);
+    saveAndSend(post.getLeader().getId(), title, body, NotificationType.TRADE, deeplink);
   }
 
   // 참여자 입금 정보 제출(WAIT_PAY_CHECK) → 모집자에게
@@ -39,7 +45,7 @@ public class FcmNotificationService {
     String title = "입금 확인이 필요해요 ⏳";
     String body = post.getTitle() + " 입금 확인을 기다리는 참여자가 있어요";
     String deeplink = deeplinkHost + "/participant-manage/" + post.getId();
-    sendToUser(post.getLeader().getId(), title, body, deeplink);
+    saveAndSend(post.getLeader().getId(), title, body, NotificationType.TRADE, deeplink);
   }
 
   // 모든 참여자 입금 완료(PAYMENT_DONE) → 모집자에게 배송 시작 요청
@@ -47,7 +53,7 @@ public class FcmNotificationService {
     String title = "배송 시작이 필요해요 ⏳";
     String body = post.getTitle() + " 모든 참여자의 입금이 완료되었어요. 배송을 시작해주세요!";
     String deeplink = deeplinkHost + "/participant-manage/" + post.getId();
-    sendToUser(post.getLeader().getId(), title, body, deeplink);
+    saveAndSend(post.getLeader().getId(), title, body, NotificationType.TRADE, deeplink);
   }
 
   // 분철글 상태 변경 → 모집자 + 참여자 전원 (딥링크 수신자별 상이)
@@ -58,12 +64,29 @@ public class FcmNotificationService {
     String body = post.getTitle() + " " + statusMsg;
 
     String leaderDeeplink = deeplinkHost + "/recruiter-detail/" + post.getId();
-    sendToUser(post.getLeader().getId(), title, body, leaderDeeplink);
+    saveAndSend(post.getLeader().getId(), title, body, NotificationType.TRADE, leaderDeeplink);
 
     participantOrders.forEach(order -> {
       String participantDeeplink = deeplinkHost + "/participant-detail/" + order.getId();
-      sendToUser(order.getUser().getId(), title, body, participantDeeplink);
+      saveAndSend(order.getUser().getId(), title, body, NotificationType.TRADE, participantDeeplink);
     });
+  }
+
+  private void saveAndSend(Long userId, String title, String body, NotificationType type, String deeplink) {
+    notificationService.save(userId, title, body, type, deeplink);
+
+    userRepository.findById(userId).ifPresent(user -> {
+      if (isAllowed(user, type)) {
+        sendToUser(userId, title, body, deeplink);
+      }
+    });
+  }
+
+  private boolean isAllowed(User user, NotificationType type) {
+    return switch (type) {
+      case TRADE -> user.isTradeNotificationEnabled();
+      case EVENT -> user.isEventNotificationEnabled();
+    };
   }
 
   private void sendToUser(Long userId, String title, String body, String deeplink) {

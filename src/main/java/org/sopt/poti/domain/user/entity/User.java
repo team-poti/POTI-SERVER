@@ -66,6 +66,12 @@ public class User extends BaseSoftDeleteEntity {
   @Column(name = "withdrawal_reason", length = 500)
   private String withdrawalReason;
 
+  @Column(name = "trade_notification_enabled", nullable = false)
+  private boolean tradeNotificationEnabled = true;
+
+  @Column(name = "event_notification_enabled", nullable = false)
+  private boolean eventNotificationEnabled = true;
+
   @Builder
   private User(String socialId, SocialType socialType, String email, String nickname,
       String profileImageUrl, Artist favoriteArtist, Role role) {
@@ -116,6 +122,11 @@ public class User extends BaseSoftDeleteEntity {
 
   public void unsuspend() {
     this.status = UserStatus.ACTIVE;
+  }
+
+  public void updateNotificationSettings(boolean tradeNotificationEnabled, boolean eventNotificationEnabled) {
+    this.tradeNotificationEnabled = tradeNotificationEnabled;
+    this.eventNotificationEnabled = eventNotificationEnabled;
   }
 
   public void withdraw(String reason) {
