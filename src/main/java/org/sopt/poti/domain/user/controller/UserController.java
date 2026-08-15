@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.user.dto.request.UpdateFavoriteArtistRequest;
+import org.sopt.poti.domain.user.dto.request.UpdateProfileRequest;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.user.service.UserService;
@@ -25,6 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
+
+  @Operation(summary = "마이페이지 프로필 편집", description = "닉네임과 프로필 사진 URL을 변경합니다. 프로필 사진은 Presigned URL로 S3 업로드 후 URL을 전달하세요.")
+  @PatchMapping("/me/profile")
+  public ResponseEntity<ApiResponse<?>> updateProfile(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @Validated @RequestBody UpdateProfileRequest request
+  ) {
+    userService.updateProfile(userPrincipal.getUserId(), request);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK));
+  }
 
   @Operation(summary = "최애 아티스트 변경", description = "마이페이지에서 최애 아티스트를 변경합니다. artistId null 시 최애 없음으로 변경됩니다.")
   @PatchMapping("/me/favorite-artist")
