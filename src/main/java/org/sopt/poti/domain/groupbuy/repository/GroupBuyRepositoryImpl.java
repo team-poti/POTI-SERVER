@@ -214,6 +214,77 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
         .getResultList();
   }
 
+  @Override
+  public List<String> findTitlesByNgramGlobal(String keyword, int limit) {
+    String sanitized = keyword.replaceAll("[+\\-<>~*()\"@]", " ").trim();
+    if (sanitized.isBlank()) {
+      return Collections.emptyList();
+    }
+
+    String[] words = sanitized.split("\\s+");
+    StringBuilder sb = new StringBuilder();
+    for (String word : words) {
+      if (!word.isBlank()) {
+        sb.append("+").append(word).append("* ");
+      }
+    }
+    String searchKeyword = sb.toString().trim();
+
+    String sql = "SELECT DISTINCT title FROM group_buy_posts " +
+        "WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) " +
+        "LIMIT :limit";
+
+    return em.createNativeQuery(sql)
+        .setParameter("keyword", searchKeyword)
+        .setParameter("limit", limit)
+        .getResultList();
+  }
+
+  @Override
+  public Slice<FeedGroupItem> searchByKeyword(String keyword, Pageable pageable) {
+    QGroupBuyPost subGroupBuyPost = new QGroupBuyPost("subGroupBuyPost");
+
+    BooleanExpression titleMatch = Expressions.booleanTemplate(
+        "function('match_against', {0}, {1})", groupBuyPost.title, keyword
+    );
+    BooleanExpression artistMatch = groupBuyPost.artist.name.containsIgnoreCase(keyword);
+
+    List<FeedGroupItem> content = queryFactory
+        .select(Projections.constructor(FeedGroupItem.class,
+            artist.name,
+            artist.id,
+            JPAExpressions.select(subGroupBuyPost.representativeImageUrl)
+                .from(subGroupBuyPost)
+                .where(subGroupBuyPost.id.eq(
+                    JPAExpressions.select(subGroupBuyPost.id.max())
+                        .from(subGroupBuyPost)
+                        .where(subGroupBuyPost.title.eq(groupBuyPost.title)
+                            .and(subGroupBuyPost.artist.id.eq(groupBuyPost.artist.id)))
+                )),
+            groupBuyPost.title,
+            groupBuyPost.id.count(),
+            new CaseBuilder()
+                .when(groupBuyPost.id.count().goe(5L)).then("인기")
+                .otherwise("").as("tag")
+        ))
+        .from(groupBuyPost)
+        .join(groupBuyPost.artist, artist)
+        .where(titleMatch.or(artistMatch))
+        .groupBy(groupBuyPost.title, artist.name, groupBuyPost.artist.id)
+        .orderBy(groupBuyPost.createdAt.max().desc())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize() + 1)
+        .fetch();
+
+    boolean hasNext = false;
+    if (content.size() > pageable.getPageSize()) {
+      content.remove(pageable.getPageSize());
+      hasNext = true;
+    }
+
+    return new SliceImpl<>(content, pageable, hasNext);
+  }
+
   // 멤버 필터링: 선택한 멤버들이 '남아있는(주문되지 않은)' 상태여야 함
   private BooleanExpression memberIdsIn(List<Long> memberIds) {
     if (memberIds == null || memberIds.isEmpty()) {
