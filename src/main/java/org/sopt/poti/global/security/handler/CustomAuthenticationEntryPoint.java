@@ -30,7 +30,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        ApiResponse<?> apiResponse = ApiResponse.fail(ErrorStatus.UNAUTHORIZED_USER);
+        ApiResponse<?> apiResponse = ApiResponse.fail(ErrorStatus.MISSING_JWT_TOKEN);
 
         objectMapper.writeValue(response.getWriter(), apiResponse);
     }
