@@ -3,6 +3,7 @@ package org.sopt.poti.domain.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.user.dto.request.UpdateFavoriteArtistRequest;
 import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
 import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
 import org.sopt.poti.domain.user.service.UserService;
@@ -24,6 +25,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
+
+  @Operation(summary = "최애 아티스트 변경", description = "마이페이지에서 최애 아티스트를 변경합니다. artistId null 시 최애 없음으로 변경됩니다.")
+  @PatchMapping("/me/favorite-artist")
+  public ResponseEntity<ApiResponse<?>> updateFavoriteArtist(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @RequestBody UpdateFavoriteArtistRequest request
+  ) {
+    userService.updateFavoriteArtist(userPrincipal.getUserId(), request.artistId());
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK));
+  }
 
   @Operation(summary = "온보딩", description = "온보딩 정보(닉네임, 최애 설정) 입력")
   @PatchMapping("/onboarding")

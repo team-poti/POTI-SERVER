@@ -47,6 +47,15 @@ public class UserService {
     );
   }
 
+  @Transactional
+  public void updateFavoriteArtist(Long userId, Long artistId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+
+    Artist favorite = (artistId == null) ? null : artistService.getById(artistId);
+    user.updateFavoriteArtist(favorite);
+  }
+
   public Optional<User> findUserBySocialIdAndSocialType(String socialId, SocialType socialType) {
     return userRepository.findBySocialIdAndSocialType(socialId, socialType);
   }
