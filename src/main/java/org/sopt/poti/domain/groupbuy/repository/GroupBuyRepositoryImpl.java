@@ -244,9 +244,7 @@ public class GroupBuyRepositoryImpl implements GroupBuyRepositoryCustom {
   public Slice<FeedGroupItem> searchByKeyword(String keyword, Pageable pageable) {
     QGroupBuyPost subGroupBuyPost = new QGroupBuyPost("subGroupBuyPost");
 
-    BooleanExpression titleMatch = Expressions.booleanTemplate(
-        "function('match_against', {0}, {1})", groupBuyPost.title, keyword
-    );
+    BooleanExpression titleMatch = groupBuyPost.title.containsIgnoreCase(keyword);
     BooleanExpression artistMatch = groupBuyPost.artist.name.containsIgnoreCase(keyword);
 
     List<FeedGroupItem> content = queryFactory
