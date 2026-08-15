@@ -8,9 +8,13 @@ import org.sopt.poti.domain.auth.dto.request.AuthRequest;
 import org.sopt.poti.domain.auth.dto.request.LogoutRequest;
 import org.sopt.poti.domain.auth.dto.request.TokenReissueRequest;
 import org.sopt.poti.domain.auth.dto.request.WithdrawRequest;
+import java.util.Arrays;
+import java.util.List;
 import org.sopt.poti.domain.auth.dto.response.AuthResponse;
 import org.sopt.poti.domain.auth.dto.response.TokenReissueResponse;
+import org.sopt.poti.domain.auth.dto.response.WithdrawalReasonResponse;
 import org.sopt.poti.domain.auth.service.AuthService;
+import org.sopt.poti.domain.user.entity.WithdrawalReason;
 import org.sopt.poti.global.common.ApiResponse;
 import org.sopt.poti.global.common.SuccessStatus;
 import org.sopt.poti.global.error.BusinessException;
@@ -19,6 +23,7 @@ import org.sopt.poti.global.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -68,15 +73,23 @@ public class AuthController {
     );
   }
 
+  @GetMapping("/withdrawal/reasons")
+  @Operation(summary = "탈퇴 사유 목록 조회", description = "회원탈퇴 시 선택할 수 있는 사유 목록을 반환합니다.")
+  public ResponseEntity<ApiResponse<List<WithdrawalReasonResponse>>> getWithdrawalReasons() {
+    List<WithdrawalReasonResponse> reasons = Arrays.stream(WithdrawalReason.values())
+        .map(WithdrawalReasonResponse::from)
+        .toList();
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, reasons));
+  }
+
   @DeleteMapping("/withdrawal")
-  @Operation(summary = "회원탈퇴", description = "회원탈퇴 시 SoftDelete 방향으로 처리되며, email, socialId, nickname 등이 탈퇴처리 됩니다. 진행 중인 거래가 있으면 탈퇴할 수 없습니다.")
+  @Operation(summary = "회원탈퇴", description = "탈퇴 사유를 선택하여 회원탈퇴합니다. 진행 중인 거래가 있으면 탈퇴할 수 없습니다.")
   public ResponseEntity<ApiResponse<Void>> withdrawal(
       @RequestHeader("Authorization") String accessToken,
       @AuthenticationPrincipal UserPrincipal userPrincipal,
-      @RequestBody(required = false) WithdrawRequest request
+      @RequestBody @Valid WithdrawRequest request
   ) {
-    String reason = (request != null) ? request.reason() : null;
-    authService.withdraw(extractToken(accessToken), userPrincipal.getUserId(), reason);
+    authService.withdraw(extractToken(accessToken), userPrincipal.getUserId(), request.reason().name());
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK)
     );
