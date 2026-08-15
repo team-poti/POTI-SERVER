@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -67,7 +68,7 @@ class SearchServiceTest {
       when(artistService.searchArtists("뉴진스")).thenReturn(
           ArtistTitlesResponse.of(List.of(new ArtistTitleDto(1L, "뉴진스")))
       );
-      when(groupBuyRepository.findTitlesByNgramGlobal("뉴진스", 5)).thenReturn(
+      when(groupBuyRepository.findTitlesByNgramGlobal(eq("뉴진스"), anyInt())).thenReturn(
           List.of("뉴진스 버블검 포카")
       );
 
@@ -87,7 +88,7 @@ class SearchServiceTest {
       when(artistService.searchArtists("버블검")).thenReturn(
           ArtistTitlesResponse.of(List.of())
       );
-      when(groupBuyRepository.findTitlesByNgramGlobal("버블검", 5)).thenReturn(
+      when(groupBuyRepository.findTitlesByNgramGlobal(eq("버블검"), anyInt())).thenReturn(
           List.of("뉴진스 버블검 포카", "버블검 앨범")
       );
 
@@ -104,7 +105,7 @@ class SearchServiceTest {
       when(artistService.searchArtists("없는검색어")).thenReturn(
           ArtistTitlesResponse.of(List.of())
       );
-      when(groupBuyRepository.findTitlesByNgramGlobal("없는검색어", 5)).thenReturn(
+      when(groupBuyRepository.findTitlesByNgramGlobal(eq("없는검색어"), anyInt())).thenReturn(
           List.of()
       );
 
