@@ -9,6 +9,6 @@ public record CreateOrderRequest(
         @NotNull(message = "분철글 ID를 입력해주세요.") Long groupBuyPostId,
         @NotNull(message = "배송 방법을 선택해주세요.") Long shippingId,
         @NotNull(message = "배송지 정보를 입력해주세요.") @Valid DeliveryInfoRequest deliveryInfo,
-        @NotEmpty(message = "주문 항목을 선택해주세요.") List<OrderItemRequest> items,
+        @NotEmpty(message = "주문 항목을 선택해주세요.") List<@NotNull(message = "주문 항목을 입력해주세요.") @Valid OrderItemRequest> items,
         boolean saveAsMyAddress
 ) {}
