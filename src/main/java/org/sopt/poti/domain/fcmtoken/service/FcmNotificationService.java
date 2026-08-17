@@ -149,8 +149,6 @@ public class FcmNotificationService {
     return switch (status) {
       case CLOSED -> "📋";
       case PAYMENT_DONE -> "💵";
-      case SHIPPING -> "🚚";
-      case DELIVERED -> "📦";
       default -> "📢";
     };
   }
@@ -159,8 +157,6 @@ public class FcmNotificationService {
     return switch (status) {
       case CLOSED -> "모집이 완료되었어요";
       case PAYMENT_DONE -> "입금이 완료되었어요";
-      case SHIPPING -> "배송이 시작되었어요";
-      case DELIVERED -> "배송이 완료되었어요";
       default -> "상태가 변경되었어요";
     };
   }

@@ -29,7 +29,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
   @Query("SELECT COUNT(o) FROM Order o WHERE o.groupBuyPost.id = :postId AND o.status <> :status")
   long countUnpaidOrders(@Param("postId") Long postId, @Param("status") OrderStatus status);
 
-  @Query("SELECT o FROM Order o JOIN FETCH o.groupBuyPost p JOIN FETCH p.leader WHERE o.id = :orderId")
+  @Query("SELECT o FROM Order o JOIN FETCH o.user JOIN FETCH o.groupBuyPost p JOIN FETCH p.leader WHERE o.id = :orderId")
   Optional<Order> findByIdWithPostAndLeader(@Param("orderId") Long orderId);
 
   @Query("""
