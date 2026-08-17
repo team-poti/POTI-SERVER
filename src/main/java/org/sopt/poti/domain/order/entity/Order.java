@@ -44,6 +44,7 @@ public class Order extends BaseTimeEntity {
   private Long id;
 
   @Version
+  @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
   private Long version;
 
   @Enumerated(EnumType.STRING)
