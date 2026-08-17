@@ -56,4 +56,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
 
   @Query("SELECT o FROM Order o JOIN FETCH o.user WHERE o.groupBuyPost.id = :postId")
   List<Order> findOrdersWithUserByGroupBuyPost_Id(@Param("postId") Long postId);
+
+  @Query("SELECT o FROM Order o JOIN FETCH o.user JOIN FETCH o.groupBuyPost WHERE o.groupBuyPost.id = :postId AND o.status = :status")
+  List<Order> findByGroupBuyPostIdAndStatus(@Param("postId") Long postId, @Param("status") OrderStatus status);
 }

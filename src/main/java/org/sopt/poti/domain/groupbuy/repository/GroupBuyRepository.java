@@ -1,5 +1,7 @@
 package org.sopt.poti.domain.groupbuy.repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -32,4 +34,10 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuyPost, Long>,
   boolean existsByOrderNumber(String orderNumber);
 
   Page<GroupBuyPost> findByStatus(GroupBuyPostStatus status, Pageable pageable);
+
+  @Query("SELECT p FROM GroupBuyPost p JOIN FETCH p.leader WHERE p.status = :status AND p.recruitDeadline = :date")
+  List<GroupBuyPost> findByStatusAndRecruitDeadline(@Param("status") GroupBuyPostStatus status, @Param("date") LocalDate date);
+
+  @Query("SELECT p FROM GroupBuyPost p JOIN FETCH p.leader WHERE p.status = :status AND p.closedAt BETWEEN :start AND :end")
+  List<GroupBuyPost> findByStatusAndClosedAtBetween(@Param("status") GroupBuyPostStatus status, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

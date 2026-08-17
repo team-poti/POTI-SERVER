@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -75,6 +76,9 @@ public class GroupBuyPost extends BaseTimeEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 30)
   private GroupBuyPostStatus status;
+
+  @Column(name = "closed_at")
+  private LocalDateTime closedAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
@@ -174,9 +178,13 @@ public class GroupBuyPost extends BaseTimeEntity {
     order.setGroupBuyPost(this);
   }
 
-  // 분철글 상태 변경 메서드
   public void updateStatus(GroupBuyPostStatus status) {
     this.status = status;
+  }
+
+  public void close() {
+    this.status = GroupBuyPostStatus.CLOSED;
+    this.closedAt = LocalDateTime.now();
   }
 
   //분철글 참여자 다 찼을때 분철글 상태 변경하는 메서드
@@ -188,7 +196,7 @@ public class GroupBuyPost extends BaseTimeEntity {
 
     if (this.currentQuantity >= this.goalQuantity) {
       this.currentQuantity = this.goalQuantity;
-      this.status = GroupBuyPostStatus.CLOSED;
+      close();
     }
   }
 

@@ -74,6 +74,22 @@ public class FcmNotificationService {
     saveAndSend(post.getLeader().getId(), title, body, NotificationType.TRADE, deeplink);
   }
 
+  // 모집 마감 1일 전 → 모집자에게
+  public void notifyRecruitDeadlineTomorrow(GroupBuyPost post) {
+    String title = "모집 마감이 내일이에요 ⏰";
+    String body = post.getTitle() + " 모집 마감이 내일까지예요. 참여자 현황을 확인해보세요";
+    String deeplink = deeplinkHost + "/recruiter-detail/" + post.getId();
+    saveAndSend(post.getLeader().getId(), title, body, NotificationType.TRADE, deeplink);
+  }
+
+  // 입금 마감 N시간/분 전 → WAIT_PAY 참여자에게
+  public void notifyPaymentDeadlineReminder(Order order, String remainingTime) {
+    String title = "입금 마감까지 " + remainingTime + " 남았어요 ⏰";
+    String body = order.getGroupBuyPost().getTitle() + " 입금을 완료한 후 입금 완료 버튼을 눌러주세요";
+    String deeplink = deeplinkHost + "/participant-detail/" + order.getId();
+    saveAndSend(order.getUser().getId(), title, body, NotificationType.TRADE, deeplink);
+  }
+
   // 분철글 상태 변경 → 모집자 + 참여자 전원 (딥링크 수신자별 상이)
   public void notifyPostStatusChanged(GroupBuyPost post, List<Order> participantOrders) {
     String emoji = resolveEmoji(post.getStatus());
