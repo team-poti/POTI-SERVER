@@ -89,8 +89,7 @@ public class ParticipationService {
       if (post.getStatus() != GroupBuyPostStatus.DELIVERED) {
         post.completePostDelivery();
         if (fcmNotificationService != null) {
-          List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(postId);
-          fcmNotificationService.notifyPostStatusChanged(post, participantOrders);
+          fcmNotificationService.notifyAllDelivered(post);
         }
       }
     }

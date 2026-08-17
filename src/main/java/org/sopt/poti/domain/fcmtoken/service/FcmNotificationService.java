@@ -50,6 +50,22 @@ public class FcmNotificationService {
     saveAndSend(post.getLeader().getId(), title, body, NotificationType.TRADE, deeplink);
   }
 
+  // 모집자가 개별 참여자 송장 등록(SHIPPED) → 해당 참여자에게
+  public void notifyShippingStarted(Order order) {
+    String title = "배송이 시작되었어요 🚚";
+    String body = order.getGroupBuyPost().getTitle() + " 배송이 시작되었어요";
+    String deeplink = deeplinkHost + "/participant-detail/" + order.getId();
+    saveAndSend(order.getUser().getId(), title, body, NotificationType.TRADE, deeplink);
+  }
+
+  // 모든 참여자 수령 완료(DELIVERED) → 모집자에게
+  public void notifyAllDelivered(GroupBuyPost post) {
+    String title = "분철이 모두 완료되었어요 📦";
+    String body = post.getTitle() + " 모든 참여자의 배송이 완료되었어요";
+    String deeplink = deeplinkHost + "/recruiter-detail/" + post.getId();
+    saveAndSend(post.getLeader().getId(), title, body, NotificationType.TRADE, deeplink);
+  }
+
   // 모든 참여자 입금 완료(PAYMENT_DONE) → 모집자에게 배송 시작 요청
   public void notifyNeedStartDelivery(GroupBuyPost post) {
     String title = "배송 시작이 필요해요 ⏳";
@@ -133,8 +149,6 @@ public class FcmNotificationService {
     return switch (status) {
       case CLOSED -> "📋";
       case PAYMENT_DONE -> "💵";
-      case SHIPPING -> "🚚";
-      case DELIVERED -> "📦";
       default -> "📢";
     };
   }
@@ -143,8 +157,6 @@ public class FcmNotificationService {
     return switch (status) {
       case CLOSED -> "모집이 완료되었어요";
       case PAYMENT_DONE -> "입금이 완료되었어요";
-      case SHIPPING -> "배송이 시작되었어요";
-      case DELIVERED -> "배송이 완료되었어요";
       default -> "상태가 변경되었어요";
     };
   }

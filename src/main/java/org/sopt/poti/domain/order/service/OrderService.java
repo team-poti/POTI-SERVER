@@ -116,17 +116,17 @@ public class OrderService {
     deliveryService.saveDelivery(delivery);
     order.startDelivery();
 
+    if (fcmNotificationService != null) {
+      fcmNotificationService.notifyShippingStarted(order);
+    }
+
     long notShippedCount = orderRepository.countByGroupBuyPostIdAndStatusIn(
         groupBuyPost.getId(),
         List.of(OrderStatus.WAIT_PAY, OrderStatus.WAIT_PAY_CHECK, OrderStatus.PAID)
     );
 
-    if (notShippedCount == 0 && groupBuyPost.getStatus() != GroupBuyPostStatus.DELIVERED) { // 모두 배송 시작(SHIPPED) 이상
+    if (notShippedCount == 0 && groupBuyPost.getStatus() != GroupBuyPostStatus.DELIVERED) {
       groupBuyPost.updateStatus(GroupBuyPostStatus.SHIPPING);
-      if (fcmNotificationService != null) {
-        List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(groupBuyPost.getId());
-        fcmNotificationService.notifyPostStatusChanged(groupBuyPost, participantOrders);
-      }
     }
 
     return new StartDeliveryResponse(orderId, order.getStatus(),
