@@ -4,14 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.notification.dto.request.NotificationSettingRequest;
-import org.sopt.poti.domain.notification.dto.response.NotificationResponse;
+import org.sopt.poti.domain.notification.dto.response.NotificationListResponse;
 import org.sopt.poti.domain.notification.dto.response.NotificationSettingResponse;
 import org.sopt.poti.domain.notification.service.NotificationService;
 import org.sopt.poti.global.common.ApiResponse;
 import org.sopt.poti.global.common.SuccessStatus;
 import org.sopt.poti.global.security.UserPrincipal;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,13 +30,13 @@ public class NotificationController {
 
   @GetMapping("/notifications")
   @Operation(summary = "알림 내역 조회", description = "내 알림 내역을 최신순으로 페이징 조회합니다.")
-  public ResponseEntity<ApiResponse<Slice<NotificationResponse>>> getNotifications(
+  public ResponseEntity<ApiResponse<NotificationListResponse>> getNotifications(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
       @PageableDefault(size = 20) Pageable pageable
   ) {
     return ResponseEntity.ok(ApiResponse.success(
         SuccessStatus.OK,
-        notificationService.getNotifications(userPrincipal.getUserId(), pageable)
+        NotificationListResponse.from(notificationService.getNotifications(userPrincipal.getUserId(), pageable))
     ));
   }
 
