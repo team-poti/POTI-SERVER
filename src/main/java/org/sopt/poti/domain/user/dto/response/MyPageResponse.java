@@ -11,6 +11,7 @@ public record MyPageResponse(
     String activityMessage,
     LocalDate joinedAt,
     Boolean hasFavoriteArtist,
+    Long favoriteArtistId,
     String favoriteArtistName,
     Summary participationSummary,
     Summary recruitSummary

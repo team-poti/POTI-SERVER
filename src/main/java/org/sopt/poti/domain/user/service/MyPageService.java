@@ -33,9 +33,8 @@ public class MyPageService {
     LocalDate joinedAt = user.getCreatedAt().toLocalDate();
     boolean hasFavoriteArtist = (user.getFavoriteArtist() != null);
 
-    String favoriteArtistName = hasFavoriteArtist
-        ? user.getFavoriteArtist().getName()
-        : null;
+    Long favoriteArtistId = hasFavoriteArtist ? user.getFavoriteArtist().getId() : null;
+    String favoriteArtistName = hasFavoriteArtist ? user.getFavoriteArtist().getName() : null;
 
     List<OrderStatus> pInProgressStatuses = List.of(
         OrderStatus.WAIT_PAY,
@@ -74,6 +73,7 @@ public class MyPageService {
         activityMessage,
         joinedAt,
         hasFavoriteArtist,
+        favoriteArtistId,
         favoriteArtistName,
         participation,
         recruit
