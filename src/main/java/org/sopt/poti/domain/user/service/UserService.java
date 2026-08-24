@@ -17,6 +17,7 @@ import org.sopt.poti.domain.user.repository.UserAddressRepository;
 import org.sopt.poti.domain.user.repository.UserRepository;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,9 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserAddressRepository userAddressRepository;
   private final ArtistService artistService;
+
+  @Value("${spring.cloud.aws.s3.base_url}")
+  private String s3BaseUrl;
 
   public User getUserById(Long userId) {
     return userRepository.findById(userId)
@@ -62,7 +66,11 @@ public class UserService {
   public void updateProfile(Long userId, UpdateProfileRequest request) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
-    user.updateProfile(request.nickname(), request.profileImageUrl());
+    String imageUrl = request.profileImageUrl();
+    if (imageUrl != null && !imageUrl.startsWith("http")) {
+      imageUrl = s3BaseUrl + imageUrl;
+    }
+    user.updateProfile(request.nickname(), imageUrl);
   }
 
   @Transactional
