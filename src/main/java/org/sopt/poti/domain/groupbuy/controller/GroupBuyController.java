@@ -77,9 +77,8 @@ public class GroupBuyController {
       @PathVariable Long postId,
       @AuthenticationPrincipal UserPrincipal userPrincipal
   ) {
-
-    GroupBuyDetailResponse groupBuyDetail = groupBuyService.getGroupBuyDetail(
-        userPrincipal.getUserId(), postId);
+    Long userId = userPrincipal != null ? userPrincipal.getUserId() : null;
+    GroupBuyDetailResponse groupBuyDetail = groupBuyService.getGroupBuyDetail(userId, postId);
 
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyDetail));
   }

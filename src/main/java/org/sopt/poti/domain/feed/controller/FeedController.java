@@ -33,8 +33,8 @@ public class FeedController {
       @RequestParam(required = false, defaultValue = "HOT") String sort,
       @PageableDefault(size = 10) Pageable pageable
   ) {
-    FeedResponse response = feedService.getFeed(userPrincipal.getUserId(), artistId, sort,
-        pageable);
+    Long userId = userPrincipal != null ? userPrincipal.getUserId() : null;
+    FeedResponse response = feedService.getFeed(userId, artistId, sort, pageable);
     return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, response));
   }
 }

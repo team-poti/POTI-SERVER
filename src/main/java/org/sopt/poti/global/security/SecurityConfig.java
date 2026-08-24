@@ -35,6 +35,13 @@ public class SecurityConfig {
       "/favicon.ico",
       "/css/**",
       "/dev/login", // 개발자용 자동 로그인 (토큰 발급)
+      // 게스트 허용 (ADR-011)
+      "/api/v1/home",
+      "/api/v1/feeds",
+      "/api/v1/posts/{postId}",
+      "/api/v1/search/**",
+      "/api/v1/artists/**",
+      "/api/v1/shippings",
   };
 
   @Bean
