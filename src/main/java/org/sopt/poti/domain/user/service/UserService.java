@@ -67,7 +67,7 @@ public class UserService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
     String imageUrl = request.profileImageUrl();
-    if (imageUrl != null && !imageUrl.startsWith("http")) {
+    if (imageUrl != null && !imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
       imageUrl = s3BaseUrl + imageUrl;
     }
     user.updateProfile(request.nickname(), imageUrl);
