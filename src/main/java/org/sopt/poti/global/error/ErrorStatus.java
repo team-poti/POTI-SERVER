@@ -66,6 +66,7 @@ public enum ErrorStatus {
   PAYMENT_NOT_FOUND(40408, HttpStatus.NOT_FOUND, "존재하지 않는 결제 정보입니다."),
   GROUP_BUY_SHIPPING_NOT_FOUND(40409, HttpStatus.NOT_FOUND, "해당 분철글에서 선택한 배송 옵션을 찾을 수 없습니다."),
   GROUP_BUY_OPTION_NOT_FOUND(40410, HttpStatus.NOT_FOUND, "존재하지 않는 분철 옵션이 포함되어 있습니다."),
+  NOTIFICATION_NOT_FOUND(40411, HttpStatus.NOT_FOUND, "존재하지 않는 알림입니다."),
 
   /**
    * 409 Conflict

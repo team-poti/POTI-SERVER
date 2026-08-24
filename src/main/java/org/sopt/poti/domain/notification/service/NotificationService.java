@@ -54,6 +54,16 @@ public class NotificationService {
     return NotificationSettingResponse.from(user);
   }
 
+  @Transactional
+  public void readNotification(Long userId, Long notificationId) {
+    Notification notification = notificationRepository.findById(notificationId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.NOTIFICATION_NOT_FOUND));
+    if (!notification.getUserId().equals(userId)) {
+      throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
+    }
+    notification.markAsRead();
+  }
+
   private User getUser(Long userId) {
     return userRepository.findById(userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));

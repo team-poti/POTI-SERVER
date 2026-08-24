@@ -43,6 +43,10 @@ public class Notification extends BaseTimeEntity {
   @Column(name = "is_read", nullable = false)
   private boolean read = false;
 
+  public void markAsRead() {
+    this.read = true;
+  }
+
   @Builder
   private Notification(Long userId, String title, String body, NotificationType type, String deeplink) {
     this.userId = userId;
