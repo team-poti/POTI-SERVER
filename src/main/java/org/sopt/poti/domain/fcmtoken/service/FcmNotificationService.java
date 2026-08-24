@@ -107,7 +107,7 @@ public class FcmNotificationService {
   }
 
   private void saveAndSend(Long userId, String title, String body, NotificationType type, String deeplink) {
-    notificationService.save(userId, title, body, type, deeplink);
+    Long notificationId = notificationService.save(userId, title, body, type, deeplink);
 
     User user = userRepository.findById(userId).orElse(null);
     if (user == null) {
@@ -122,11 +122,11 @@ public class FcmNotificationService {
       TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
         @Override
         public void afterCommit() {
-          sendToUser(userId, title, body, deeplink);
+          sendToUser(userId, title, body, deeplink, notificationId);
         }
       });
     } else {
-      sendToUser(userId, title, body, deeplink);
+      sendToUser(userId, title, body, deeplink, notificationId);
     }
   }
 
@@ -137,20 +137,21 @@ public class FcmNotificationService {
     };
   }
 
-  private void sendToUser(Long userId, String title, String body, String deeplink) {
+  private void sendToUser(Long userId, String title, String body, String deeplink, Long notificationId) {
     List<String> tokens = fcmTokenRepository.findAllByUser_Id(userId).stream()
         .map(fcmToken -> fcmToken.getToken())
         .toList();
-    tokens.forEach(token -> send(token, title, body, deeplink));
+    tokens.forEach(token -> send(token, title, body, deeplink, notificationId));
   }
 
-  private void send(String token, String title, String body, String deeplink) {
+  private void send(String token, String title, String body, String deeplink, Long notificationId) {
     try {
       Message message = Message.builder()
           .setToken(token)
           .putData("title", title)
           .putData("body", body)
           .putData("deeplink", deeplink)
+          .putData("notificationId", String.valueOf(notificationId))
           .build();
       FirebaseMessaging.getInstance().send(message);
     } catch (FirebaseMessagingException e) {

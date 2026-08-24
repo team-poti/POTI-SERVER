@@ -24,14 +24,14 @@ public class NotificationService {
   private final UserRepository userRepository;
 
   @Transactional
-  public void save(Long userId, String title, String body, NotificationType type, String deeplink) {
-    notificationRepository.save(Notification.builder()
+  public Long save(Long userId, String title, String body, NotificationType type, String deeplink) {
+    return notificationRepository.save(Notification.builder()
         .userId(userId)
         .title(title)
         .body(body)
         .type(type)
         .deeplink(deeplink)
-        .build());
+        .build()).getId();
   }
 
   @Transactional(readOnly = true)
