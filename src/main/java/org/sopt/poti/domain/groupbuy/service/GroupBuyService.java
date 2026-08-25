@@ -247,7 +247,7 @@ public class GroupBuyService {
         .artist(groupBuyPost.getArtist().getName())
         .artistId(groupBuyPost.getArtist().getId())
         .images(imageResponseList)
-        .isMyPost(groupBuyPost.getLeader().getId().equals(userId))
+        .isMyPost(userId != null && groupBuyPost.getLeader().getId().equals(userId))
         .status(groupBuyPost.getStatus().name())
         .shippingOptions(shippingResponseList)
         .uploader(uploaderResponse)

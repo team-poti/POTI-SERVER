@@ -26,30 +26,28 @@ public class HomeService {
   private static final int ITEM_LIMIT = 5;
 
   public HomeResponse getHomeData(Long userId) {
-    User user = userService.getUserById(userId);
-
-    String nickname = user.getNickname();
+    String nickname = null;
     String mainArtistName = null;
     Long mainArtistId = null;
 
     List<HomeGroupBuyItem> myGroupItems;
     List<HomeGroupBuyItem> otherGroupItems;
 
-    if (user.getFavoriteArtist() != null) {
-      Long favoriteArtistId = user.getFavoriteArtist().getId();
-      mainArtistName = user.getFavoriteArtist().getName();
-      mainArtistId = user.getFavoriteArtist().getId();
+    if (userId != null) {
+      User user = userService.getUserById(userId);
+      nickname = user.getNickname();
+      mainArtistName = user.getFavoriteArtist() != null ? user.getFavoriteArtist().getName() : null;
+      mainArtistId = user.getFavoriteArtist() != null ? user.getFavoriteArtist().getId() : null;
+    }
 
-      myGroupItems = groupBuyRepository.findPopularTitlesByArtist(favoriteArtistId,
-          ITEM_LIMIT);
+    if (mainArtistId != null) {
+      myGroupItems = groupBuyRepository.findPopularTitlesByArtist(mainArtistId, ITEM_LIMIT);
 
-      // 내 최애 아티스트의 공구글이 없을 때에도 전체 인기순으로 보여주기
       if (myGroupItems.isEmpty()) {
-        myGroupItems = groupBuyRepository.findPopularTitlesByArtist(null,
-            ITEM_LIMIT);
+        myGroupItems = groupBuyRepository.findPopularTitlesByArtist(null, ITEM_LIMIT);
       }
 
-      otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(favoriteArtistId,
+      otherGroupItems = groupBuyRepository.findPopularTitlesExcludingArtist(mainArtistId,
           "RANDOM", ITEM_LIMIT);
     } else {
       log.info("유저 ID {}의 최애 아티스트가 설정되지 않아 전체 인기 상품을 조회합니다.", userId);

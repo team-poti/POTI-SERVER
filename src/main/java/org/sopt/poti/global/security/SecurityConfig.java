@@ -37,6 +37,15 @@ public class SecurityConfig {
       "/dev/login", // 개발자용 자동 로그인 (토큰 발급)
   };
 
+  // 게스트 허용 (ADR-011)
+  private static final String[] GUEST_LIST = {
+      "/api/v1/home",
+      "/api/v1/feeds",
+      "/api/v1/search/**",
+      "/api/v1/artists/**",
+      "/api/v1/shippings",
+  };
+
   @Bean
   @Order(2)
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,8 +57,14 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안 함
 
         // URL별 권한 설정
+        // {postId} 패턴이 /posts/me 등 seller 경로를 삼키지 않도록 authenticated() 규칙을 먼저 선언
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(WHITE_LIST).permitAll()
+            .requestMatchers("/api/v1/posts/me").authenticated()
+            .requestMatchers("/api/v1/posts/{postId}/participants").authenticated()
+            .requestMatchers("/api/v1/posts/sale/{postId}").authenticated()
+            .requestMatchers(GUEST_LIST).permitAll()
+            .requestMatchers("/api/v1/posts/{postId}").permitAll()
             .anyRequest().authenticated()
         )
 

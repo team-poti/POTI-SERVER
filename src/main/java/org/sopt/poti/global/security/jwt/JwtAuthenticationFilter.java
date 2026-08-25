@@ -34,29 +34,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     String jwt = getJwtFromRequest(request);
 
-    if (jwt != null) { // JWT가 존재할 경우에만 유효성 검사 및 인증 처리
-      tokenProvider.validateToken(jwt); // 여기서 예외 발생 시 JwtExceptionFilter가 잡음
-      Long userId = tokenProvider.getUserIdFromToken(jwt);
+    if (jwt != null) {
+      try {
+        tokenProvider.validateToken(jwt);
+        Long userId = tokenProvider.getUserIdFromToken(jwt);
 
-      // User 엔티티 조회 (UserPrincipal 생성을 위해 필요)
-      User user = userRepository.findById(userId)
-          .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
 
-      if (user.getStatus() == UserStatus.SUSPENDED) {
-        throw new BusinessException(ErrorStatus.USER_SUSPENDED);
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+          throw new BusinessException(ErrorStatus.USER_SUSPENDED);
+        }
+
+        UserPrincipal userPrincipal = UserPrincipal.create(user);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+            userPrincipal, null, userPrincipal.getAuthorities());
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+      } catch (BusinessException e) {
+        // USER_SUSPENDED는 게스트 접근도 막아야 하므로 재throw
+        if (e.getErrorStatus() == ErrorStatus.USER_SUSPENDED) {
+          throw e;
+        }
+        // 만료·위변조 토큰 등 인증 실패 시 인증 없이 계속 진행
+        // permitAll 엔드포인트는 게스트로 처리되고, 인증 필요 엔드포인트는 이후 필터에서 401 반환
+        log.warn("JWT 인증 실패 (게스트로 처리): {}", e.getErrorStatus().getMessage());
       }
-
-      UserPrincipal userPrincipal = UserPrincipal.create(user);
-      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-          userPrincipal, null, userPrincipal.getAuthorities());
-      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-      SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-    // JWT가 없거나 유효하지 않아도 필터 체인은 계속 진행.
-    // SecurityConfig에서 .anyRequest().authenticated()로 설정했으므로,
-    // 토큰이 없거나 유효하지 않아 인증 객체가 SecurityContext에 없으면
-    // 다음 필터에서 Unauthorized (401) 처리됨.
 
     filterChain.doFilter(request, response);
   }

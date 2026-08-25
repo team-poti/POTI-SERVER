@@ -23,7 +23,16 @@ public class FeedService {
   private final GroupBuyRepository groupBuyRepository;
 
   public FeedResponse getFeed(Long userId, Long artistId, String sort, Pageable pageable) {
-    User user = userService.getUserById(userId);
+    String nickname = null;
+    String mainArtist = null;
+    Long mainArtistId = null;
+
+    if (userId != null) {
+      User user = userService.getUserById(userId);
+      nickname = user.getNickname();
+      mainArtist = user.getFavoriteArtist() != null ? user.getFavoriteArtist().getName() : null;
+      mainArtistId = user.getFavoriteArtist() != null ? user.getFavoriteArtist().getId() : null;
+    }
 
     log.info("1st :{}", sort);
     FeedSearchCondition condition = FeedSearchCondition.builder()
@@ -35,17 +44,7 @@ public class FeedService {
     log.info("2st :{}", condition.sort());
     Slice<FeedGroupItem> feedItems = groupBuyRepository.findFeedItems(condition, pageable);
 
-    String mainArtist =
-        user.getFavoriteArtist() != null ? user.getFavoriteArtist().getName() : null;
-
-    Long mainArtistId = user.getFavoriteArtist() != null ? user.getFavoriteArtist().getId() : null;
-
-    return FeedResponse.of(
-        user.getNickname(),
-        mainArtist,
-        mainArtistId,
-        feedItems.hasNext(),
-        feedItems.getContent()
-    );
+    return FeedResponse.of(nickname, mainArtist, mainArtistId, feedItems.hasNext(),
+        feedItems.getContent());
   }
 }

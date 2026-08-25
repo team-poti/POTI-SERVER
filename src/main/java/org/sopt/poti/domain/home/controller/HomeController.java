@@ -26,7 +26,8 @@ public class HomeController {
   @Operation(summary = "홈 화면 조회", description = "사용자의 닉네임, 최애 아티스트 공구, 다른 아티스트 공구, 배너 정보를 조회합니다.")
   public ResponseEntity<ApiResponse<HomeResponse>> getHomeData(
       @AuthenticationPrincipal UserPrincipal userPrincipal) {
-    HomeResponse response = homeService.getHomeData(userPrincipal.getUserId());
+    Long userId = userPrincipal != null ? userPrincipal.getUserId() : null;
+    HomeResponse response = homeService.getHomeData(userId);
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK, response)
     );
