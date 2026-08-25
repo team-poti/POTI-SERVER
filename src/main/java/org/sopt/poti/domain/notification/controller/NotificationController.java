@@ -52,6 +52,15 @@ public class NotificationController {
     ));
   }
 
+  @PatchMapping("/notifications/read-all")
+  @Operation(summary = "알림 전체 읽음 처리", description = "읽지 않은 알림을 모두 읽음 처리합니다.")
+  public ResponseEntity<ApiResponse<Void>> readAllNotifications(
+      @AuthenticationPrincipal UserPrincipal userPrincipal
+  ) {
+    notificationService.readAllNotifications(userPrincipal.getUserId());
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, null));
+  }
+
   @PatchMapping("/notifications/{notificationId}/read")
   @Operation(summary = "알림 읽음 처리", description = "알림 클릭 시 해당 알림을 읽음 처리합니다.")
   public ResponseEntity<ApiResponse<Void>> readNotification(

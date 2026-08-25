@@ -55,6 +55,11 @@ public class NotificationService {
   }
 
   @Transactional
+  public void readAllNotifications(Long userId) {
+    notificationRepository.markAllAsReadByUserId(userId);
+  }
+
+  @Transactional
   public void readNotification(Long userId, Long notificationId) {
     Notification notification = notificationRepository.findById(notificationId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.NOTIFICATION_NOT_FOUND));
