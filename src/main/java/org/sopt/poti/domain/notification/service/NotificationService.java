@@ -61,11 +61,8 @@ public class NotificationService {
 
   @Transactional
   public void readNotification(Long userId, Long notificationId) {
-    Notification notification = notificationRepository.findById(notificationId)
+    Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.NOTIFICATION_NOT_FOUND));
-    if (!notification.getUserId().equals(userId)) {
-      throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
-    }
     notification.markAsRead();
   }
 
