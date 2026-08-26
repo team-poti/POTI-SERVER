@@ -24,14 +24,14 @@ public class NotificationService {
   private final UserRepository userRepository;
 
   @Transactional
-  public void save(Long userId, String title, String body, NotificationType type, String deeplink) {
-    notificationRepository.save(Notification.builder()
+  public Long save(Long userId, String title, String body, NotificationType type, String deeplink) {
+    return notificationRepository.save(Notification.builder()
         .userId(userId)
         .title(title)
         .body(body)
         .type(type)
         .deeplink(deeplink)
-        .build());
+        .build()).getId();
   }
 
   @Transactional(readOnly = true)
@@ -52,6 +52,18 @@ public class NotificationService {
     User user = getUser(userId);
     user.updateNotificationSettings(request.tradeNotificationEnabled(), request.eventNotificationEnabled());
     return NotificationSettingResponse.from(user);
+  }
+
+  @Transactional
+  public void readAllNotifications(Long userId) {
+    notificationRepository.markAllAsReadByUserId(userId);
+  }
+
+  @Transactional
+  public void readNotification(Long userId, Long notificationId) {
+    Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.NOTIFICATION_NOT_FOUND));
+    notification.markAsRead();
   }
 
   private User getUser(Long userId) {
