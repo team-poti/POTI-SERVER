@@ -1,8 +1,13 @@
 package org.sopt.poti.domain.admin.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.artist.entity.Artist;
+import org.sopt.poti.domain.artist.repository.ArtistRepository;
+import org.sopt.poti.domain.artist.repository.MemberRepository;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
 import org.sopt.poti.domain.fcmtoken.service.FcmTokenService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
@@ -17,6 +22,7 @@ import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +36,37 @@ public class AdminService {
   private final OrderRepository orderRepository;
   private final RefreshTokenRepository refreshTokenRepository;
   private final FcmTokenService fcmTokenService;
+  private final ArtistRepository artistRepository;
+  private final MemberRepository memberRepository;
+
+  public long countArtists() {
+    return artistRepository.count();
+  }
+
+  public List<Artist> getArtists() {
+    return artistRepository.findAll(Sort.by("name"));
+  }
+
+  public Map<Long, Long> getArtistPostCounts() {
+    return artistRepository.findAll().stream()
+        .collect(Collectors.toMap(Artist::getId, a -> groupBuyRepository.countByArtist_Id(a.getId())));
+  }
+
+  @Transactional
+  public void createArtist(String name, String logoImageUrl) {
+    artistRepository.save(Artist.create(name, logoImageUrl.isBlank() ? null : logoImageUrl));
+  }
+
+  @Transactional
+  public void deleteArtist(Long artistId) {
+    Artist artist = artistRepository.findById(artistId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.ARTIST_NOT_FOUND));
+    if (groupBuyRepository.existsByArtist_Id(artistId)) {
+      throw new BusinessException(ErrorStatus.ARTIST_HAS_POSTS);
+    }
+    memberRepository.deleteByArtist(artist);
+    artistRepository.delete(artist);
+  }
 
   public long countUsers() {
     return userRepository.count();

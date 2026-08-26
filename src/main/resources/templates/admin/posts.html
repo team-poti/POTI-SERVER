@@ -30,9 +30,9 @@
       <tbody>
         <tr th:each="post : ${posts.content}">
           <td class="cell-id" th:text="${post.id}"></td>
-          <td><strong th:text="${post.title}"></strong></td>
-          <td class="cell-sub" th:text="${post.artist.name}"></td>
-          <td class="cell-sub" th:text="${post.leader.nickname}"></td>
+          <td class="cell-truncate" style="max-width:220px;"><strong th:text="${post.title}" th:title="${post.title}"></strong></td>
+          <td class="cell-sub cell-truncate" style="max-width:90px;" th:text="${post.artist.name}" th:title="${post.artist.name}"></td>
+          <td class="cell-sub cell-truncate" style="max-width:90px;" th:text="${post.leader.nickname}" th:title="${post.leader.nickname}"></td>
           <td>
             <span class="badge-pill"
                   th:classappend="'status-' + ${post.status.name().toLowerCase()}"

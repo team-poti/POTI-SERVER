@@ -300,6 +300,132 @@ body {
 .filter-tab:hover { border-color: var(--accent); color: var(--accent); }
 .filter-tab.is-active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
+/* ── Cell Truncate ── */
+.cell-truncate {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Artist Logo ── */
+.artist-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+.artist-logo-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ── Add Button ── */
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.btn-add:hover { filter: brightness(0.9); }
+
+/* ── Modal ── */
+.admin-modal {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
+}
+.admin-modal .modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-modal .modal-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.admin-modal .modal-body { padding: 20px 24px; }
+.admin-modal .modal-footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+  gap: 8px;
+}
+.btn-close-sm { width: 24px; height: 24px; }
+
+.form-group-admin {}
+.form-label-admin {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.form-label-admin .required { color: #ef4444; margin-left: 2px; }
+.form-label-admin .optional { color: var(--text-muted); font-weight: 400; }
+.form-input-admin {
+  width: 100%;
+  padding: 9px 13px;
+  font-size: 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input-admin:focus { border-color: var(--accent); }
+.form-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin: 5px 0 0;
+}
+
+.btn-modal-cancel {
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-modal-cancel:hover { background: var(--border); }
+.btn-modal-submit {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.btn-modal-submit:hover { filter: brightness(0.9); }
+
+/* ── Artist Post Count Badges ── */
+.badge-has-posts { background: #dbeafe; color: #1d4ed8; }
+.badge-no-posts  { background: #f1f5f9; color: #94a3b8; }
+
 /* ── Empty State ── */
 .empty-state {
   padding: 52px 0;

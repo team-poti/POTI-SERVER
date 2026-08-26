@@ -33,6 +33,10 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuyPost, Long>,
 
   boolean existsByOrderNumber(String orderNumber);
 
+  boolean existsByArtist_Id(Long artistId);
+
+  long countByArtist_Id(Long artistId);
+
   Page<GroupBuyPost> findByStatus(GroupBuyPostStatus status, Pageable pageable);
 
   @Query("SELECT p FROM GroupBuyPost p JOIN FETCH p.leader WHERE p.status = :status AND p.recruitDeadline = :date")
