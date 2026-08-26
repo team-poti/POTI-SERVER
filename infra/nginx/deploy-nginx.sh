@@ -9,10 +9,10 @@ KEY=~/documents/poti/poti-key.pem
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [ "$ENV" = "dev" ]; then
-  HOST=ubuntu@3.34.207.84
+  HOST=ubuntu@${DEV_HOST:?DEV_HOST 환경변수를 설정하세요 (export DEV_HOST=<IP>)}
   SITES="dev-app.poti.kr dev.poti.kr"
 elif [ "$ENV" = "prod" ]; then
-  HOST=ubuntu@${PROD_HOST:?PROD_HOST 환경변수를 설정하세요}
+  HOST=ubuntu@${PROD_HOST:?PROD_HOST 환경변수를 설정하세요 (export PROD_HOST=<IP>)}
   SITES="app.poti.kr"
 else
   echo "사용법: $0 [dev|prod]"
