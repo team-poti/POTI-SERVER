@@ -38,7 +38,7 @@ jobs:
             sudo cp /tmp/nginx-deploy/dev-app.poti.kr /etc/nginx/sites-available/dev-app.poti.kr
             sudo ln -sf /etc/nginx/sites-available/dev.poti.kr /etc/nginx/sites-enabled/dev.poti.kr
             sudo ln -sf /etc/nginx/sites-available/dev-app.poti.kr /etc/nginx/sites-enabled/dev-app.poti.kr
-            sudo nginx -t && sudo systemctl restart nginx
+            sudo nginx -t && sudo systemctl reload nginx
 
   deploy-prod:
     if: github.ref == 'refs/heads/main'
@@ -69,4 +69,4 @@ jobs:
           script: |
             sudo cp /tmp/nginx-deploy/app.poti.kr /etc/nginx/sites-available/app.poti.kr
             sudo ln -sf /etc/nginx/sites-available/app.poti.kr /etc/nginx/sites-enabled/app.poti.kr
-            sudo nginx -t && sudo systemctl restart nginx
+            sudo nginx -t && sudo systemctl reload nginx

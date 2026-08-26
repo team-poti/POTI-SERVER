@@ -21,6 +21,10 @@ fi
 
 echo "### [$ENV] nginx 설정 배포 시작"
 
+# service-url.inc 없으면 초기값 생성 (신규 서버 대응)
+ssh -i "$KEY" "$HOST" \
+  "[ -f /etc/nginx/conf.d/service-url.inc ] || echo 'set \$service_url http://127.0.0.1:8080;' | sudo tee /etc/nginx/conf.d/service-url.inc"
+
 # sites-available 복사
 for SITE in $SITES; do
   echo "### $SITE 설정 복사..."
@@ -29,8 +33,8 @@ for SITE in $SITES; do
     sudo ln -sf /etc/nginx/sites-available/$SITE /etc/nginx/sites-enabled/$SITE"
 done
 
-# nginx 문법 검사 및 재시작
+# nginx 문법 검사 및 reload (연결 중단 없이 설정 반영)
 echo "### nginx 문법 검사..."
-ssh -i "$KEY" "$HOST" "sudo nginx -t && sudo systemctl restart nginx"
+ssh -i "$KEY" "$HOST" "sudo nginx -t && sudo systemctl reload nginx"
 
 echo "### ✅ 배포 완료"
