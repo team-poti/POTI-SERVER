@@ -23,7 +23,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          source: "infra/nginx/sites-available/dev.poti.kr,infra/nginx/sites-available/dev-app.poti.kr,infra/nginx/conf.d/service-url.inc"
+          source: "infra/nginx/sites-available/dev.poti.kr,infra/nginx/sites-available/dev-app.poti.kr"
           target: "/tmp/nginx-deploy"
           strip_components: 3
 
@@ -56,7 +56,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          source: "infra/nginx/sites-available/app.poti.kr,infra/nginx/conf.d/service-url.inc"
+          source: "infra/nginx/sites-available/app.poti.kr"
           target: "/tmp/nginx-deploy"
           strip_components: 3
 
