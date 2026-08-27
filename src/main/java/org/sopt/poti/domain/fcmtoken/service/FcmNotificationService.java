@@ -1,12 +1,19 @@
 package org.sopt.poti.domain.fcmtoken.service;
 
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
+import com.google.firebase.messaging.ApsAlert;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MessagingErrorCode;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sopt.poti.domain.fcmtoken.entity.DeviceType;
+import org.sopt.poti.domain.fcmtoken.entity.FcmToken;
 import org.sopt.poti.domain.fcmtoken.repository.FcmTokenRepository;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPost;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
@@ -138,13 +145,20 @@ public class FcmNotificationService {
   }
 
   private void sendToUser(Long userId, String title, String body, String deeplink, Long notificationId) {
-    List<String> tokens = fcmTokenRepository.findAllByUser_Id(userId).stream()
-        .map(fcmToken -> fcmToken.getToken())
-        .toList();
-    tokens.forEach(token -> send(token, title, body, deeplink, notificationId));
+    Map<DeviceType, List<String>> tokensByType = fcmTokenRepository.findAllByUser_Id(userId).stream()
+        .collect(Collectors.groupingBy(
+            FcmToken::getDeviceType,
+            Collectors.mapping(FcmToken::getToken, Collectors.toList())
+        ));
+
+    tokensByType.getOrDefault(DeviceType.ANDROID, List.of())
+        .forEach(token -> sendAndroid(token, title, body, deeplink, notificationId));
+
+    tokensByType.getOrDefault(DeviceType.IOS, List.of())
+        .forEach(token -> sendIos(token, title, body, deeplink, notificationId));
   }
 
-  private void send(String token, String title, String body, String deeplink, Long notificationId) {
+  private void sendAndroid(String token, String title, String body, String deeplink, Long notificationId) {
     try {
       Message message = Message.builder()
           .setToken(token)
@@ -155,11 +169,37 @@ public class FcmNotificationService {
           .build();
       FirebaseMessaging.getInstance().send(message);
     } catch (FirebaseMessagingException e) {
-      if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-        fcmTokenRepository.deleteByToken(token);
-      }
-      log.warn("FCM 발송 실패: error={}", e.getMessage());
+      handleSendFailure(token, e);
     }
+  }
+
+  private void sendIos(String token, String title, String body, String deeplink, Long notificationId) {
+    try {
+      Message message = Message.builder()
+          .setToken(token)
+          .setApnsConfig(ApnsConfig.builder()
+              .setAps(Aps.builder()
+                  .setAlert(ApsAlert.builder()
+                      .setTitle(title)
+                      .setBody(body)
+                      .build())
+                  .setSound("default")
+                  .build())
+              .putCustomData("deeplink", deeplink)
+              .putCustomData("notificationId", String.valueOf(notificationId))
+              .build())
+          .build();
+      FirebaseMessaging.getInstance().send(message);
+    } catch (FirebaseMessagingException e) {
+      handleSendFailure(token, e);
+    }
+  }
+
+  private void handleSendFailure(String token, FirebaseMessagingException e) {
+    if (e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+      fcmTokenRepository.deleteByToken(token);
+    }
+    log.warn("FCM 발송 실패: error={}", e.getMessage());
   }
 
   private String resolveEmoji(GroupBuyPostStatus status) {
