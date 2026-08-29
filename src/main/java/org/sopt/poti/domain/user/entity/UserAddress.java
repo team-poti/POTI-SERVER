@@ -33,27 +33,32 @@ public class UserAddress {
   @Column(length = 10)
   private String zipcode;
 
-  @Column(name = "address_line", length = 255)
-  private String addressLine;
+  @Column(name = "address", length = 255)
+  private String address;
+
+  @Column(name = "address_detail", length = 255)
+  private String addressDetail;
 
   @Column(length = 20)
   private String phone;
 
   public static UserAddress create(User user, String receiverName, String zipcode,
-      String addressLine, String phone) {
-    UserAddress address = new UserAddress();
-    address.user = user;
-    address.receiverName = receiverName;
-    address.zipcode = zipcode;
-    address.addressLine = addressLine;
-    address.phone = phone;
-    return address;
+      String address, String addressDetail, String phone) {
+    UserAddress userAddress = new UserAddress();
+    userAddress.user = user;
+    userAddress.receiverName = receiverName;
+    userAddress.zipcode = zipcode;
+    userAddress.address = address;
+    userAddress.addressDetail = addressDetail;
+    userAddress.phone = phone;
+    return userAddress;
   }
 
-  public void update(String receiverName, String zipcode, String addressLine, String phone) {
+  public void update(String receiverName, String zipcode, String address, String addressDetail, String phone) {
     this.receiverName = receiverName;
     this.zipcode = zipcode;
-    this.addressLine = addressLine;
+    this.address = address;
+    this.addressDetail = addressDetail;
     this.phone = phone;
   }
 }

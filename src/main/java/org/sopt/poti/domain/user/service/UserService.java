@@ -96,18 +96,18 @@ public class UserService {
     userAddressRepository.findByUserId(userId)
         .ifPresentOrElse(
             address -> address.update(request.receiverName(), request.zipcode(),
-                request.addressLine(), request.phone()),
+                request.address(), request.addressDetail(), request.phone()),
             () -> userAddressRepository.save(
                 UserAddress.create(user, request.receiverName(), request.zipcode(),
-                    request.addressLine(), request.phone()))
+                    request.address(), request.addressDetail(), request.phone()))
         );
   }
 
   // 참여 시 "내 배송지로 등록" 체크박스 처리
   public void saveAddressIfRequested(Long userId, boolean save, String receiverName,
-      String zipcode, String addressLine, String phone) {
+      String zipcode, String address, String addressDetail, String phone) {
     if (!save) return;
-    updateMyAddress(userId, new UpdateAddressRequest(receiverName, zipcode, addressLine, phone));
+    updateMyAddress(userId, new UpdateAddressRequest(receiverName, zipcode, address, addressDetail, phone));
   }
 
   public Optional<User> findUserBySocialIdAndSocialType(String socialId, SocialType socialType) {

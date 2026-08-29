@@ -41,6 +41,7 @@ public record ParticipationDetailResponse(
       String receiver,
       String zipcode,
       String address,
+      String addressDetail,
       String phone,
       String carrier,
       String trackingNumber,

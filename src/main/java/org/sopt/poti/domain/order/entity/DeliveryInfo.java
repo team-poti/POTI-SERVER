@@ -18,8 +18,11 @@ public class DeliveryInfo {
   @Column(length = 10)
   private String zipcode;
 
-  @Column(name = "address_line", length = 255)
-  private String addressLine;
+  @Column(name = "address", length = 255)
+  private String address;
+
+  @Column(name = "address_detail", length = 255)
+  private String addressDetail;
 
   @Column(length = 20)
   @NotBlank(message = "휴대폰 번호는 필수입니다.")
@@ -29,12 +32,14 @@ public class DeliveryInfo {
   public DeliveryInfo(
       String receiverName,
       String zipcode,
-      String addressLine,
+      String address,
+      String addressDetail,
       String phone
   ) {
     this.receiverName = receiverName;
     this.zipcode = zipcode;
-    this.addressLine = addressLine;
+    this.address = address;
+    this.addressDetail = addressDetail;
     this.phone = phone;
   }
 }
