@@ -5,15 +5,17 @@ import org.sopt.poti.domain.user.entity.UserAddress;
 public record UserAddressResponse(
     String receiverName,
     String zipcode,
-    String addressLine,
+    String address,
+    String addressDetail,
     String phone
 ) {
-  public static UserAddressResponse from(UserAddress address) {
+  public static UserAddressResponse from(UserAddress userAddress) {
     return new UserAddressResponse(
-        address.getReceiverName(),
-        address.getZipcode(),
-        address.getAddressLine(),
-        address.getPhone()
+        userAddress.getReceiverName(),
+        userAddress.getZipcode(),
+        userAddress.getAddress(),
+        userAddress.getAddressDetail(),
+        userAddress.getPhone()
     );
   }
 }

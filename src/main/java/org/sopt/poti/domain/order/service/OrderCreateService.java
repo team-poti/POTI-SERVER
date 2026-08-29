@@ -78,7 +78,8 @@ public class OrderCreateService {
     DeliveryInfo deliveryInfo = new DeliveryInfo(
         request.deliveryInfo().receiverName(),
         request.deliveryInfo().zipcode(),
-        request.deliveryInfo().addressLine(),
+        request.deliveryInfo().address(),
+        request.deliveryInfo().addressDetail(),
         request.deliveryInfo().phone()
     );
 
@@ -135,7 +136,8 @@ public class OrderCreateService {
     userService.saveAddressIfRequested(userId, request.saveAsMyAddress(),
         request.deliveryInfo().receiverName(),
         request.deliveryInfo().zipcode(),
-        request.deliveryInfo().addressLine(),
+        request.deliveryInfo().address(),
+        request.deliveryInfo().addressDetail(),
         request.deliveryInfo().phone());
 
     if (fcmNotificationService != null) {

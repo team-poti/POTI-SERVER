@@ -286,9 +286,12 @@ public class OrderService {
           trackingNumber
       );
     }
+    String fullAddress = "(" + info.getZipcode() + ") " + info.getAddress()
+        + (info.getAddressDetail() != null && !info.getAddressDetail().isBlank()
+           ? " " + info.getAddressDetail() : "");
     return new ShippingInfo(
         info.getReceiverName(),
-        "(" + info.getZipcode() + ") " + info.getAddressLine(),
+        fullAddress,
         info.getPhone(),
         trackingNumber
     );
@@ -317,9 +320,12 @@ public class OrderService {
   // 판매자 - 분철글 상세 조회 (배송정보)
   private ShippingInfoForDetail shippingInfoForDetail(Order order) {
     DeliveryInfo deliveryInfo = order.getDeliveryInfo();
+    String fullAddress = "(" + deliveryInfo.getZipcode() + ") " + deliveryInfo.getAddress()
+        + (deliveryInfo.getAddressDetail() != null && !deliveryInfo.getAddressDetail().isBlank()
+           ? " " + deliveryInfo.getAddressDetail() : "");
     return new ShippingInfoForDetail(
         deliveryInfo.getReceiverName(),
-        "(" + deliveryInfo.getZipcode() + ") " + deliveryInfo.getAddressLine(),
+        fullAddress,
         deliveryInfo.getPhone()
     );
   }
