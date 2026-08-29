@@ -1,0 +1,43 @@
+server {
+    server_name dev-app.poti.kr;
+
+    # 딥링크 폴백 페이지
+    location ~* ^/pot/ {
+        root /var/www/poti;
+        try_files /fallback.html =404;
+    }
+
+    # iOS Universal Link (AASA)
+    location = /.well-known/apple-app-site-association {
+        alias /var/www/poti/.well-known/apple-app-site-association;
+        default_type application/json;
+    }
+
+    # Android App Link
+    location = /.well-known/assetlinks.json {
+        alias /var/www/poti/.well-known/assetlinks.json;
+        default_type application/json;
+    }
+
+    include /etc/nginx/conf.d/service-url.inc;
+
+    location / {
+        proxy_pass $service_url;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/dev-app.poti.kr/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/dev-app.poti.kr/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+server {
+    listen 80;
+    server_name dev-app.poti.kr;
+    return 301 https://$host$request_uri;
+}

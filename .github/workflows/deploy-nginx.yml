@@ -1,0 +1,72 @@
+name: Nginx 설정 배포
+
+on:
+  push:
+    branches: [ "develop", "main" ]
+    paths:
+      - 'infra/nginx/**'
+
+jobs:
+  deploy-dev:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: dev
+    concurrency:
+      group: deploy-nginx-dev
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: nginx 설정 파일 전송 (DEV)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "infra/nginx/sites-available/dev.poti.kr,infra/nginx/sites-available/dev-app.poti.kr"
+          target: "/tmp/nginx-deploy"
+          strip_components: 3
+
+      - name: nginx 설정 적용 및 재시작 (DEV)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            sudo cp /tmp/nginx-deploy/dev.poti.kr /etc/nginx/sites-available/dev.poti.kr
+            sudo cp /tmp/nginx-deploy/dev-app.poti.kr /etc/nginx/sites-available/dev-app.poti.kr
+            sudo ln -sf /etc/nginx/sites-available/dev.poti.kr /etc/nginx/sites-enabled/dev.poti.kr
+            sudo ln -sf /etc/nginx/sites-available/dev-app.poti.kr /etc/nginx/sites-enabled/dev-app.poti.kr
+            sudo nginx -t && sudo systemctl reload nginx
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: prod
+    concurrency:
+      group: deploy-nginx-prod
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: nginx 설정 파일 전송 (PROD)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "infra/nginx/sites-available/app.poti.kr"
+          target: "/tmp/nginx-deploy"
+          strip_components: 3
+
+      - name: nginx 설정 적용 및 재시작 (PROD)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            sudo cp /tmp/nginx-deploy/app.poti.kr /etc/nginx/sites-available/app.poti.kr
+            sudo ln -sf /etc/nginx/sites-available/app.poti.kr /etc/nginx/sites-enabled/app.poti.kr
+            sudo nginx -t && sudo systemctl reload nginx
