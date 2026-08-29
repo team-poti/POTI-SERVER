@@ -25,7 +25,7 @@ class OrderStatusTransitionTest {
             mock(User.class),
             mock(DeliveryMethod.class),
             10000,
-            new DeliveryInfo("홍길동", "12345", "서울시 강남구", "010-1234-5678"),
+            new DeliveryInfo("홍길동", "12345", "서울시 강남구", null, "010-1234-5678"),
             "POTI-001"
         );
     }
