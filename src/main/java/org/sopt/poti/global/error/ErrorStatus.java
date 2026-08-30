@@ -35,6 +35,7 @@ public enum ErrorStatus {
   POST_HAS_ORDERS(40020, HttpStatus.BAD_REQUEST, "주문이 존재하는 분철글은 삭제할 수 없습니다."),
   POST_IN_PROGRESS(40021, HttpStatus.BAD_REQUEST, "진행 중인 분철글은 삭제할 수 없습니다."),
   ARTIST_HAS_POSTS(40022, HttpStatus.BAD_REQUEST, "분철글이 있는 아티스트는 삭제할 수 없습니다."),
+  ARTIST_NAME_BLANK(40023, HttpStatus.BAD_REQUEST, "아티스트 이름을 입력해주세요."),
 
   /**
    * 401 Unauthorized

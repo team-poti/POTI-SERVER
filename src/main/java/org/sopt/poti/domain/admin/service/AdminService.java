@@ -54,6 +54,9 @@ public class AdminService {
 
   @Transactional
   public void createArtist(String name, String logoImageUrl) {
+    if (name == null || name.isBlank()) {
+      throw new BusinessException(ErrorStatus.ARTIST_NAME_BLANK);
+    }
     artistRepository.save(Artist.create(name, logoImageUrl.isBlank() ? null : logoImageUrl));
   }
 
