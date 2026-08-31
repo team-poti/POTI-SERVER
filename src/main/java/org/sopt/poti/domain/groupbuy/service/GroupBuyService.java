@@ -281,7 +281,10 @@ public class GroupBuyService {
 
     List<GroupBuyPotItem> potItems = postsSlice.getContent().stream()
         .map(post -> {
+          List<Long> memberIds = request.memberIds();
           int minPrice = post.getOptions().stream()
+              .filter(option -> memberIds == null || memberIds.isEmpty()
+                  || memberIds.contains(option.getMember().getId()))
               .mapToInt(GroupBuyOption::getPrice)
               .min()
               .orElse(0);
