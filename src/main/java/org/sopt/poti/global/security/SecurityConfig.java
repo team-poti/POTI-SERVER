@@ -44,6 +44,7 @@ public class SecurityConfig {
       "/api/v1/search/**",
       "/api/v1/artists/**",
       "/api/v1/shippings",
+      "/api/v1/users/*/profile",
   };
 
   @Bean
