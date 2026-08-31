@@ -4,7 +4,7 @@
 <body>
 <section>
   <div class="row g-3 mb-3">
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="stat-card">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between mb-2">
@@ -19,9 +19,7 @@
         <div class="stat-bar" style="background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div>
       </div>
     </div>
-
-    <!-- 분철글 수 -->
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="stat-card">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between mb-2">
@@ -36,9 +34,7 @@
         <div class="stat-bar" style="background:linear-gradient(90deg,#1d4ed8,#60a5fa);"></div>
       </div>
     </div>
-
-    <!-- 총 주문 수 -->
-    <div class="col-md-4">
+    <div class="col-md-3">
       <div class="stat-card">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between mb-2">
@@ -53,16 +49,34 @@
         <div class="stat-bar" style="background:linear-gradient(90deg,#15803d,#4ade80);"></div>
       </div>
     </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="stat-label">아티스트 수</span>
+            <div class="stat-icon" style="background:#fff7ed;">
+              <i class="bi bi-stars" style="color:#ea580c;"></i>
+            </div>
+          </div>
+          <div class="stat-value" th:text="${artistCount}">0</div>
+          <div class="stat-desc">등록된 아티스트</div>
+        </div>
+        <div class="stat-bar" style="background:linear-gradient(90deg,#ea580c,#fb923c);"></div>
+      </div>
+    </div>
   </div>
 
   <div class="quick-card">
     <div class="section-title">빠른 이동</div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
       <a th:href="@{/admin/users}" class="quick-link">
         <i class="bi bi-people-fill" style="color:#7c3aed;"></i> 유저 관리
       </a>
       <a th:href="@{/admin/posts}" class="quick-link">
         <i class="bi bi-card-list" style="color:#1d4ed8;"></i> 분철글 관리
+      </a>
+      <a th:href="@{/admin/artists}" class="quick-link">
+        <i class="bi bi-stars" style="color:#ea580c;"></i> 아티스트 관리
       </a>
     </div>
   </div>

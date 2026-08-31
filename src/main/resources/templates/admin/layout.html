@@ -35,6 +35,11 @@
          th:classappend="${currentPage == 'posts'} ? ' active'">
         <i class="bi bi-card-list"></i> 분철글 관리
       </a>
+      <a th:href="@{/admin/artists}"
+         class="sidebar-link"
+         th:classappend="${currentPage == 'artists'} ? ' active'">
+        <i class="bi bi-stars"></i> 아티스트 관리
+      </a>
     </nav>
     <div class="sidebar-footer">
       <form th:action="@{/admin/logout}" method="post">
@@ -50,7 +55,8 @@
     <div class="topbar">
       <span class="topbar-title"
         th:text="${currentPage == 'dashboard'} ? '대시보드' :
-                 (${currentPage == 'users'} ? '유저 관리' : '분철글 관리')">
+                 (${currentPage == 'users'} ? '유저 관리' :
+                 (${currentPage == 'posts'} ? '분철글 관리' : '아티스트 관리'))">
       </span>
       <span class="topbar-badge">POTI Admin</span>
     </div>

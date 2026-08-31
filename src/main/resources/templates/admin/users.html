@@ -19,17 +19,11 @@
       <tbody>
         <tr th:each="user : ${users.content}">
           <td class="cell-id" th:text="${user.id}"></td>
-          <td><strong th:text="${user.nickname}"></strong></td>
-          <td class="cell-sub" th:text="${user.email}"></td>
+          <td class="cell-truncate" style="max-width:120px;"><strong th:text="${user.nickname}" th:title="${user.nickname}"></strong></td>
+          <td class="cell-sub cell-truncate" style="max-width:180px;" th:text="${user.email}" th:title="${user.email}"></td>
           <td>
             <span class="badge-pill badge-kakao" th:text="${user.socialType}"></span>
           </td>
-          <td>
-            <span th:if="${user.status.name() == 'ACTIVE'}"    class="badge-pill badge-active">활성</span>
-            <span th:if="${user.status.name() == 'SUSPENDED'}" class="badge-pill badge-suspended">정지</span>
-            <span th:if="${user.status.name() == 'WITHDRAWN'}" class="badge-pill badge-withdrawn">탈퇴</span>
-          </td>
-          <td class="cell-sub" th:text="${#temporals.format(user.createdAt, 'yyyy.MM.dd')}"></td>
           <td>
             <span th:if="${user.status.name() == 'ACTIVE'}"    class="badge-pill badge-active">활성</span>
             <span th:if="${user.status.name() == 'SUSPENDED'}" class="badge-pill badge-suspended">정지</span>

@@ -32,6 +32,7 @@ public class AdminController {
     model.addAttribute("userCount", adminService.countUsers());
     model.addAttribute("postCount", adminService.countPosts());
     model.addAttribute("orderCount", adminService.countOrders());
+    model.addAttribute("artistCount", adminService.countArtists());
     return "admin/dashboard";
   }
 
@@ -96,5 +97,36 @@ public class AdminController {
       ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
     }
     return "redirect:/admin/posts";
+  }
+
+  @GetMapping("/artists")
+  public String artists(Model model) {
+    model.addAttribute("artists", adminService.getArtists());
+    model.addAttribute("postCounts", adminService.getArtistPostCounts());
+    return "admin/artists";
+  }
+
+  @PostMapping("/artists")
+  public String createArtist(
+      @RequestParam String name,
+      @RequestParam(defaultValue = "") String logoImageUrl,
+      RedirectAttributes ra
+  ) {
+    try {
+      adminService.createArtist(name.strip(), logoImageUrl.strip());
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
+    return "redirect:/admin/artists";
+  }
+
+  @PostMapping("/artists/{artistId}/delete")
+  public String deleteArtist(@PathVariable Long artistId, RedirectAttributes ra) {
+    try {
+      adminService.deleteArtist(artistId);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
+    return "redirect:/admin/artists";
   }
 }

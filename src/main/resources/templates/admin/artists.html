@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::section}, 'artists')}">
+<body>
+<section>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted" style="font-size:0.82rem;"
+          th:text="'총 ' + ${#lists.size(artists)} + '개'"></span>
+    <button type="button" class="btn-add" data-bs-toggle="modal" data-bs-target="#addArtistModal">
+      <i class="bi bi-plus-lg"></i> 아티스트 추가
+    </button>
+  </div>
+
+  <div class="table-card">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th style="width:56px;">ID</th>
+          <th style="width:60px;">로고</th>
+          <th>이름</th>
+          <th style="width:100px;">분철글 수</th>
+          <th style="width:72px;">관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="artist : ${artists}">
+          <td class="cell-id" th:text="${artist.id}"></td>
+          <td>
+            <img th:if="${artist.logoImageUrl != null and !artist.logoImageUrl.isEmpty()}"
+                 th:src="${artist.logoImageUrl}"
+                 class="artist-logo" alt="logo">
+            <div th:unless="${artist.logoImageUrl != null and !artist.logoImageUrl.isEmpty()}"
+                 class="artist-logo-placeholder">
+              <i class="bi bi-image"></i>
+            </div>
+          </td>
+          <td><strong th:text="${artist.name}"></strong></td>
+          <td>
+            <span class="badge-pill"
+                  th:classappend="${postCounts[artist.id] > 0} ? 'badge-has-posts' : 'badge-no-posts'"
+                  th:text="${postCounts[artist.id]} + '개'"></span>
+          </td>
+          <td>
+            <form th:action="@{/admin/artists/{id}/delete(id=${artist.id})}" method="post">
+              <button type="button" class="btn-action btn-delete"
+                      th:attr="data-name=${artist.name}, data-count=${postCounts[artist.id]}"
+                      onclick="confirmArtistDelete(this)">삭제</button>
+              <button type="submit" class="d-none js-submit"></button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(artists)}">
+          <td colspan="5">
+            <div class="empty-state">
+              <i class="bi bi-stars"></i>
+              <p>등록된 아티스트가 없습니다.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Artist Modal -->
+  <div class="modal fade" id="addArtistModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+      <div class="modal-content admin-modal">
+        <div class="modal-header">
+          <h6 class="modal-title">아티스트 추가</h6>
+          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+        </div>
+        <form th:action="@{/admin/artists}" method="post">
+          <div class="modal-body">
+            <div class="form-group-admin mb-3">
+              <label class="form-label-admin">아티스트 이름 <span class="required">*</span></label>
+              <input type="text" name="name" class="form-input-admin"
+                     placeholder="예: BTS, IVE" maxlength="100" required autofocus>
+            </div>
+            <div class="form-group-admin">
+              <label class="form-label-admin">로고 이미지 URL <span class="optional">(선택)</span></label>
+              <input type="url" name="logoImageUrl" class="form-input-admin"
+                     placeholder="https://...">
+              <p class="form-hint">S3에 업로드 후 URL을 입력하세요.</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">취소</button>
+            <button type="submit" class="btn-modal-submit">추가</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function confirmArtistDelete(btn) {
+      const count = parseInt(btn.dataset.count);
+      if (count > 0) {
+        alert('「' + btn.dataset.name + '」은 분철글이 ' + count + '개 있어 삭제할 수 없습니다.');
+        return;
+      }
+      if (confirm('「' + btn.dataset.name + '」 아티스트를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+        btn.closest('form').querySelector('.js-submit').click();
+      }
+    }
+  </script>
+</section>
+</body>
+</html>
