@@ -497,4 +497,20 @@ public class GroupBuyService {
   public List<String> searchTitlesNgram(Long artistId, String keyword) {
     return groupBuyRepository.findTitlesByNgram(artistId, keyword, 50);
   }
+
+  @Transactional
+  public void deleteGroupBuyPost(Long userId, Long postId) {
+    GroupBuyPost post = groupBuyRepository.findById(postId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
+
+    if (!post.getLeader().getId().equals(userId)) {
+      throw new BusinessException(ErrorStatus.FORBIDDEN_USER);
+    }
+
+    if (orderService.existsByPostId(postId)) {
+      throw new BusinessException(ErrorStatus.POST_HAS_ORDERS);
+    }
+
+    groupBuyRepository.delete(post);
+  }
 }

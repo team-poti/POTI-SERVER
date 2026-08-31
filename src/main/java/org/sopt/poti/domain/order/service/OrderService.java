@@ -76,6 +76,10 @@ public class OrderService {
     return orderItemRepository.findAllByGroupBuyOptionIdIn(optionIds);
   }
 
+  public boolean existsByPostId(Long postId) {
+    return orderRepository.existsByGroupBuyPost_Id(postId);
+  }
+
 
   public List<Order> getOrdersByUser(Long userId) {
     return orderRepository.findByUser_IdOrderByCreatedAtDesc(userId);

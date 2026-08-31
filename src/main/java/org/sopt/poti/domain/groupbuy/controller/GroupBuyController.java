@@ -29,6 +29,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -154,6 +155,16 @@ public class GroupBuyController {
     return ResponseEntity.ok(
         ApiResponse.success(SuccessStatus.OK, groupBuyPostDetailForSale)
     );
+  }
+
+  @DeleteMapping("/v1/posts/{postId}")
+  @Operation(summary = "분철글 삭제", description = "총대(모집자)가 본인 분철글을 삭제합니다. 주문이 존재하는 경우 삭제할 수 없습니다.")
+  public ResponseEntity<ApiResponse<Void>> deleteGroupBuyPost(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable Long postId
+  ) {
+    groupBuyService.deleteGroupBuyPost(userPrincipal.getUserId(), postId);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, null));
   }
 
   @GetMapping("/v2/posts/titles")
