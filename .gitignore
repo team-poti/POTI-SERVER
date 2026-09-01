@@ -69,3 +69,4 @@ infra/*.tfstate.backup
 infra/*.auto.tfvars
 infra/*.auto.tfvars.json
 infra/terraform.tfvars.json
+PROD-CHECKLIST.md

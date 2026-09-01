@@ -55,3 +55,27 @@ API를 세 등급으로 분류한다.
 - 홈 피드는 로그인 유저(최애 기반) / 비로그인 또는 최애 미설정 유저(인기순) 분기 로직 추가 필요.
 - 참여·등록 시도 시 클라이언트에서 로그인 유도 모달 처리 (서버는 기존과 동일하게 40105 반환).
 - 로그인 완료 후 기존에 보던 분철글로 복귀하는 딥링크 플로우는 클라이언트 처리.
+
+---
+
+## 보완 (2026.08)
+
+### SecurityConfig `{postId}` 패턴 충돌 수정
+
+`WHITE_LIST`에 `/api/v1/posts/{postId}`를 단순 추가하면 Spring Security 패턴 매칭 특성상 `/api/v1/posts/me`, `/api/v1/posts/pots` 등 single-segment 경로를 모두 허용해버린다.
+
+이를 방지하기 위해 `authorizeHttpRequests` 체인에서 판매자 전용 경로를 먼저 `authenticated()`로 고정한 뒤, 그 아래에 `permitAll()` 규칙을 배치한다 (first-match 원칙).
+
+```java
+.requestMatchers("/api/v1/posts/me").authenticated()
+.requestMatchers("/api/v1/posts/{postId}/participants").authenticated()
+.requestMatchers("/api/v1/posts/sale/{postId}").authenticated()
+.requestMatchers(GUEST_LIST).permitAll()
+.requestMatchers("/api/v1/posts/{postId}").permitAll()
+```
+
+### 만료된 토큰 + 공개 API 접근 처리
+
+기존 `JwtAuthenticationFilter`는 토큰이 존재하면 무조건 검증하고 실패 시 `JwtExceptionFilter`까지 예외를 올려 401을 반환했다. 이 경우 앱에 만료 토큰이 저장된 상태로 홈 진입 시 게스트 콘텐츠 대신 401이 반환되는 문제가 발생한다.
+
+수정: `JwtAuthenticationFilter` 내부에서 검증 실패를 try-catch로 잡고, `USER_SUSPENDED` 외의 인증 실패는 예외를 올리지 않고 인증 세팅만 스킵한 채 필터 체인을 계속 진행한다. `permitAll()` 엔드포인트는 anonymous로 처리되고, `authenticated()` 엔드포인트는 이후 필터에서 정상적으로 401을 반환한다.
