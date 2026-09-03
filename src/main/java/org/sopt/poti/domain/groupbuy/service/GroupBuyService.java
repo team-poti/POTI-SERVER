@@ -248,6 +248,7 @@ public class GroupBuyService {
         .artistId(groupBuyPost.getArtist().getId())
         .images(imageResponseList)
         .isMyPost(userId != null && groupBuyPost.getLeader().getId().equals(userId))
+        .isParticipated(userId != null && orderService.existsByPostIdAndUserId(groupBuyPost.getId(), userId))
         .status(groupBuyPost.getStatus().name())
         .shippingOptions(shippingResponseList)
         .uploader(uploaderResponse)

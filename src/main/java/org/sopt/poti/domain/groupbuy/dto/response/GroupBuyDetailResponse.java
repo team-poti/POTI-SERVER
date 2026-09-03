@@ -9,6 +9,7 @@ import lombok.Builder;
 public record GroupBuyDetailResponse(
     Long postId,
     Boolean isMyPost,
+    Boolean isParticipated,
     String status,
     String artist,
     Long artistId,
