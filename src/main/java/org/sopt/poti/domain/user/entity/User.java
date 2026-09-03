@@ -66,11 +66,11 @@ public class User extends BaseSoftDeleteEntity {
   @Column(name = "withdrawal_reason", length = 500)
   private String withdrawalReason;
 
-  @Column(name = "trade_notification_enabled", columnDefinition = "TINYINT(1) DEFAULT 1 NOT NULL")
-  private boolean tradeNotificationEnabled = true;
+  @Column(name = "trade_notification_enabled", columnDefinition = "TINYINT(1) DEFAULT 0 NOT NULL")
+  private boolean tradeNotificationEnabled = false;
 
-  @Column(name = "event_notification_enabled", columnDefinition = "TINYINT(1) DEFAULT 1 NOT NULL")
-  private boolean eventNotificationEnabled = true;
+  @Column(name = "event_notification_enabled", columnDefinition = "TINYINT(1) DEFAULT 0 NOT NULL")
+  private boolean eventNotificationEnabled = false;
 
   @Builder
   private User(String socialId, SocialType socialType, String email, String nickname,
