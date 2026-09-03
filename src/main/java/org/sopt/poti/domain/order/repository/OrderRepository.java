@@ -51,6 +51,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderReposi
 
   boolean existsByGroupBuyPost_Id(Long postId);
 
+  boolean existsByGroupBuyPost_IdAndUser_Id(Long postId, Long userId);
+
   @Query("SELECT o.user.id FROM Order o WHERE o.groupBuyPost.id = :postId")
   List<Long> findUserIdsByGroupBuyPost_Id(@Param("postId") Long postId);
 
