@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.artist.entity.Artist;
 import org.sopt.poti.domain.artist.repository.ArtistRepository;
+import org.sopt.poti.domain.banner.entity.Banner;
+import org.sopt.poti.domain.banner.repository.BannerRepository;
 import org.sopt.poti.domain.artist.repository.MemberRepository;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
 import org.sopt.poti.domain.fcmtoken.service.FcmTokenService;
@@ -38,6 +40,32 @@ public class AdminService {
   private final FcmTokenService fcmTokenService;
   private final ArtistRepository artistRepository;
   private final MemberRepository memberRepository;
+  private final BannerRepository bannerRepository;
+
+  public List<Banner> getBanners() {
+    return bannerRepository.findAll(org.springframework.data.domain.Sort.by("sortOrder"));
+  }
+
+  @Transactional
+  public void createBanner(String imageUrl, String deeplink, int sortOrder) {
+    bannerRepository.save(Banner.builder()
+        .imageUrl(imageUrl)
+        .deeplink(deeplink.isBlank() ? null : deeplink)
+        .sortOrder(sortOrder)
+        .build());
+  }
+
+  @Transactional
+  public void updateBanner(Long bannerId, String imageUrl, String deeplink, int sortOrder, boolean active) {
+    Banner banner = bannerRepository.findById(bannerId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.NOT_FOUND_HANDLER));
+    banner.update(imageUrl, deeplink.isBlank() ? null : deeplink, sortOrder, active);
+  }
+
+  @Transactional
+  public void deleteBanner(Long bannerId) {
+    bannerRepository.deleteById(bannerId);
+  }
 
   public long countArtists() {
     return artistRepository.count();

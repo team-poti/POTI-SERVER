@@ -99,6 +99,50 @@ public class AdminController {
     return "redirect:/admin/posts";
   }
 
+  @GetMapping("/banners")
+  public String banners(Model model) {
+    model.addAttribute("banners", adminService.getBanners());
+    return "admin/banners";
+  }
+
+  @PostMapping("/banners")
+  public String createBanner(
+      @RequestParam String imageUrl,
+      @RequestParam(defaultValue = "") String deeplink,
+      @RequestParam(defaultValue = "0") int sortOrder,
+      RedirectAttributes ra
+  ) {
+    try {
+      adminService.createBanner(imageUrl.strip(), deeplink.strip(), sortOrder);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
+    return "redirect:/admin/banners";
+  }
+
+  @PostMapping("/banners/{bannerId}/update")
+  public String updateBanner(
+      @PathVariable Long bannerId,
+      @RequestParam String imageUrl,
+      @RequestParam(defaultValue = "") String deeplink,
+      @RequestParam(defaultValue = "0") int sortOrder,
+      @RequestParam(defaultValue = "false") boolean active,
+      RedirectAttributes ra
+  ) {
+    try {
+      adminService.updateBanner(bannerId, imageUrl.strip(), deeplink.strip(), sortOrder, active);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
+    return "redirect:/admin/banners";
+  }
+
+  @PostMapping("/banners/{bannerId}/delete")
+  public String deleteBanner(@PathVariable Long bannerId, RedirectAttributes ra) {
+    adminService.deleteBanner(bannerId);
+    return "redirect:/admin/banners";
+  }
+
   @GetMapping("/artists")
   public String artists(Model model) {
     model.addAttribute("artists", adminService.getArtists());

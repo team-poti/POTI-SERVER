@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.domain.artist.service.ArtistService;
+import org.sopt.poti.domain.banner.repository.BannerRepository;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
 import org.sopt.poti.domain.home.dto.response.HomeBanner;
 import org.sopt.poti.domain.home.dto.response.HomeGroupBuyItem;
@@ -22,6 +23,7 @@ public class HomeService {
   private final UserService userService;
   private final ArtistService artistService;
   private final GroupBuyRepository groupBuyRepository;
+  private final BannerRepository bannerRepository;
 
   private static final int ITEM_LIMIT = 5;
 
@@ -58,18 +60,10 @@ public class HomeService {
           ITEM_LIMIT);
     }
 
-    // TODO: 배너 로직 구현 필요 (현재는 더미 추후에 기획에 물어보고 변경할 예정 => 3개만.)
-    List<HomeBanner> banners = List.of(
-        HomeBanner.builder().postId(1L)
-            .imageUrl("https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/banners/banner-1.png")
-            .build(),
-        HomeBanner.builder().postId(2L)
-            .imageUrl("https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/banners/banner-2.png")
-            .build(),
-        HomeBanner.builder().postId(3L)
-            .imageUrl("https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/banners/banner-3.png")
-            .build()
-    );
+    List<HomeBanner> banners = bannerRepository.findByActiveTrueOrderBySortOrderAsc()
+        .stream()
+        .map(HomeBanner::from)
+        .toList();
 
     return HomeResponse.builder()
         .nickname(nickname)

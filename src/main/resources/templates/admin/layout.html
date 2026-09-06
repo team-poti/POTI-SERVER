@@ -40,6 +40,11 @@
          th:classappend="${currentPage == 'artists'} ? ' active'">
         <i class="bi bi-stars"></i> 아티스트 관리
       </a>
+      <a th:href="@{/admin/banners}"
+         class="sidebar-link"
+         th:classappend="${currentPage == 'banners'} ? ' active'">
+        <i class="bi bi-images"></i> 배너 관리
+      </a>
     </nav>
     <div class="sidebar-footer">
       <form th:action="@{/admin/logout}" method="post">
