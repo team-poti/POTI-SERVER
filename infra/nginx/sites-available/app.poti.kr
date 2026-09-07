@@ -4,10 +4,10 @@
 server {
     server_name app.poti.kr;
 
-    # 딥링크 폴백 페이지
-    location ~* ^/pot/ {
-        root /var/www/poti;
-        try_files /fallback.html =404;
+    # 딥링크 폴백 페이지 (/pot/* → /var/www/poti/index.html, CSS·에셋 포함)
+    location /pot/ {
+        alias /var/www/poti/;
+        try_files $uri index.html =404;
     }
 
     # iOS Universal Link (AASA)
