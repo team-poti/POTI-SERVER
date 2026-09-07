@@ -48,6 +48,7 @@ public class AdminService {
 
   @Transactional
   public void createBanner(String imageUrl, String deeplink, int sortOrder) {
+    validateBannerInput(imageUrl, deeplink, sortOrder);
     bannerRepository.save(Banner.builder()
         .imageUrl(imageUrl)
         .deeplink(deeplink.isBlank() ? null : deeplink)
@@ -57,9 +58,16 @@ public class AdminService {
 
   @Transactional
   public void updateBanner(Long bannerId, String imageUrl, String deeplink, int sortOrder, boolean active) {
+    validateBannerInput(imageUrl, deeplink, sortOrder);
     Banner banner = bannerRepository.findById(bannerId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.NOT_FOUND_HANDLER));
     banner.update(imageUrl, deeplink.isBlank() ? null : deeplink, sortOrder, active);
+  }
+
+  private void validateBannerInput(String imageUrl, String deeplink, int sortOrder) {
+    if (imageUrl.isBlank() || imageUrl.length() > 500) throw new BusinessException(ErrorStatus.BAD_REQUEST);
+    if (deeplink.length() > 500) throw new BusinessException(ErrorStatus.BAD_REQUEST);
+    if (sortOrder < 0) throw new BusinessException(ErrorStatus.BAD_REQUEST);
   }
 
   @Transactional

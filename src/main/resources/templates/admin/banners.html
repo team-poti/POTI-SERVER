@@ -123,6 +123,7 @@
           <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
         </div>
         <form id="editBannerForm" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label-admin">이미지 <span class="required">*</span></label>
