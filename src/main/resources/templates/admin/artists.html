@@ -102,9 +102,17 @@
       const form = new FormData();
       form.append('file', file);
       form.append('directory', 'ARTIST');
+      const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
       try {
-        const res = await fetch('/admin/upload', { method: 'POST', body: form });
+        const res = await fetch('/admin/upload', {
+          method: 'POST',
+          headers: { [csrfHeader]: csrfToken },
+          body: form
+        });
+        if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
         const data = await res.json();
+        if (!data.url) throw new Error('URL이 없습니다.');
         document.getElementById('artistLogoUrl').value = data.url;
       } catch (e) {
         alert('업로드 실패: ' + e.message);

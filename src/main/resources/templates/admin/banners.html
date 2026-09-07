@@ -164,13 +164,20 @@
     async function uploadImage(input, targetId) {
       const file = input.files[0];
       if (!file) return;
-      const directory = targetId.startsWith('edit') ? 'BANNER' : 'BANNER';
       const form = new FormData();
       form.append('file', file);
-      form.append('directory', directory);
+      form.append('directory', 'BANNER');
+      const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
       try {
-        const res = await fetch('/admin/upload', { method: 'POST', body: form });
+        const res = await fetch('/admin/upload', {
+          method: 'POST',
+          headers: { [csrfHeader]: csrfToken },
+          body: form
+        });
+        if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
         const data = await res.json();
+        if (!data.url) throw new Error('URL이 없습니다.');
         document.getElementById(targetId).value = data.url;
       } catch (e) {
         alert('업로드 실패: ' + e.message);
