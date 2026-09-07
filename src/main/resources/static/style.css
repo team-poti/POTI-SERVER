@@ -1,0 +1,189 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background: #fafafc;
+  color: #303030;
+}
+
+.download-page {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #fafafc;
+}
+
+.background-graphic {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  width: auto;
+  height: 120%;
+  transform: translateX(-50%);
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+}
+
+.logo {
+  position: absolute;
+  top: 45px;
+  left: 50%;
+  width: 100px;
+  height: auto;
+  transform: translateX(-50%);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  min-height: 1024px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 220px;
+}
+
+.copy {
+  text-align: center;
+}
+
+.copy h1 {
+  margin: 0;
+  font-size: 60px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.copy p {
+  margin: 40px 0 0;
+  font-size: 32px;
+  line-height: 1.50;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+.card-area {
+  margin-top: 74px;
+  display: flex;
+  justify-content: center;
+}
+
+.cards-graphic {
+  display: block;
+  width: 750px;
+  height: auto;
+}
+
+.download-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 122px;
+}
+
+.download-button {
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  min-width: 294px;
+  height: 80px;
+  padding: 0 32px;
+  border-radius: 12px;
+  background: #303030;
+  color: #fafafc;
+  text-decoration: none;
+  font-size: 26px;
+  font-weight: 600;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.download-button:hover {
+  background: #111;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 767px) {
+  .download-page {
+    min-height: 100dvh;
+  }
+
+  .background-graphic {
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+    width: 180vw;
+    height: auto;
+  }
+
+  .logo {
+    top: 28px;
+    width: 64px;
+    height: auto;
+  }
+
+  .content {
+    padding-top: 212px;
+  }
+
+  .copy {
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .copy h1 {
+    font-size: 32px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  .copy p {
+    margin-top: 27px;
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+  }
+
+  .card-area {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .cards-graphic {
+    display: block;
+    width: 440px;
+    height: auto;
+  }
+
+  .download-buttons {
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 94px;
+  }
+
+  .download-button {
+    min-width: 170px;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 6px;
+    font-size: 16px;
+  }
+}
