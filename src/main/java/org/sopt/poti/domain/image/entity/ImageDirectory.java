@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 public enum ImageDirectory {
   POST("posts"),
   PROFILE("profiles"),
-  REVIEW("reviews");  // 아직 사진 리뷰는 없지만, 미리 추가
+  REVIEW("reviews"),
+  BANNER("banners"),
+  ARTIST("artists");
 
   private final String prefix;
 }

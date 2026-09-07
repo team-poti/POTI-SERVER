@@ -1,9 +1,12 @@
 package org.sopt.poti.global.external.s3;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,10 @@ import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -24,9 +31,48 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 public class S3Service {
 
   private final S3Presigner s3Presigner;
+  private final S3Client s3Client;
 
   @Value("${spring.cloud.aws.s3.bucket}")
   private String bucketName;
+
+  @Value("${spring.cloud.aws.s3.base_url}")
+  private String baseUrl;
+
+  private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+      "image/jpeg", "image/png", "image/gif", "image/webp"
+  );
+  private static final long MAX_UPLOAD_BYTES = 10 * 1024 * 1024L;
+
+  public String upload(MultipartFile file, ImageDirectory directory) {
+    if (file.isEmpty()) throw new BusinessException(ErrorStatus.BAD_REQUEST);
+    if (file.getSize() > MAX_UPLOAD_BYTES) throw new BusinessException(ErrorStatus.BAD_REQUEST);
+    String contentType = file.getContentType();
+    if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType))
+      throw new BusinessException(ErrorStatus.BAD_REQUEST);
+
+    String extension = getExtension(file.getOriginalFilename());
+    String key = createPath(directory.getPrefix(), extension);
+    try (InputStream is = file.getInputStream()) {
+      s3Client.putObject(
+          PutObjectRequest.builder()
+              .bucket(bucketName)
+              .key(key)
+              .contentType(contentType)
+              .build(),
+          RequestBody.fromInputStream(is, file.getSize())
+      );
+    } catch (IOException | S3Exception | SdkClientException e) {
+      log.error("S3 업로드 실패: {}", e.getMessage());
+      throw new BusinessException(ErrorStatus.EXTERNAL_API_ERROR);
+    }
+    return baseUrl + key;
+  }
+
+  private String getExtension(String filename) {
+    if (filename == null || !filename.contains(".")) return "jpg";
+    return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+  }
 
   public List<PresignedUrlResponse> getPresignedUrls(ImageDirectory directory, List<String> extensions) {
     List<PresignedUrlResponse> responses = new ArrayList<>();

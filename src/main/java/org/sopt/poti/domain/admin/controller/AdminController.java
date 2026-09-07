@@ -1,11 +1,15 @@
 package org.sopt.poti.domain.admin.controller;
 
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.admin.service.AdminService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
+import org.sopt.poti.domain.image.entity.ImageDirectory;
 import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.external.s3.S3Service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -21,6 +27,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
   private final AdminService adminService;
+  private final S3Service s3Service;
+
+  @PostMapping("/upload")
+  @ResponseBody
+  public ResponseEntity<Map<String, String>> upload(
+      @RequestParam MultipartFile file,
+      @RequestParam(defaultValue = "BANNER") ImageDirectory directory
+  ) {
+    String url = s3Service.upload(file, directory);
+    return ResponseEntity.ok(Map.of("url", url));
+  }
 
   @GetMapping("/login")
   public String loginPage() {
@@ -97,6 +114,50 @@ public class AdminController {
       ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
     }
     return "redirect:/admin/posts";
+  }
+
+  @GetMapping("/banners")
+  public String banners(Model model) {
+    model.addAttribute("banners", adminService.getBanners());
+    return "admin/banners";
+  }
+
+  @PostMapping("/banners")
+  public String createBanner(
+      @RequestParam String imageUrl,
+      @RequestParam(defaultValue = "") String deeplink,
+      @RequestParam(defaultValue = "0") int sortOrder,
+      RedirectAttributes ra
+  ) {
+    try {
+      adminService.createBanner(imageUrl.strip(), deeplink.strip(), sortOrder);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
+    return "redirect:/admin/banners";
+  }
+
+  @PostMapping("/banners/{bannerId}/update")
+  public String updateBanner(
+      @PathVariable Long bannerId,
+      @RequestParam String imageUrl,
+      @RequestParam(defaultValue = "") String deeplink,
+      @RequestParam(defaultValue = "0") int sortOrder,
+      @RequestParam(defaultValue = "false") boolean active,
+      RedirectAttributes ra
+  ) {
+    try {
+      adminService.updateBanner(bannerId, imageUrl.strip(), deeplink.strip(), sortOrder, active);
+    } catch (BusinessException e) {
+      ra.addFlashAttribute("errorMessage", e.getErrorStatus().getMessage());
+    }
+    return "redirect:/admin/banners";
+  }
+
+  @PostMapping("/banners/{bannerId}/delete")
+  public String deleteBanner(@PathVariable Long bannerId, RedirectAttributes ra) {
+    adminService.deleteBanner(bannerId);
+    return "redirect:/admin/banners";
   }
 
   @GetMapping("/artists")
