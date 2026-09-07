@@ -1,11 +1,15 @@
 package org.sopt.poti.domain.admin.controller;
 
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.admin.service.AdminService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
+import org.sopt.poti.domain.image.entity.ImageDirectory;
 import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.external.s3.S3Service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -21,6 +27,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
   private final AdminService adminService;
+  private final S3Service s3Service;
+
+  @PostMapping("/upload")
+  @ResponseBody
+  public ResponseEntity<Map<String, String>> upload(
+      @RequestParam MultipartFile file,
+      @RequestParam(defaultValue = "BANNER") ImageDirectory directory
+  ) {
+    String url = s3Service.upload(file, directory);
+    return ResponseEntity.ok(Map.of("url", url));
+  }
 
   @GetMapping("/login")
   public String loginPage() {

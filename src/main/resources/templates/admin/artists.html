@@ -77,10 +77,13 @@
                      placeholder="예: BTS, IVE" maxlength="100" required autofocus>
             </div>
             <div class="form-group-admin">
-              <label class="form-label-admin">로고 이미지 URL <span class="optional">(선택)</span></label>
-              <input type="url" name="logoImageUrl" class="form-input-admin"
-                     placeholder="https://...">
-              <p class="form-hint">S3에 업로드 후 URL을 입력하세요.</p>
+              <label class="form-label-admin">로고 이미지 <span class="optional">(선택)</span></label>
+              <div class="d-flex gap-2 mb-1">
+                <input type="file" accept="image/*" class="form-input-admin" style="padding:6px;"
+                       onchange="uploadArtistImage(this)">
+              </div>
+              <input type="url" id="artistLogoUrl" name="logoImageUrl" class="form-input-admin"
+                     placeholder="업로드하거나 URL 직접 입력">
             </div>
           </div>
           <div class="modal-footer">
@@ -93,6 +96,21 @@
   </div>
 
   <script>
+    async function uploadArtistImage(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const form = new FormData();
+      form.append('file', file);
+      form.append('directory', 'ARTIST');
+      try {
+        const res = await fetch('/admin/upload', { method: 'POST', body: form });
+        const data = await res.json();
+        document.getElementById('artistLogoUrl').value = data.url;
+      } catch (e) {
+        alert('업로드 실패: ' + e.message);
+      }
+    }
+
     function confirmArtistDelete(btn) {
       const count = parseInt(btn.dataset.count);
       if (count > 0) {

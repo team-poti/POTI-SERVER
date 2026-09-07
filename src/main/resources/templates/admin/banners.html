@@ -84,10 +84,13 @@
         <form th:action="@{/admin/banners}" method="post">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label-admin">이미지 URL <span class="required">*</span></label>
-              <input type="url" name="imageUrl" class="form-input-admin"
-                     placeholder="https://..." required>
-              <p class="form-hint">S3에 업로드 후 URL을 입력하세요.</p>
+              <label class="form-label-admin">이미지 <span class="required">*</span></label>
+              <div class="d-flex gap-2 mb-1">
+                <input type="file" accept="image/*" class="form-input-admin" style="padding:6px;"
+                       onchange="uploadImage(this, 'addImageUrl')">
+              </div>
+              <input type="url" id="addImageUrl" name="imageUrl" class="form-input-admin"
+                     placeholder="업로드하거나 URL 직접 입력" required>
             </div>
             <div class="mb-3">
               <label class="form-label-admin">딥링크 <span class="optional">(선택)</span></label>
@@ -122,8 +125,13 @@
         <form id="editBannerForm" method="post">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label-admin">이미지 URL <span class="required">*</span></label>
-              <input type="url" id="editImageUrl" name="imageUrl" class="form-input-admin" required>
+              <label class="form-label-admin">이미지 <span class="required">*</span></label>
+              <div class="d-flex gap-2 mb-1">
+                <input type="file" accept="image/*" class="form-input-admin" style="padding:6px;"
+                       onchange="uploadImage(this, 'editImageUrl')">
+              </div>
+              <input type="url" id="editImageUrl" name="imageUrl" class="form-input-admin"
+                     placeholder="업로드하거나 URL 직접 입력" required>
             </div>
             <div class="mb-3">
               <label class="form-label-admin">딥링크 <span class="optional">(선택)</span></label>
@@ -152,6 +160,22 @@
   </div>
 
   <script th:inline="javascript">
+    async function uploadImage(input, targetId) {
+      const file = input.files[0];
+      if (!file) return;
+      const directory = targetId.startsWith('edit') ? 'BANNER' : 'BANNER';
+      const form = new FormData();
+      form.append('file', file);
+      form.append('directory', directory);
+      try {
+        const res = await fetch('/admin/upload', { method: 'POST', body: form });
+        const data = await res.json();
+        document.getElementById(targetId).value = data.url;
+      } catch (e) {
+        alert('업로드 실패: ' + e.message);
+      }
+    }
+
     function openEditModal(btn) {
       const id = btn.dataset.id;
       document.getElementById('editBannerForm').action = '/admin/banners/' + id + '/update';

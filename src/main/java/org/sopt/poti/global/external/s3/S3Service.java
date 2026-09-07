@@ -1,5 +1,6 @@
 package org.sopt.poti.global.external.s3;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,6 +14,9 @@ import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -24,9 +28,37 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 public class S3Service {
 
   private final S3Presigner s3Presigner;
+  private final S3Client s3Client;
 
   @Value("${spring.cloud.aws.s3.bucket}")
   private String bucketName;
+
+  @Value("${spring.cloud.aws.s3.base_url}")
+  private String baseUrl;
+
+  public String upload(MultipartFile file, ImageDirectory directory) {
+    String extension = getExtension(file.getOriginalFilename());
+    String key = createPath(directory.getPrefix(), extension);
+    try {
+      s3Client.putObject(
+          PutObjectRequest.builder()
+              .bucket(bucketName)
+              .key(key)
+              .contentType(getContentType(extension))
+              .build(),
+          RequestBody.fromBytes(file.getBytes())
+      );
+    } catch (IOException | S3Exception e) {
+      log.error("S3 업로드 실패: {}", e.getMessage());
+      throw new BusinessException(ErrorStatus.EXTERNAL_API_ERROR);
+    }
+    return baseUrl + key;
+  }
+
+  private String getExtension(String filename) {
+    if (filename == null || !filename.contains(".")) return "jpg";
+    return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+  }
 
   public List<PresignedUrlResponse> getPresignedUrls(ImageDirectory directory, List<String> extensions) {
     List<PresignedUrlResponse> responses = new ArrayList<>();
