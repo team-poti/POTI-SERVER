@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.poti.android.dev",
+      "sha256_cert_fingerprints": [
+        "13:DB:C8:6B:C5:AA:BF:F1:EA:8F:72:9F:14:AA:29:82:8E:1D:10:5A:E7:E2:93:20:7F:AD:CA:51:63:AF:E5:2F"
+      ]
+    }
+  }
+]
