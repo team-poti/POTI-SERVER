@@ -50,6 +50,16 @@ jobs:
           source: "deploy.sh,docker-compose.yml"
           target: "/home/ubuntu/app"
 
+      - name: .env 복원
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "${{ secrets.ENV_FILE }}" | base64 -d > ~/app/.env
+            chmod 600 ~/app/.env
+
       - name: Firebase 크리덴셜 복원
         uses: appleboy/ssh-action@master
         with:
@@ -112,7 +122,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            echo "${{ secrets.PROD_ENV_FILE }}" | base64 -d > ~/app/.env
+            echo "${{ secrets.ENV_FILE }}" | base64 -d > ~/app/.env
             chmod 600 ~/app/.env
 
       - name: Firebase 크리덴셜 복원

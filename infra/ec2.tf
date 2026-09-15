@@ -74,7 +74,7 @@ resource "aws_instance" "dev" {
     aws_security_group.dev_ec2.id,
   ]
 
-  lifecycle {                      
+  lifecycle {
     ignore_changes = [user_data]
   }
 
@@ -84,5 +84,14 @@ resource "aws_instance" "dev" {
 
   metadata_options {
     http_tokens = "required" # IMDSv2 강제 (SSRF 시 자격증명 탈취 방어)
+  }
+}
+
+resource "aws_eip" "dev" {
+  instance = aws_instance.dev.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "poti-dev-eip"
   }
 }
