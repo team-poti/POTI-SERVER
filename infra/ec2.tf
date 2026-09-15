@@ -35,6 +35,15 @@ resource "aws_instance" "prod" {
     mkdir -p /var/www/poti/.well-known
     chown -R ubuntu:ubuntu /home/ubuntu/app
 
+    # 스왑 설정 (t3.micro 1GB RAM 보완)
+    fallocate -l 2G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    echo 'vm.swappiness=10' >> /etc/sysctl.conf
+    sysctl -p
+
     # docker 네트워크 생성
     docker network create poti-net || true
 

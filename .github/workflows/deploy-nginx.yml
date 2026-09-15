@@ -6,6 +6,7 @@ on:
     paths:
       - 'infra/nginx/**'
       - 'infra/www/**'
+      - 'poti-web/**'
 
 jobs:
   deploy-dev:
@@ -38,6 +39,16 @@ jobs:
           target: "/tmp/www-deploy"
           strip_components: 2
 
+      - name: poti-web 파일 전송 (DEV)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "poti-web"
+          target: "/tmp/poti-web-deploy"
+          strip_components: 1
+
       - name: nginx 설정 적용 및 재시작 (DEV)
         uses: appleboy/ssh-action@master
         with:
@@ -47,6 +58,7 @@ jobs:
           script: |
             sudo mkdir -p /var/www/poti/.well-known
             sudo cp /tmp/www-deploy/.well-known/* /var/www/poti/.well-known/
+            sudo cp -r /tmp/poti-web-deploy/* /var/www/poti/
             sudo cp /tmp/nginx-deploy/dev.poti.kr /etc/nginx/sites-available/dev.poti.kr
             sudo cp /tmp/nginx-deploy/dev-app.poti.kr /etc/nginx/sites-available/dev-app.poti.kr
             sudo ln -sf /etc/nginx/sites-available/dev.poti.kr /etc/nginx/sites-enabled/dev.poti.kr
@@ -83,6 +95,16 @@ jobs:
           target: "/tmp/www-deploy"
           strip_components: 2
 
+      - name: poti-web 파일 전송 (PROD)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "poti-web"
+          target: "/tmp/poti-web-deploy"
+          strip_components: 1
+
       - name: nginx 설정 적용 및 재시작 (PROD)
         uses: appleboy/ssh-action@master
         with:
@@ -92,6 +114,7 @@ jobs:
           script: |
             sudo mkdir -p /var/www/poti/.well-known
             sudo cp /tmp/www-deploy/.well-known/* /var/www/poti/.well-known/
+            sudo cp -r /tmp/poti-web-deploy/* /var/www/poti/
             sudo cp /tmp/nginx-deploy/app.poti.kr /etc/nginx/sites-available/app.poti.kr
             sudo ln -sf /etc/nginx/sites-available/app.poti.kr /etc/nginx/sites-enabled/app.poti.kr
             sudo nginx -t && sudo systemctl reload nginx
