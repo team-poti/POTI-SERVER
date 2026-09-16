@@ -57,7 +57,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            echo "${{ secrets.ENV_FILE }}" | base64 -d > ~/app/.env
+            set -e
+            echo "${{ secrets.ENV_FILE }}" | base64 -d > ~/app/.env.tmp
+            test -s ~/app/.env.tmp || { echo ".env 복원 실패: 파일이 비어 있습니다"; exit 1; }
+            mv ~/app/.env.tmp ~/app/.env
             chmod 600 ~/app/.env
 
       - name: Firebase 크리덴셜 복원
@@ -122,7 +125,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            echo "${{ secrets.ENV_FILE }}" | base64 -d > ~/app/.env
+            set -e
+            echo "${{ secrets.ENV_FILE }}" | base64 -d > ~/app/.env.tmp
+            test -s ~/app/.env.tmp || { echo ".env 복원 실패: 파일이 비어 있습니다"; exit 1; }
+            mv ~/app/.env.tmp ~/app/.env
             chmod 600 ~/app/.env
 
       - name: Firebase 크리덴셜 복원

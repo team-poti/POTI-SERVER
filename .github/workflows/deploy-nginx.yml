@@ -57,8 +57,8 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             sudo mkdir -p /var/www/poti/.well-known
-            sudo cp /tmp/www-deploy/.well-known/* /var/www/poti/.well-known/
-            sudo cp -r /tmp/poti-web-deploy/* /var/www/poti/
+            sudo rsync -a --delete /tmp/www-deploy/.well-known/ /var/www/poti/.well-known/
+            sudo rsync -a --delete --exclude='.well-known' /tmp/poti-web-deploy/ /var/www/poti/
             sudo cp /tmp/nginx-deploy/dev.poti.kr /etc/nginx/sites-available/dev.poti.kr
             sudo cp /tmp/nginx-deploy/dev-app.poti.kr /etc/nginx/sites-available/dev-app.poti.kr
             sudo ln -sf /etc/nginx/sites-available/dev.poti.kr /etc/nginx/sites-enabled/dev.poti.kr
@@ -113,8 +113,8 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             sudo mkdir -p /var/www/poti/.well-known
-            sudo cp /tmp/www-deploy/.well-known/* /var/www/poti/.well-known/
-            sudo cp -r /tmp/poti-web-deploy/* /var/www/poti/
+            sudo rsync -a --delete /tmp/www-deploy/.well-known/ /var/www/poti/.well-known/
+            sudo rsync -a --delete --exclude='.well-known' /tmp/poti-web-deploy/ /var/www/poti/
             sudo cp /tmp/nginx-deploy/app.poti.kr /etc/nginx/sites-available/app.poti.kr
             sudo ln -sf /etc/nginx/sites-available/app.poti.kr /etc/nginx/sites-enabled/app.poti.kr
             sudo nginx -t && sudo systemctl reload nginx
