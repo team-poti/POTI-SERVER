@@ -5,20 +5,25 @@ server:
       force: true
       charset: UTF-8
       enabled: true
+    # File Upload (Multipart)
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  forward-headers-strategy: framework
 
 spring:
   application:
     name: poti-server
 
-  # 1. Database (MySQL)
+  # Database (MySQL)
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    # ???(Asia/Seoul)? ???(utf8mb4) ?? ???
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/poti_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useUnicode=true
+    # ???(Asia/Seoul)? ???(utf8mb4) ?? ??
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/poti?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useUnicode=true
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 
-  # 2. JPA
+  # JPA
   jpa:
     open-in-view: true
     hibernate:
@@ -30,14 +35,14 @@ spring:
         default_batch_fetch_size: 100 # N+1 ?? ??
         dialect: org.hibernate.dialect.MySQL8Dialect
 
-  # 3. Redis
+  # Redis
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
       # password: ${REDIS_PASSWORD} # ??? ?? ??
 
-  # 4. OAuth2 (Kakao)
+  # OAuth2 (Kakao)
   security:
     oauth2:
       client:
@@ -59,13 +64,7 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-  # 5. File Upload (Multipart)
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-
-  # 6. AWS S3 (Spring Cloud AWS)
+  # AWS S3 (Spring Cloud AWS)
   cloud:
     aws:
       credentials:
@@ -75,22 +74,76 @@ spring:
         static: ap-northeast-2
       s3:
         bucket: ${S3_BUCKET_NAME}
+        base_url: ${S3_BUCKET_BASE_URL}
 
-# 7. Actuator (Health Check)
+# Actuator
 management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
-# 8. Custom JWT Config
+# Custom JWT Config
 jwt:
   secret: ${JWT_SECRET}
-  access-token-validity: 3600000 # 1?? (ms)
-  refresh-token-validity: 1209600000 # 14? (ms)
+  access-token-validity: 3600000 # ms 3600000
+  refresh-token-validity: 1209600000 # ms
 
-# 9. Logging
+# Logging
 logging:
   level:
     root: INFO
     org.sopt: DEBUG
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    groups-order: DESC   # 그룹 정렬 순서
+    operations-sorter: method # 메소드 순서대로 정렬
+    disable-swagger-default-url: true # 기본 petstore URL 끄기
+    display-request-duration: true # 요청 소요 시간 표시
+
+swagger:
+  server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
+  server-description: ${SWAGGER_SERVER_DESC:로컬 서버 (Local)}
+
+firebase:
+  credentials-path: classpath:firebase-service-account.json
+
+admin:
+  username: ${ADMIN_USERNAME}
+  password: ${ADMIN_PASSWORD}
+
+gemini:
+  api-key: ${GEMINI_KEY}
+
+discord:
+  webhook-url: ${DISCORD_WEBHOOK}
+
+security:
+  encryption-key: ${ENCRYPTION_KEY}
+
+app:
+  deeplink:
+    host: ${APP_DEEPLINK_HOST:https://app.poti.kr}
+
+google:
+  client-id-ios: ${GOOGLE_CLIENT_ID_IOS}
+  client-id-android: ${GOOGLE_CLIENT_ID_ANDROID}
+
+apple:
+  bundle-id: ${APPLE_BUNDLE_ID}
+
+mixpanel:
+  token: ${MIXPANEL_TOKEN:dummy}
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SPRING_PROFILES_ACTIVE:local}
+  traces-sample-rate: 0.2

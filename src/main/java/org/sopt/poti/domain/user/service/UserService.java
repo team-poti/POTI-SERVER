@@ -1,0 +1,121 @@
+package org.sopt.poti.domain.user.service;
+
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.artist.entity.Artist;
+import org.sopt.poti.domain.artist.service.ArtistService;
+import org.sopt.poti.domain.user.dto.request.UpdateAddressRequest;
+import org.sopt.poti.domain.user.dto.request.UpdateProfileRequest;
+import org.sopt.poti.domain.user.dto.request.UserOnboardingRequest;
+import org.sopt.poti.domain.user.dto.response.AccountResponse;
+import org.sopt.poti.domain.user.dto.response.UserAddressResponse;
+import org.sopt.poti.domain.user.dto.response.UserOnboardingResponse;
+import org.sopt.poti.domain.user.entity.SocialType;
+import org.sopt.poti.domain.user.entity.User;
+import org.sopt.poti.domain.user.entity.UserAddress;
+import org.sopt.poti.domain.user.repository.UserAddressRepository;
+import org.sopt.poti.domain.user.repository.UserRepository;
+import org.sopt.poti.global.error.BusinessException;
+import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class UserService {
+
+  private final UserRepository userRepository;
+  private final UserAddressRepository userAddressRepository;
+  private final ArtistService artistService;
+
+  @Value("${spring.cloud.aws.s3.base_url}")
+  private String s3BaseUrl;
+
+  public User getUserById(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+  }
+
+  public AccountResponse getMyAccount(Long userId) {
+    return AccountResponse.from(getUserById(userId));
+  }
+
+  @Transactional
+  public UserOnboardingResponse saveOnboarding(Long userId, UserOnboardingRequest req) {
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+
+    user.updateNickname(req.nickname());
+
+    Artist favorite = (req.favoriteArtistId() == null)
+        ? null
+        : artistService.getById(req.favoriteArtistId());
+
+    user.updateFavoriteArtist(favorite);
+
+    return new UserOnboardingResponse(
+        user.getNickname(),
+        user.getFavoriteArtist() == null ? null : user.getFavoriteArtist().getId()
+    );
+  }
+
+  @Transactional
+  public void updateProfile(Long userId, UpdateProfileRequest request) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+    String imageUrl = request.profileImageUrl();
+    if (imageUrl != null && !imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+      imageUrl = s3BaseUrl + imageUrl;
+    }
+    user.updateProfile(request.nickname(), imageUrl);
+  }
+
+  @Transactional
+  public void updateFavoriteArtist(Long userId, Long artistId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+
+    Artist favorite = (artistId == null) ? null : artistService.getById(artistId);
+    user.updateFavoriteArtist(favorite);
+  }
+
+  public UserAddressResponse getMyAddress(Long userId) {
+    return userAddressRepository.findByUserId(userId)
+        .map(UserAddressResponse::from)
+        .orElse(null);
+  }
+
+  @Transactional
+  public void updateMyAddress(Long userId, UpdateAddressRequest request) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(ErrorStatus.USER_NOT_FOUND));
+
+    userAddressRepository.findByUserId(userId)
+        .ifPresentOrElse(
+            address -> address.update(request.receiverName(), request.zipcode(),
+                request.address(), request.addressDetail(), request.phone()),
+            () -> userAddressRepository.save(
+                UserAddress.create(user, request.receiverName(), request.zipcode(),
+                    request.address(), request.addressDetail(), request.phone()))
+        );
+  }
+
+  // 참여 시 "내 배송지로 등록" 체크박스 처리
+  public void saveAddressIfRequested(Long userId, boolean save, String receiverName,
+      String zipcode, String address, String addressDetail, String phone) {
+    if (!save) return;
+    updateMyAddress(userId, new UpdateAddressRequest(receiverName, zipcode, address, addressDetail, phone));
+  }
+
+  public Optional<User> findUserBySocialIdAndSocialType(String socialId, SocialType socialType) {
+    return userRepository.findBySocialIdAndSocialType(socialId, socialType);
+  }
+
+  @Transactional
+  public void registerUser(User user) {
+    userRepository.save(user);
+  }
+}

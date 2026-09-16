@@ -1,0 +1,21 @@
+prometheus.scrape "poti_server" {
+  targets = [
+    { __address__ = "poti-blue:8080" },
+    { __address__ = "poti-green:8080" },
+  ]
+  metrics_path    = "/actuator/prometheus"
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.metrics_hosted_prometheus.receiver]
+}
+
+prometheus.remote_write "metrics_hosted_prometheus" {
+  endpoint {
+    name = "hosted-prometheus"
+    url  = "https://prometheus-prod-49-prod-ap-northeast-0.grafana.net/api/prom/push"
+
+    basic_auth {
+      username = "3588462"
+      password = env("GRAFANA_CLOUD_TOKEN")
+    }
+  }
+}

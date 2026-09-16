@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(content, currentPage)">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <title>POTI 어드민</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link th:href="@{/css/admin.css}" rel="stylesheet">
+</head>
+<body>
+<div class="d-flex">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-title">🍵 POTI Admin</div>
+      <div class="brand-sub">관리자 패널</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">메뉴</div>
+      <a th:href="@{/admin/dashboard}"
+         class="sidebar-link"
+         th:classappend="${currentPage == 'dashboard'} ? ' active'">
+        <i class="bi bi-grid-1x2-fill"></i> 대시보드
+      </a>
+      <a th:href="@{/admin/users}"
+         class="sidebar-link"
+         th:classappend="${currentPage == 'users'} ? ' active'">
+        <i class="bi bi-people-fill"></i> 유저 관리
+      </a>
+      <a th:href="@{/admin/posts}"
+         class="sidebar-link"
+         th:classappend="${currentPage == 'posts'} ? ' active'">
+        <i class="bi bi-card-list"></i> 분철글 관리
+      </a>
+      <a th:href="@{/admin/artists}"
+         class="sidebar-link"
+         th:classappend="${currentPage == 'artists'} ? ' active'">
+        <i class="bi bi-stars"></i> 아티스트 관리
+      </a>
+      <a th:href="@{/admin/banners}"
+         class="sidebar-link"
+         th:classappend="${currentPage == 'banners'} ? ' active'">
+        <i class="bi bi-images"></i> 배너 관리
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <form th:action="@{/admin/logout}" method="post">
+        <button type="submit">
+          <i class="bi bi-box-arrow-left"></i> 로그아웃
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-wrapper">
+    <div class="topbar">
+      <span class="topbar-title"
+        th:text="${currentPage == 'dashboard'} ? '대시보드' :
+                 (${currentPage == 'users'} ? '유저 관리' :
+                 (${currentPage == 'posts'} ? '분철글 관리' : '아티스트 관리'))">
+      </span>
+      <span class="topbar-badge">POTI Admin</span>
+    </div>
+    <div class="main-content">
+      <div th:if="${errorMessage}"
+           class="alert alert-danger alert-flash alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+      </div>
+      <th:block th:replace="${content}"></th:block>
+    </div>
+  </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

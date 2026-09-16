@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::section}, 'banners')}">
+<body>
+<section>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted" style="font-size:0.82rem;"
+          th:text="'총 ' + ${#lists.size(banners)} + '개'"></span>
+    <button type="button" class="btn-add" data-bs-toggle="modal" data-bs-target="#addBannerModal">
+      <i class="bi bi-plus-lg"></i> 배너 추가
+    </button>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert-flash alert alert-danger">
+    <i class="bi bi-exclamation-circle-fill"></i>
+    <span th:text="${errorMessage}"></span>
+  </div>
+
+  <div class="table-card">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th style="width:56px;">ID</th>
+          <th style="width:80px;">순서</th>
+          <th style="width:100px;">미리보기</th>
+          <th>이미지 URL</th>
+          <th>딥링크</th>
+          <th style="width:70px;">활성</th>
+          <th style="width:120px;">관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="banner : ${banners}">
+          <td class="cell-id" th:text="${banner.id}"></td>
+          <td th:text="${banner.sortOrder}"></td>
+          <td>
+            <img th:if="${banner.imageUrl != null}"
+                 th:src="${banner.imageUrl}"
+                 style="width:80px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);"
+                 alt="banner">
+          </td>
+          <td class="cell-truncate" style="max-width:180px;" th:text="${banner.imageUrl}"></td>
+          <td class="cell-truncate" style="max-width:160px;" th:text="${banner.deeplink ?: '-'}"></td>
+          <td>
+            <span class="badge-pill"
+                  th:classappend="${banner.active} ? 'badge-active' : 'badge-suspended'"
+                  th:text="${banner.active} ? '활성' : '비활성'"></span>
+          </td>
+          <td>
+            <button type="button" class="btn-action btn-release"
+                    th:attr="data-id=${banner.id},
+                             data-image=${banner.imageUrl},
+                             data-deeplink=${banner.deeplink ?: ''},
+                             data-sort=${banner.sortOrder},
+                             data-active=${banner.active}"
+                    onclick="openEditModal(this)">수정</button>
+            <form th:action="@{/admin/banners/{id}/delete(id=${banner.id})}" method="post" style="display:inline;">
+              <button type="button" class="btn-action btn-delete"
+                      onclick="confirmDelete(this)">삭제</button>
+              <button type="submit" class="d-none js-submit"></button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(banners)}">
+          <td colspan="7">
+            <div class="empty-state">
+              <i class="bi bi-images"></i>
+              <p>등록된 배너가 없습니다.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Banner Modal -->
+  <div class="modal fade" id="addBannerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+      <div class="modal-content admin-modal">
+        <div class="modal-header">
+          <h6 class="modal-title">배너 추가</h6>
+          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+        </div>
+        <form th:action="@{/admin/banners}" method="post">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label-admin">이미지 <span class="required">*</span></label>
+              <div class="d-flex gap-2 mb-1">
+                <input type="file" accept="image/*" class="form-input-admin" style="padding:6px;"
+                       onchange="uploadImage(this, 'addImageUrl')">
+              </div>
+              <input type="url" id="addImageUrl" name="imageUrl" class="form-input-admin"
+                     placeholder="업로드하거나 URL 직접 입력" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-admin">딥링크 <span class="optional">(선택)</span></label>
+              <input type="text" name="deeplink" class="form-input-admin"
+                     placeholder="https://app.poti.kr/favorite-artist">
+              <p class="form-hint">클라이언트 딥링크 경로를 입력하세요. 없으면 비워두세요.</p>
+            </div>
+            <div>
+              <label class="form-label-admin">노출 순서</label>
+              <input type="number" name="sortOrder" class="form-input-admin"
+                     value="0" min="0">
+              <p class="form-hint">숫자가 낮을수록 먼저 노출됩니다.</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">취소</button>
+            <button type="submit" class="btn-modal-submit">추가</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Banner Modal -->
+  <div class="modal fade" id="editBannerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+      <div class="modal-content admin-modal">
+        <div class="modal-header">
+          <h6 class="modal-title">배너 수정</h6>
+          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="editBannerForm" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label-admin">이미지 <span class="required">*</span></label>
+              <div class="d-flex gap-2 mb-1">
+                <input type="file" accept="image/*" class="form-input-admin" style="padding:6px;"
+                       onchange="uploadImage(this, 'editImageUrl')">
+              </div>
+              <input type="url" id="editImageUrl" name="imageUrl" class="form-input-admin"
+                     placeholder="업로드하거나 URL 직접 입력" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-admin">딥링크 <span class="optional">(선택)</span></label>
+              <input type="text" id="editDeeplink" name="deeplink" class="form-input-admin"
+                     placeholder="https://app.poti.kr/favorite-artist">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-admin">노출 순서</label>
+              <input type="number" id="editSortOrder" name="sortOrder" class="form-input-admin" min="0">
+            </div>
+            <div>
+              <label class="form-label-admin">활성 여부</label>
+              <select id="editActive" name="active" class="form-input-admin">
+                <option value="true">활성</option>
+                <option value="false">비활성</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">취소</button>
+            <button type="submit" class="btn-modal-submit">저장</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    async function uploadImage(input, targetId) {
+      const file = input.files[0];
+      if (!file) return;
+      const form = new FormData();
+      form.append('file', file);
+      form.append('directory', 'BANNER');
+      const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+      try {
+        const res = await fetch('/admin/upload', {
+          method: 'POST',
+          headers: { [csrfHeader]: csrfToken },
+          body: form
+        });
+        if (!res.ok) throw new Error(`서버 오류: ${res.status}`);
+        const data = await res.json();
+        if (!data.url) throw new Error('URL이 없습니다.');
+        document.getElementById(targetId).value = data.url;
+      } catch (e) {
+        alert('업로드 실패: ' + e.message);
+      }
+    }
+
+    function openEditModal(btn) {
+      const id = btn.dataset.id;
+      document.getElementById('editBannerForm').action = '/admin/banners/' + id + '/update';
+      document.getElementById('editImageUrl').value = btn.dataset.image || '';
+      document.getElementById('editDeeplink').value = btn.dataset.deeplink || '';
+      document.getElementById('editSortOrder').value = btn.dataset.sort || 0;
+      document.getElementById('editActive').value = btn.dataset.active;
+      new bootstrap.Modal(document.getElementById('editBannerModal')).show();
+    }
+
+    function confirmDelete(btn) {
+      if (confirm('이 배너를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+        btn.closest('form').querySelector('.js-submit').click();
+      }
+    }
+  </script>
+</section>
+</body>
+</html>

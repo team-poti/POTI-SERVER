@@ -1,0 +1,29 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "P64LJZB7SK.com.kr.POTI"
+        ],
+        "components": [
+          {
+            "/": "/pot/*",
+            "comment": "분철팟 상세"
+          },
+          {
+            "/": "/participant-detail/*",
+            "comment": "참여자 상세"
+          },
+          {
+            "/": "/recruiter-detail/*",
+            "comment": "모집자 상세"
+          },
+          {
+            "/": "/participant-manage/*",
+            "comment": "참여자 관리"
+          }
+        ]
+      }
+    ]
+  }
+}

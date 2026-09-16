@@ -1,0 +1,181 @@
+package org.sopt.poti.domain.groupbuy.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.sopt.poti.domain.artist.dto.request.ArtistSearchRequest;
+import org.sopt.poti.domain.artist.dto.response.ArtistTitlesResponse;
+import org.sopt.poti.domain.artist.service.ArtistService;
+import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyCreateRequest;
+import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyListRequest;
+import org.sopt.poti.domain.groupbuy.dto.request.GroupBuyMeStatus;
+import org.sopt.poti.domain.groupbuy.dto.request.GroupBuySearchTitleRequest;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyCreateResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyDetailResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyListResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyMeResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyPostOptionResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuySaleDetailResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.GroupBuyTitlesResponse;
+import org.sopt.poti.domain.groupbuy.dto.response.PostParticipantListResponse;
+import org.sopt.poti.domain.groupbuy.service.GroupBuyService;
+import org.sopt.poti.global.common.ApiResponse;
+import org.sopt.poti.global.common.SuccessStatus;
+import org.sopt.poti.global.security.UserPrincipal;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+@Tag(name = "GroupBuy", description = "공동구매글 관련 API")
+public class GroupBuyController {
+
+  private final GroupBuyService groupBuyService;
+  private final ArtistService artistService;
+
+  @PostMapping("/v1/posts")
+  @Operation(summary = "공동구매 게시글 등록", description = "새로운 공동구매 게시글을 등록합니다.")
+  public ResponseEntity<ApiResponse<GroupBuyCreateResponse>> createGroupBuy(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @RequestBody @Valid GroupBuyCreateRequest request
+  ) {
+    GroupBuyCreateResponse response = groupBuyService.createGroupBuyPost(userPrincipal.getUserId(),
+        request);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ApiResponse.success(SuccessStatus.CREATED, response));
+  }
+
+  @GetMapping("/v1/posts/titles")
+  @Operation(summary = "상품명 자동완성/추천", description = "입력 키워드를 기반으로 공동구매 상품명 리스트를 추천합니다.")
+  public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitles(
+      @ModelAttribute @Valid GroupBuySearchTitleRequest request
+  ) {
+    List<String> titles = groupBuyService.searchTitles(request.artistId(), request.keyword());
+
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles))
+    );
+  }
+
+  @GetMapping("/v1/posts/{postId}")
+  @Operation(summary = "분철글 상세 조회", description = "일반 사용자가 분철글에 대한 정보를 상세 조회합니다.")
+  public ResponseEntity<ApiResponse<GroupBuyDetailResponse>> getGroupBuyPostDetail(
+      @PathVariable Long postId,
+      @AuthenticationPrincipal UserPrincipal userPrincipal
+  ) {
+    Long userId = userPrincipal != null ? userPrincipal.getUserId() : null;
+    GroupBuyDetailResponse groupBuyDetail = groupBuyService.getGroupBuyDetail(userId, postId);
+
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyDetail));
+  }
+
+  @GetMapping("/v1/posts/pots")
+  @Operation(summary = "상품별 분철 팟 목록 조회", description = "특정 아티스트의 특정 상품명에 해당하는 분철 팟(게시글) 목록을 필터링 및 정렬하여 조회합니다. (남아있는 멤버 필터링, 평점순, 마감임박순 정렬)")
+  public ResponseEntity<ApiResponse<GroupBuyListResponse>> getGroupBuyPotList(
+      @ModelAttribute @Valid GroupBuyListRequest request,
+      @PageableDefault(size = 10) Pageable pageable
+  ) {
+    GroupBuyListResponse response = groupBuyService.getGroupBuyListByPostTitle(request, pageable);
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK, response)
+    );
+  }
+
+  @GetMapping("/v1/posts/{postId}/options")
+  @Operation(summary = "분철글 선택 가능한 분철 멤버 옵션과 배송 방법 조회", description = "특정 분철글에 참여(구매) 가능한 멤버 옵션과 배송 방법들을 조회합니다.")
+  public ResponseEntity<ApiResponse<GroupBuyPostOptionResponse>> getGroupBuyOptionList(
+      @PathVariable(name = "postId") Long postId
+  ) {
+    GroupBuyPostOptionResponse groupBuyPostOptionResponse = groupBuyService.getGroupBuyPostOptionResponse(
+        postId);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyPostOptionResponse));
+  }
+
+  @GetMapping("/v1/posts/artists")
+  @Operation(summary = "아티스트 실시간 검색 자동완성/추천", description = "입력 키워드를 기반으로 아티스트명을 추천합니다.")
+  public ApiResponse<ArtistTitlesResponse> searchArtists(
+      @ModelAttribute @Valid ArtistSearchRequest request
+  ) {
+    return ApiResponse.success(
+        SuccessStatus.OK,
+        artistService.searchArtists(request.keyword())
+    );
+  }
+
+
+  @GetMapping("/v1/posts/me")
+  @Operation(summary = "판매자 - 내 판매 내역 리스트 조회", description =
+      "총대로 진행했던 내역들을 조회합니다. 상태값은 IN_PROGRESS (진행중) \n"
+          + "또는\n"
+          + "COMPLETED (완료)가 있습니다.")
+  public ResponseEntity<ApiResponse<GroupBuyMeResponse>> getGroupBuyMeList(
+      @RequestParam(name = "status") GroupBuyMeStatus status,
+      @AuthenticationPrincipal UserPrincipal userPrincipal
+  ) {
+    GroupBuyMeResponse response = groupBuyService.getMyGroupBuyPosts(userPrincipal.getUserId(),
+        status);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, response));
+  }
+
+  @GetMapping("/v1/posts/{postId}/participants")
+  @Operation(summary = "판매자 - 특정 분철글의 참여자 목록 조회", description = "특정 분철글의 참여자 목록을 조회합니다."
+      + "\nOrderStatus별로 주는 값이 달라집니다. 컬럼이 사라지진 않고, null로 반환합니다.")
+  public ResponseEntity<ApiResponse<PostParticipantListResponse>> getGroupBuyParticipantList(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable(name = "postId") Long postId
+  ) {
+    PostParticipantListResponse groupBuyParticipantList = groupBuyService.getGroupBuyParticipantList(
+        userPrincipal.getUserId(), postId);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, groupBuyParticipantList));
+  }
+
+  @GetMapping("/v1/posts/sale/{postId}")
+  @Operation(summary = "판매자 - 분철글 상세 조회", description = "특정 분철글을 상세 조회합니다.")
+  public ResponseEntity<ApiResponse<GroupBuySaleDetailResponse>> getGroupBuySaleDetail(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable(name = "postId") Long postId
+  ) {
+    GroupBuySaleDetailResponse groupBuyPostDetailForSale = groupBuyService.getGroupBuyPostDetailForSale(
+        userPrincipal.getUserId(), postId);
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK, groupBuyPostDetailForSale)
+    );
+  }
+
+  @DeleteMapping("/v1/posts/{postId}")
+  @Operation(summary = "분철글 삭제", description = "총대(모집자)가 본인 분철글을 삭제합니다. 주문이 존재하는 경우 삭제할 수 없습니다.")
+  public ResponseEntity<ApiResponse<Void>> deleteGroupBuyPost(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable Long postId
+  ) {
+    groupBuyService.deleteGroupBuyPost(userPrincipal.getUserId(), postId);
+    return ResponseEntity.ok(ApiResponse.success(SuccessStatus.OK, null));
+  }
+
+  @GetMapping("/v2/posts/titles")
+  @Operation(summary = "상품명 자동완성/추천", description = "입력 키워드를 기반으로 공동구매 상품명 리스트를 추천합니다.")
+  public ResponseEntity<ApiResponse<GroupBuyTitlesResponse>> searchTitlesV2(
+      @ModelAttribute @Valid GroupBuySearchTitleRequest request
+  ) {
+    List<String> titles = groupBuyService.searchTitlesNgram(request.artistId(), request.keyword());
+
+    return ResponseEntity.ok(
+        ApiResponse.success(SuccessStatus.OK, GroupBuyTitlesResponse.of(titles))
+    );
+  }
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::section}, 'users')}">
+<body>
+<section>
+  <div class="table-card">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th style="width:56px;">ID</th>
+          <th>닉네임</th>
+          <th>이메일</th>
+          <th style="width:72px;">소셜</th>
+          <th style="width:80px;">상태</th>
+          <th style="width:96px;">가입일</th>
+          <th style="width:156px;">관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="user : ${users.content}">
+          <td class="cell-id" th:text="${user.id}"></td>
+          <td class="cell-truncate" style="max-width:120px;"><strong th:text="${user.nickname}" th:title="${user.nickname}"></strong></td>
+          <td class="cell-sub cell-truncate" style="max-width:180px;" th:text="${user.email}" th:title="${user.email}"></td>
+          <td>
+            <span class="badge-pill badge-kakao" th:text="${user.socialType}"></span>
+          </td>
+          <td>
+            <span th:if="${user.status.name() == 'ACTIVE'}"    class="badge-pill badge-active">활성</span>
+            <span th:if="${user.status.name() == 'SUSPENDED'}" class="badge-pill badge-suspended">정지</span>
+            <span th:if="${user.status.name() == 'WITHDRAWN'}" class="badge-pill badge-withdrawn">탈퇴</span>
+          </td>
+          <td class="cell-sub" th:text="${#temporals.format(user.createdAt, 'yyyy.MM.dd')}"></td>
+          <td>
+            <div class="d-flex gap-1">
+              <form th:if="${user.status.name() == 'ACTIVE'}"
+                    th:action="@{/admin/users/{id}/suspend(id=${user.id})}" method="post">
+                <button type="button" class="btn-action btn-suspend"
+                        th:attr="data-name=${user.nickname}"
+                        onclick="confirmSuspend(this)">정지</button>
+                <button type="submit" class="d-none js-submit"></button>
+              </form>
+              <form th:if="${user.status.name() == 'SUSPENDED'}"
+                    th:action="@{/admin/users/{id}/unsuspend(id=${user.id})}" method="post">
+                <button type="submit" class="btn-action btn-release">정지 해제</button>
+              </form>
+              <form th:if="${user.status.name() != 'WITHDRAWN'}"
+                    th:action="@{/admin/users/{id}/withdraw(id=${user.id})}" method="post">
+                <button type="button" class="btn-action btn-withdraw"
+                        th:attr="data-name=${user.nickname}"
+                        onclick="confirmWithdraw(this)">강제 탈퇴</button>
+                <button type="submit" class="d-none js-submit"></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <tr th:if="${users.content.empty}">
+          <td colspan="7">
+            <div class="empty-state">
+              <i class="bi bi-people"></i>
+              <p>유저가 없습니다.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav th:if="${users.totalPages > 1}" class="mt-3 d-flex justify-content-center">
+    <ul class="pagination pagination-sm mb-0">
+      <li class="page-item" th:classappend="${users.first} ? 'disabled'">
+        <a class="page-link"
+           th:href="${users.first} ? '#' : @{/admin/users(page=${users.number - 1})}">
+          <i class="bi bi-chevron-left" style="font-size:0.65rem;"></i>
+        </a>
+      </li>
+      <li class="page-item"
+          th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+          th:classappend="${i == users.number} ? 'active'">
+        <a class="page-link"
+           th:href="@{/admin/users(page=${i})}"
+           th:text="${i + 1}"></a>
+      </li>
+      <li class="page-item" th:classappend="${users.last} ? 'disabled'">
+        <a class="page-link"
+           th:href="${users.last} ? '#' : @{/admin/users(page=${users.number + 1})}">
+          <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <script>
+    function confirmSuspend(btn) {
+      if (confirm('"' + btn.dataset.name + '" 유저를 이용 정지하시겠습니까?')) {
+        btn.closest('form').querySelector('.js-submit').click();
+      }
+    }
+    function confirmWithdraw(btn) {
+      if (confirm('"' + btn.dataset.name + '" 유저를 강제 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+        btn.closest('form').querySelector('.js-submit').click();
+      }
+    }
+  </script>
+</section>
+</body>
+</html>

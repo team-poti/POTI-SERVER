@@ -1,0 +1,13 @@
+language: ko-KR
+tone_instructions: >-
+  모든 리뷰는 '한국어'로 작성하세요. 말투는 'Chill'하게 동료처럼 하되, 기술적 지적은 명확히 해주세요. 띄어쓰기 같은 포맷팅 지적은 하지 말고, 버그와 성능 이슈, 보안
+  취약점 위주로 리뷰해주세요.
+reviews:
+  poem: false
+  path_filters:
+    - '!**/generated/**'
+    - '!**/Q*.java'
+    - '!**/*.min.js'
+    - '!**/*.lock'
+    - '!**/build/**'
+    - '!**/dist/**'

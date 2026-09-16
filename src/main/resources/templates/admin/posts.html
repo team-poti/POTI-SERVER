@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::section}, 'posts')}">
+<body>
+<section>
+  <div class="filter-tabs">
+    <a th:href="@{/admin/posts}"
+       class="filter-tab"
+       th:classappend="${selectedStatus == null} ? ' is-active'">전체</a>
+    <a th:each="s : ${statuses}"
+       th:href="@{/admin/posts(status=${s})}"
+       class="filter-tab"
+       th:classappend="${s == selectedStatus} ? ' is-active'"
+       th:text="${s.sellerMessage}"></a>
+  </div>
+
+  <div class="table-card">
+    <table class="table admin-table mb-0">
+      <thead>
+        <tr>
+          <th style="width:56px;">ID</th>
+          <th>제목</th>
+          <th style="width:96px;">아티스트</th>
+          <th style="width:96px;">모집자</th>
+          <th style="width:104px;">상태</th>
+          <th style="width:96px;">등록일</th>
+          <th style="width:72px;">관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="post : ${posts.content}">
+          <td class="cell-id" th:text="${post.id}"></td>
+          <td class="cell-truncate" style="max-width:220px;"><strong th:text="${post.title}" th:title="${post.title}"></strong></td>
+          <td class="cell-sub cell-truncate" style="max-width:90px;" th:text="${post.artist.name}" th:title="${post.artist.name}"></td>
+          <td class="cell-sub cell-truncate" style="max-width:90px;" th:text="${post.leader.nickname}" th:title="${post.leader.nickname}"></td>
+          <td>
+            <span class="badge-pill"
+                  th:classappend="'status-' + ${post.status.name().toLowerCase()}"
+                  th:text="${post.status.sellerMessage}"></span>
+          </td>
+          <td class="cell-sub" th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd')}"></td>
+          <td>
+            <form th:action="@{/admin/posts/{id}/delete(id=${post.id})}" method="post">
+              <button type="button" class="btn-action btn-delete"
+                      th:attr="data-title=${post.title}, data-status=${post.status.name()}"
+                      onclick="confirmDelete(this)">삭제</button>
+              <button type="submit" class="d-none js-submit"></button>
+            </form>
+          </td>
+        </tr>
+        <tr th:if="${posts.content.empty}">
+          <td colspan="7">
+            <div class="empty-state">
+              <i class="bi bi-card-list"></i>
+              <p>분철글이 없습니다.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <nav th:if="${posts.totalPages > 1}" class="mt-3 d-flex justify-content-center">
+    <ul class="pagination pagination-sm mb-0">
+      <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
+        <a class="page-link"
+           th:href="${posts.first} ? '#' : @{/admin/posts(status=${selectedStatus}, page=${posts.number - 1})}">
+          <i class="bi bi-chevron-left" style="font-size:0.65rem;"></i>
+        </a>
+      </li>
+      <li class="page-item"
+          th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
+          th:classappend="${i == posts.number} ? 'active'">
+        <a class="page-link"
+           th:href="@{/admin/posts(status=${selectedStatus}, page=${i})}"
+           th:text="${i + 1}"></a>
+      </li>
+      <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
+        <a class="page-link"
+           th:href="${posts.last} ? '#' : @{/admin/posts(status=${selectedStatus}, page=${posts.number + 1})}">
+          <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <script>
+    function confirmDelete(btn) {
+      const msg = btn.dataset.status === 'RECRUITING'
+        ? '「' + btn.dataset.title + '」을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.'
+        : '「' + btn.dataset.title + '」은 현재 진행 중인 분철글입니다.\n정말 삭제하시겠습니까?';
+      if (confirm(msg)) {
+        btn.closest('form').querySelector('.js-submit').click();
+      }
+    }
+  </script>
+</section>
+</body>
+</html>

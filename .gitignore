@@ -59,3 +59,15 @@ application-real.yml
 application-local.yml
 .env
 secrets.properties
+src/main/resources/firebase-service-account.json
+
+### Terraform ###
+infra/.terraform/
+infra/terraform.tfvars
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/*.auto.tfvars
+infra/*.auto.tfvars.json
+infra/terraform.tfvars.json
+PROD-CHECKLIST.md
+poti-web.zip
