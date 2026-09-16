@@ -8,6 +8,7 @@ on:
       - 'build.gradle'
       - '.github/workflows/**'
       - 'docker-compose*.yml'
+      - 'infra/alloy/**'
 
 jobs:
   build:
@@ -115,8 +116,18 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          source: "deploy.sh,docker-compose.yml"
+          source: "deploy.sh,docker-compose.yml,docker-compose.prod.yml"
           target: "/home/ubuntu/app"
+
+      - name: Alloy 설정 파일 전송
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          source: "infra/alloy/config.alloy"
+          target: "/home/ubuntu/app"
+          strip_components: 0
 
       - name: .env 복원
         uses: appleboy/ssh-action@master
