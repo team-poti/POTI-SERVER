@@ -28,15 +28,15 @@ fi
 # 3. 헬스 체크
 echo "### 3. Health Check (서버 뜰 때까지 대기)..."
 HEALTH_CHECK_PASSED=false
-for i in {1..10}; do
+for i in {1..25}; do
   response=$(curl -s http://127.0.0.1:$TARGET_PORT/actuator/health)
   if [ "$response" == "OK" ] || [ "$response" == '{"status":"UP"}' ]; then
     echo "### ✅ 서버 정상 구동"
     HEALTH_CHECK_PASSED=true
     break
   else
-    echo "### ⏳ 대기 중... ($i/10)"
-    sleep 10
+    echo "### ⏳ 대기 중... ($i/25)"
+    sleep 12
   fi
 done
 
