@@ -7,6 +7,7 @@ import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.image.entity.ImageDirectory;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.external.s3.S3Service;
+import org.sopt.poti.global.security.jwt.JwtTokenProvider;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,13 @@ public class AdminController {
 
   private final AdminService adminService;
   private final S3Service s3Service;
+  private final JwtTokenProvider jwtTokenProvider;
+
+  @GetMapping("/token")
+  @ResponseBody
+  public ResponseEntity<Map<String, String>> issueToken(@RequestParam Long userId) {
+    return ResponseEntity.ok(Map.of("accessToken", jwtTokenProvider.createAccessToken(userId)));
+  }
 
   @PostMapping("/upload")
   @ResponseBody
