@@ -9,6 +9,8 @@ services:
     environment:
       - GRAFANA_CLOUD_TOKEN=${GRAFANA_CLOUD_TOKEN}
     command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+    extra_hosts:
+      - "host-gateway:host-gateway"
     networks:
       - poti-net
     restart: always

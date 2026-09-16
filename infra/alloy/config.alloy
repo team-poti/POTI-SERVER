@@ -1,7 +1,7 @@
 prometheus.scrape "poti_server" {
   targets = [
-    { __address__ = "poti-blue:8080" },
-    { __address__ = "poti-green:8080" },
+    { __address__ = "host-gateway:8080", instance = "blue" },
+    { __address__ = "host-gateway:8081", instance = "green" },
   ]
   metrics_path    = "/actuator/prometheus"
   scrape_interval = "15s"
