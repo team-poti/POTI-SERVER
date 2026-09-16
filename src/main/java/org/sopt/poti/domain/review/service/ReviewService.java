@@ -2,6 +2,8 @@ package org.sopt.poti.domain.review.service;
 
 import lombok.RequiredArgsConstructor;
 import org.sopt.poti.domain.order.entity.Order;
+import org.sopt.poti.global.external.mixpanel.MixpanelService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.sopt.poti.domain.order.service.OrderService;
 import org.sopt.poti.domain.review.dto.request.ReviewRequest;
 import org.sopt.poti.domain.review.entity.Review;
@@ -21,6 +23,9 @@ public class ReviewService {
   private final ReviewRepository reviewRepository;
   private final OrderService orderService;
   private final UserService userService;
+
+  @Autowired(required = false)
+  private MixpanelService mixpanelService;
 
   public Long createReview(Long writerUserId, ReviewRequest request) {
     Long orderId = request.transactionId();
@@ -44,6 +49,14 @@ public class ReviewService {
     double rawAvg = reviewRepository.avgScoreBySellerId(seller.getId());
     double roundAvg = Math.round(rawAvg * 10) / 10.0;
     seller.updateRatingAvg(roundAvg);
+
+    if (mixpanelService != null) {
+      mixpanelService.track(writerUserId, "Review Submitted", java.util.Map.of(
+          "split_id", String.valueOf(order.getGroupBuyPost().getId()),
+          "transaction_id", String.valueOf(order.getId()),
+          "rating", request.star()
+      ));
+    }
 
     return saved.getId();
   }

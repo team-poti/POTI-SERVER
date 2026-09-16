@@ -50,6 +50,8 @@ import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.sopt.poti.global.external.mixpanel.MixpanelService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -74,6 +76,9 @@ public class GroupBuyService {
 
   @Value("${spring.cloud.aws.s3.base_url}")
   private String S3_BASE_URL;
+
+  @Autowired(required = false)
+  private MixpanelService mixpanelService;
 
   @Transactional
   public GroupBuyCreateResponse createGroupBuyPost(Long userId, GroupBuyCreateRequest request) {
@@ -125,6 +130,17 @@ public class GroupBuyService {
     }
 
     groupBuyRepository.save(groupBuyPost);
+
+    if (mixpanelService != null) {
+      java.util.Map<String, Object> props = new java.util.HashMap<>();
+      props.put("split_id", String.valueOf(groupBuyPost.getId()));
+      props.put("group_id", String.valueOf(groupBuyPost.getArtist().getId()));
+      if (groupBuyPost.getItem() != null) {
+        props.put("goods_id", String.valueOf(groupBuyPost.getItem().getId()));
+      }
+      props.put("member_count", groupBuyPost.getGoalQuantity());
+      mixpanelService.track(userId, "Split Created", props);
+    }
 
     return GroupBuyCreateResponse.of(groupBuyPost.getId());
   }

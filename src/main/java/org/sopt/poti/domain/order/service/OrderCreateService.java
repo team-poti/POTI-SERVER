@@ -23,6 +23,7 @@ import org.sopt.poti.domain.order.entity.OrderItem;
 import org.sopt.poti.domain.order.repository.OrderItemRepository;
 import org.sopt.poti.domain.order.repository.OrderRepository;
 import org.sopt.poti.domain.fcmtoken.service.FcmNotificationService;
+import org.sopt.poti.global.external.mixpanel.MixpanelService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.service.UserService;
@@ -45,6 +46,9 @@ public class OrderCreateService {
 
   @Autowired(required = false)
   private FcmNotificationService fcmNotificationService;
+
+  @Autowired(required = false)
+  private MixpanelService mixpanelService;
 
   @Transactional
   public CreateOrderResponse createOrder(Long userId, CreateOrderRequest request) {
@@ -146,6 +150,17 @@ public class OrderCreateService {
         List<Order> participantOrders = orderRepository.findOrdersWithUserByGroupBuyPost_Id(post.getId());
         fcmNotificationService.notifyPostStatusChanged(post, participantOrders);
       }
+    }
+
+    if (mixpanelService != null) {
+      java.util.Map<String, Object> props = new java.util.HashMap<>();
+      props.put("split_id", String.valueOf(post.getId()));
+      props.put("group_id", String.valueOf(post.getArtist().getId()));
+      if (post.getItem() != null) {
+        props.put("goods_id", String.valueOf(post.getItem().getId()));
+      }
+      props.put("participant_count", post.getCurrentQuantity());
+      mixpanelService.track(userId, "Split Joined", props);
     }
 
     return new CreateOrderResponse(savedOrder.getId());
