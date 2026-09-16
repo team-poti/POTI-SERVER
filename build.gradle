@@ -72,6 +72,12 @@ dependencies {
     // Thymeleaf (어드민 SSR)
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    // Sentry (에러 트래킹)
+    implementation 'io.sentry:sentry-spring-boot-starter-jakarta:8.12.0'
+
+    // Prometheus (메트릭 수집)
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 }
 
 ext {

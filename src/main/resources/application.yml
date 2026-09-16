@@ -76,12 +76,16 @@ spring:
         bucket: ${S3_BUCKET_NAME}
         base_url: ${S3_BUCKET_BASE_URL}
 
-# Actuator (Health Check)
+# Actuator
 management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 # Custom JWT Config
 jwt:
@@ -138,3 +142,8 @@ apple:
 
 mixpanel:
   token: ${MIXPANEL_TOKEN:dummy}
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SPRING_PROFILES_ACTIVE:local}
+  traces-sample-rate: 0.2

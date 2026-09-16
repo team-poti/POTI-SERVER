@@ -75,3 +75,6 @@ app:
 
 mixpanel:
   token: dummy-test
+
+sentry:
+  dsn:
