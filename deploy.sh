@@ -21,6 +21,9 @@ echo "### 1. 이미지 Pull..."
 docker compose pull $TARGET_CONTAINER
 echo "### 2. 컨테이너 실행..."
 docker compose up -d $TARGET_CONTAINER
+if [ "${SPRING_PROFILES_ACTIVE}" = "prod" ]; then
+  docker compose -f docker-compose.prod.yml up -d alloy
+fi
 
 # 3. 헬스 체크
 echo "### 3. Health Check (서버 뜰 때까지 대기)..."

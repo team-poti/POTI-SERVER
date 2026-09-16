@@ -31,6 +31,7 @@ import org.sopt.poti.domain.payment.entity.Payment;
 import org.sopt.poti.domain.fcmtoken.service.FcmNotificationService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.sopt.poti.global.external.mixpanel.MixpanelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,9 @@ public class OrderService {
 
   @Autowired(required = false)
   private FcmNotificationService fcmNotificationService;
+
+  @Autowired(required = false)
+  private MixpanelService mixpanelService;
 
   public int countByUser_Id(Long userId) {
     return orderRepository.countByUser_Id(userId);
@@ -126,6 +130,13 @@ public class OrderService {
 
     if (fcmNotificationService != null) {
       fcmNotificationService.notifyShippingStarted(order);
+    }
+
+    if (mixpanelService != null) {
+      mixpanelService.track(userId, "Shipment Started", java.util.Map.of(
+          "split_id", String.valueOf(groupBuyPost.getId()),
+          "shipping_method", startDeliveryRequest.carrier()
+      ));
     }
 
     long notShippedCount = orderRepository.countByGroupBuyPostIdAndStatusIn(

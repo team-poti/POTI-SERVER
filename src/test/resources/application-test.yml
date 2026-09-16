@@ -72,3 +72,9 @@ apple:
 app:
   deeplink:
     host: https://test.poti.kr
+
+mixpanel:
+  token: dummy-test
+
+sentry:
+  dsn:

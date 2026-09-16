@@ -3,6 +3,7 @@ package org.sopt.poti.domain.auth.service;
 import feign.FeignException;
 import io.jsonwebtoken.Claims;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.sopt.poti.domain.auth.dto.response.TokenReissueResponse;
 import org.sopt.poti.domain.auth.entity.RefreshToken;
 import org.sopt.poti.domain.auth.repository.RefreshTokenRepository;
 import org.sopt.poti.domain.fcmtoken.service.FcmTokenService;
+import org.sopt.poti.global.external.mixpanel.MixpanelService;
 import org.sopt.poti.domain.groupbuy.entity.GroupBuyPostStatus;
 import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
 import org.sopt.poti.domain.order.entity.OrderStatus;
@@ -30,6 +32,7 @@ import org.sopt.poti.global.external.google.dto.GoogleTokenInfoResponse;
 import org.sopt.poti.global.external.kakao.KakaoFeignClient;
 import org.sopt.poti.global.external.kakao.dto.KakaoUserResponse;
 import org.sopt.poti.global.security.jwt.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -51,6 +54,9 @@ public class AuthService {
   private final FcmTokenService fcmTokenService;
   private final OrderService orderService;
   private final GroupBuyRepository groupBuyRepository;
+
+  @Autowired(required = false)
+  private MixpanelService mixpanelService;
 
   private final static String DEFAULT_PROFILE_IMAGE = "https://poti-s3-bucket.s3.ap-northeast-2.amazonaws.com/users/img-basic-profile.png";
 
@@ -99,6 +105,11 @@ public class AuthService {
       );
       userService.registerUser(user);
       isNewUser = true;
+      if (mixpanelService != null) {
+        String signupMethod = request.socialType().name().toLowerCase();
+        mixpanelService.track(user.getId(), "Sign Up Completed", Map.of("signup_method", signupMethod));
+        mixpanelService.setUserProperties(user.getId(), Map.of("signup_date", java.time.LocalDate.now().toString()));
+      }
     }
 
     user.updateLastActiveAt();

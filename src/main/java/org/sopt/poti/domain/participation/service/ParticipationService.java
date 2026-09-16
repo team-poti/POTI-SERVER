@@ -16,6 +16,7 @@ import org.sopt.poti.domain.participation.entity.ParticipationStatus;
 import org.sopt.poti.domain.user.service.UserService;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.sopt.poti.global.external.mixpanel.MixpanelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,9 @@ public class ParticipationService {
 
   @Autowired(required = false)
   private FcmNotificationService fcmNotificationService;
+
+  @Autowired(required = false)
+  private MixpanelService mixpanelService;
 
   public ParticipationSummaryResponse getMyParticipations(Long userId, ParticipationStatus status) {
 
@@ -90,6 +94,15 @@ public class ParticipationService {
         post.completePostDelivery();
         if (fcmNotificationService != null) {
           fcmNotificationService.notifyAllDelivered(post);
+        }
+        if (mixpanelService != null) {
+          java.util.Map<String, Object> props = new java.util.HashMap<>();
+          props.put("split_id", String.valueOf(post.getId()));
+          props.put("group_id", String.valueOf(post.getArtist().getId()));
+          if (post.getItem() != null) {
+            props.put("goods_id", String.valueOf(post.getItem().getId()));
+          }
+          mixpanelService.track(order.getUser().getId(), "Transaction Completed", props);
         }
       }
     }
