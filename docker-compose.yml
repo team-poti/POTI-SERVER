@@ -5,7 +5,7 @@ services:
     image: dlacofbs/poti-server:latest
     container_name: poti-blue
     ports:
-      - "8080:8080"  # 외부(EC2) 8080 ➡ 내부(Container) 8080
+      - "127.0.0.1:8080:8080"
     environment:
       - JAVA_OPTS=-Xms512m -Xmx512m
       - TZ=Asia/Seoul
@@ -22,7 +22,7 @@ services:
     image: dlacofbs/poti-server:latest
     container_name: poti-green
     ports:
-      - "8081:8080"  # 외부(EC2) 8081 ➡ 내부(Container) 8080
+      - "127.0.0.1:8081:8080"
     environment:
       - JAVA_OPTS=-Xms512m -Xmx512m
       - TZ=Asia/Seoul
