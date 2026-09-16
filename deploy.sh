@@ -21,7 +21,7 @@ echo "### 1. 이미지 Pull..."
 docker compose pull $TARGET_CONTAINER
 echo "### 2. 컨테이너 실행..."
 docker compose up -d $TARGET_CONTAINER
-if [ "${SPRING_PROFILES_ACTIVE}" = "prod" ]; then
+if grep -q "^SPRING_PROFILES_ACTIVE=prod" .env 2>/dev/null; then
   docker compose -f docker-compose.prod.yml up -d alloy
 fi
 
