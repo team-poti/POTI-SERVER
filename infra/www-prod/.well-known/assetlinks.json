@@ -1,0 +1,15 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.poti.android",
+      "sha256_cert_fingerprints": [
+        "5C:FF:20:87:09:FC:6C:5E:1D:59:9A:DF:EE:B1:21:EE:EE:68:CB:3B:BE:E2:21:DF:FF:CA:8F:57:CB:EB:68:E7",
+        "00:C3:B9:FA:D3:F4:12:85:7E:BD:F8:25:44:EC:7E:14:27:F1:60:CE:03:DA:31:40:1A:22:D3:EB:AF:F8:CF:2C",
+        "04:8C:6F:6A:5A:DC:6E:70:21:4B:35:8F:33:A0:90:42:D3:0B:29:F2:20:BD:0A:BF:37:F5:BF:A8:9E:30:DC:12",
+        "5C:FF:20:87:09:FC:6C:5E:1D:59:9A:DF:EE:B1:21:EE:EE:68:CB:3B:BE:E2:21:DF:FF:CA:8F:57:CB:EB:68:E7"
+      ]
+    }
+  }
+]

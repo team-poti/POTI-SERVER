@@ -6,6 +6,7 @@ on:
     paths:
       - 'infra/nginx/**'
       - 'infra/www/**'
+      - 'infra/www-prod/**'
       - 'poti-web/**'
 
 jobs:
@@ -91,7 +92,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          source: "infra/www/.well-known"
+          source: "infra/www-prod/.well-known"
           target: "/tmp/www-deploy"
           strip_components: 2
 
