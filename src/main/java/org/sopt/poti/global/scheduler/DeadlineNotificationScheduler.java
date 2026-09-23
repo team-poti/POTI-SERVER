@@ -12,6 +12,7 @@ import org.sopt.poti.domain.groupbuy.repository.GroupBuyRepository;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.order.entity.OrderStatus;
 import org.sopt.poti.domain.order.repository.OrderRepository;
+import io.sentry.spring.jakarta.checkin.SentryCheckIn;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ public class DeadlineNotificationScheduler {
 
   // 매일 오전 10시 — 모집 마감 1일 전 모집자 알림
   @Scheduled(cron = "0 0 10 * * *")
+  @SentryCheckIn("recruit-deadline-notification")
   public void notifyRecruitDeadlineTomorrow() {
     LocalDate tomorrow = LocalDate.now().plusDays(1);
     List<GroupBuyPost> posts = groupBuyRepository.findByStatusAndRecruitDeadline(
@@ -44,6 +46,7 @@ public class DeadlineNotificationScheduler {
 
   // 5분마다 — 입금 마감 3시간 전, 30분 전 알림
   @Scheduled(cron = "0 0/5 * * * *")
+  @SentryCheckIn("payment-deadline-notification")
   public void notifyPaymentDeadline() {
     LocalDateTime now = LocalDateTime.now();
     notifyPaymentReminder(now.minusHours(21), "3시간");

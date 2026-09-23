@@ -81,7 +81,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          source: "infra/nginx/sites-available/app.poti.kr"
+          source: "infra/nginx/sites-available/app.poti.kr,infra/nginx/sites-available/poti.kr"
+          # poti.kr → /etc/nginx/sites-available/poti 로 배포 (기존 symlink 유지)
           target: "/tmp/nginx-deploy"
           strip_components: 3
 
@@ -116,5 +117,7 @@ jobs:
             sudo rsync -a --delete /tmp/www-deploy/.well-known/ /var/www/poti/.well-known/
             sudo rsync -a --delete --exclude='.well-known' /tmp/poti-web-deploy/ /var/www/poti/
             sudo cp /tmp/nginx-deploy/app.poti.kr /etc/nginx/sites-available/app.poti.kr
+            sudo cp /tmp/nginx-deploy/poti.kr /etc/nginx/sites-available/poti
             sudo ln -sf /etc/nginx/sites-available/app.poti.kr /etc/nginx/sites-enabled/app.poti.kr
+            sudo ln -sf /etc/nginx/sites-available/poti /etc/nginx/sites-enabled/poti
             sudo nginx -t && sudo systemctl reload nginx

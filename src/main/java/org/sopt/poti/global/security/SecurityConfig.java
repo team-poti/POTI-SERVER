@@ -29,6 +29,7 @@ public class SecurityConfig {
   private static final String[] WHITE_LIST = {
       "/api/v1/auth/**", // 로그인/회원가입 등 인증 관련
       "/actuator/health", // 헬스 체크
+      "/actuator/prometheus", // Grafana Alloy 메트릭 수집
       "/error",
       "/swagger-ui/**", // Swagger 문서 관련
       "/v3/api-docs/**",
