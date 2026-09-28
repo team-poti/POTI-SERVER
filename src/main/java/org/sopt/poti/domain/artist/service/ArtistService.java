@@ -11,6 +11,7 @@ import org.sopt.poti.domain.artist.repository.ArtistRepository;
 import org.sopt.poti.domain.artist.repository.MemberRepository;
 import org.sopt.poti.global.error.BusinessException;
 import org.sopt.poti.global.error.ErrorStatus;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ public class ArtistService {
   }
 
   public ArtistListResponse getArtists() {
-    List<Artist> artists = artistRepository.findAll();
+    List<Artist> artists = artistRepository.findAll(Sort.by("name").ascending());
 
     return new ArtistListResponse(
         artists.stream()

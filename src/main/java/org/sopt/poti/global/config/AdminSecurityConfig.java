@@ -42,7 +42,7 @@ public class AdminSecurityConfig {
     http
         .securityMatcher("/admin/**")
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/admin/login").permitAll()
+            .requestMatchers("/admin/login", "/admin/token").permitAll()
             .anyRequest().hasRole("ADMIN")
         )
         .formLogin(form -> form
