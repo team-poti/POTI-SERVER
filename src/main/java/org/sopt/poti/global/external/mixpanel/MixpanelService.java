@@ -1,6 +1,7 @@
 package org.sopt.poti.global.external.mixpanel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,7 @@ public class MixpanelService {
             body.put("$distinct_id", String.valueOf(userId));
             body.put("$set", props);
             String json = objectMapper.writeValueAsString(List.of(body));
-            String data = Base64.getEncoder().encodeToString(json.getBytes());
+            String data = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
             mixpanelTrackClient.engage(data);
         } catch (Exception e) {
             log.warn("Mixpanel engage 실패: userId={}", userId, e);
