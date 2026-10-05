@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @Service
 @Profile("prod")
@@ -47,7 +49,9 @@ public class MixpanelService {
             body.put("$set", props);
             String json = objectMapper.writeValueAsString(List.of(body));
             String data = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
-            mixpanelTrackClient.engage(data);
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add("data", data);
+            mixpanelTrackClient.engage(formData);
         } catch (Exception e) {
             log.warn("Mixpanel engage 실패: userId={}", userId, e);
         }
