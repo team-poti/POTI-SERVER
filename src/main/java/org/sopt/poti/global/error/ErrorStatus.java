@@ -29,6 +29,7 @@ public enum ErrorStatus {
   ORDER_NOT_PAID(40014, HttpStatus.BAD_REQUEST, "입금 완료 상태에서만 배송 중 처리가 가능합니다."),
   ORDER_EXISTS_SHIPPINGS(40015, HttpStatus.BAD_REQUEST, "이미 배송처리된 주문입니다."),
   GROUP_BUY_POST_INVALID_INCREASE_COUNT(40016, HttpStatus.BAD_REQUEST, "증가 수량은 1 이상이어야 합니다."),
+  GROUP_BUY_POST_CAPACITY_EXCEEDED(40020, HttpStatus.BAD_REQUEST, "모집 정원을 초과하여 주문할 수 없습니다."),
   ORDER_NOT_SHIPPED(40017, HttpStatus.BAD_REQUEST, "배송 시작 상태에서만 배송 완료로 변경할 수 있습니다."),
   POST_NOT_SHIPPING(40018, HttpStatus.BAD_REQUEST, "배송 중인 공구글만 배송 완료로 변경할 수 있습니다."),
   ACTIVE_TRANSACTION_EXISTS(40019, HttpStatus.BAD_REQUEST, "진행 중인 거래가 있어 탈퇴할 수 없습니다."),
