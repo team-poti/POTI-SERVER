@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.sopt.poti.domain.fcmtoken.entity.FcmToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
@@ -17,6 +18,6 @@ public interface FcmTokenRepository extends JpaRepository<FcmToken, Long> {
   @Transactional
   void deleteAllByUser_Id(Long userId);
 
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   void deleteByToken(String token);
 }
