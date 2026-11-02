@@ -28,4 +28,19 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean(name = "fcmExecutor")
+    public Executor fcmExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(500);
+        executor.setThreadNamePrefix("fcm-");
+        executor.setRejectedExecutionHandler((r, e) ->
+            log.warn("FCM 발송 드롭: 큐 포화 (active={}, queue={})",
+                e.getActiveCount(), e.getQueue().size())
+        );
+        executor.initialize();
+        return executor;
+    }
 }

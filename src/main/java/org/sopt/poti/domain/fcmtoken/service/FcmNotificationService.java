@@ -9,6 +9,8 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MessagingErrorCode;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import org.sopt.poti.domain.notification.service.NotificationService;
 import org.sopt.poti.domain.order.entity.Order;
 import org.sopt.poti.domain.user.entity.User;
 import org.sopt.poti.domain.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,8 @@ public class FcmNotificationService {
   private final FcmTokenRepository fcmTokenRepository;
   private final NotificationService notificationService;
   private final UserRepository userRepository;
+  @Qualifier("fcmExecutor")
+  private final Executor fcmExecutor;
 
   @Value("${app.deeplink.host}")
   private String deeplinkHost;
@@ -129,11 +134,15 @@ public class FcmNotificationService {
       TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
         @Override
         public void afterCommit() {
-          sendToUser(userId, title, body, deeplink, notificationId);
+          try {
+            fcmExecutor.execute(() -> sendToUser(userId, title, body, deeplink, notificationId));
+          } catch (RejectedExecutionException e) {
+            log.warn("FCM 발송 드롭: 큐 포화 (userId={})", userId);
+          }
         }
       });
     } else {
-      sendToUser(userId, title, body, deeplink, notificationId);
+      fcmExecutor.execute(() -> sendToUser(userId, title, body, deeplink, notificationId));
     }
   }
 
