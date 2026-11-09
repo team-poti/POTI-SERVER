@@ -436,8 +436,9 @@ public class GroupBuyService {
     return options;
   }
 
+  @Transactional
   public GroupBuyPost getRecruitingPostById(Long postId) {
-    GroupBuyPost post = groupBuyRepository.findById(postId)
+    GroupBuyPost post = groupBuyRepository.findByIdWithLock(postId)
         .orElseThrow(() -> new BusinessException(ErrorStatus.POST_NOT_FOUND));
 
     if (post.getStatus() != GroupBuyPostStatus.RECRUITING) {

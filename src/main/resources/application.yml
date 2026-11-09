@@ -22,6 +22,9 @@ spring:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/poti?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useUnicode=true
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      connection-init-sql: "SET SESSION innodb_lock_wait_timeout = 3"
 
   # JPA
   jpa:

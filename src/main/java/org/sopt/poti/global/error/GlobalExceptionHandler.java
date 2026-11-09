@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sopt.poti.global.common.ApiResponse;
 import org.sopt.poti.global.external.discord.DiscordNotificationService;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -44,6 +45,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(
       DataIntegrityViolationException e) {
     log.warn("데이터 무결성 위반 오류: {}", e.getMessage());
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(ApiResponse.fail(ErrorStatus.CONFLICT_ERROR));
+  }
+
+  @ExceptionHandler(PessimisticLockingFailureException.class)
+  public ResponseEntity<ApiResponse<Void>> handlePessimisticLockingFailure(
+      PessimisticLockingFailureException e) {
+    log.warn("비관적 락 획득 실패 (타임아웃): {}", e.getMessage());
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(ApiResponse.fail(ErrorStatus.CONFLICT_ERROR));
   }
