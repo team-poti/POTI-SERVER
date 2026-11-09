@@ -192,6 +192,9 @@ public class GroupBuyPost extends BaseTimeEntity {
     if (count <= 0) {
       throw new BusinessException(ErrorStatus.GROUP_BUY_POST_INVALID_INCREASE_COUNT);
     }
+    if (this.currentQuantity + count > this.goalQuantity) {
+      throw new BusinessException(ErrorStatus.GROUP_BUY_POST_CAPACITY_EXCEEDED);
+    }
     this.currentQuantity += count;
 
     if (this.currentQuantity >= this.goalQuantity) {

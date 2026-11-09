@@ -9,6 +9,8 @@ spring:
     url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
     username: sa
     password:
+    hikari:
+      connection-init-sql: ""
 
   # JPA 설정 (테스트용)
   jpa:
