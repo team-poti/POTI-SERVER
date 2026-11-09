@@ -10,7 +10,6 @@ import com.google.firebase.messaging.MessagingErrorCode;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -134,11 +133,7 @@ public class FcmNotificationService {
       TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
         @Override
         public void afterCommit() {
-          try {
-            fcmExecutor.execute(() -> sendToUser(userId, title, body, deeplink, notificationId));
-          } catch (RejectedExecutionException e) {
-            log.warn("FCM 발송 드롭: 큐 포화 (userId={})", userId);
-          }
+          fcmExecutor.execute(() -> sendToUser(userId, title, body, deeplink, notificationId));
         }
       });
     } else {

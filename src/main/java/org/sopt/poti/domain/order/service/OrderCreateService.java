@@ -56,11 +56,11 @@ public class OrderCreateService {
     // 1 게시글 조회
     User user = userService.getUserById(userId);
 
+    GroupBuyPost post = groupBuyService.getRecruitingPostById(request.groupBuyPostId());
+
     if (orderRepository.existsByGroupBuyPost_IdAndUser_Id(request.groupBuyPostId(), userId)) {
       throw new BusinessException(ErrorStatus.ORDER_ALREADY_EXISTS);
     }
-
-    GroupBuyPost post = groupBuyService.getRecruitingPostById(request.groupBuyPostId());
 
     // 2 공구 배송 옵션 조회
     GroupBuyShipping shipping = groupBuyService.getShippingInPost(request.shippingId(),

@@ -40,6 +40,8 @@ public class AsyncConfig {
             log.warn("FCM 발송 드롭: 큐 포화 (active={}, queue={})",
                 e.getActiveCount(), e.getQueue().size())
         );
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
         executor.initialize();
         return executor;
     }
