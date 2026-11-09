@@ -71,3 +71,6 @@ infra/*.auto.tfvars.json
 infra/terraform.tfvars.json
 PROD-CHECKLIST.md
 poti-web.zip
+
+# Claude Code 로컬 설정
+.claude/settings.local.json
