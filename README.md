@@ -65,14 +65,19 @@
 + `ORM - Spring Data JPA`</br>
 + `Query - QueryDSL 5.0`</br>
 + `Infrastructure & Performance`</br>
-+ `Cache - Redis (ElastiCache)`</br>
++ `Cache - Redis`</br>
 + `Storage - AWS S3 (Presigned URL)`</br>
 + `Web Server - Nginx`</br>
 + `CI/CD - Docker Compose, GitHub Actions`</br>
 + `Image Build - Jib`</br>
-+ `Monitoring - Dozzle`</br>
-+ `AI & External Service`</br>
-+ `AI - OpenAI API`</br>
++ `Monitoring - Dozzle, Prometheus, Grafana Cloud`</br>
++ `Error Tracking - Sentry`</br>
++ `API Docs - Swagger (SpringDoc)`</br>
++ `External Service`</br>
++ `Auth - Kakao / Google / Apple OAuth`</br>
++ `Push Notification - Firebase Cloud Messaging (FCM)`</br>
++ `Analytics - Mixpanel`</br>
++ `AI - Google Gemini API`</br>
 + `Alert - Discord Webhook`</br>
 </br>
 
@@ -98,40 +103,39 @@ DDD의 핵심 철학인 Bounded Context를 반영하여 도메인형 패키지 �
 ```bash
 src/main/java/org/sopt/poti
 ├── 📂 global                  # 공통 커널 & 횡단 관심사
-│   ├── config                 # 설정 (Security, QueryDSL, Redis)
+│   ├── config                 # 설정 (Security, QueryDSL, Redis, Async)
 │   ├── common                 # 공통 응답/유틸 (ApiResponse, BaseEntity)
 │   ├── error                  # 예외 처리 (GlobalExceptionHandler)
 │   ├── external               # 인프라 계층 (Infrastructure Layer)
 │   │   ├── s3                 # AWS S3 구현체
 │   │   ├── discord            # Discord Webhook 구현체
-│   │   └── kakao              # Kakao OAuth 구현체
+│   │   ├── kakao              # Kakao OAuth 구현체
+│   │   ├── google             # Google OAuth 구현체
+│   │   ├── apple              # Apple ID 검증 구현체
+│   │   └── mixpanel           # Mixpanel 이벤트 트래킹 구현체
+│   ├── scheduler              # 스케줄 작업
+│   ├── util                   # 공통 유틸리티
 │   └── security               # 인증/인가 (JwtFilter, UserPrincipal)
 │
 ├── 📂 domain                  # 핵심 비즈니스 로직
 │   ├── 📂 user                # [회원] 도메인 컨텍스트
-│   │   ├── controller         # (Interfaces) 요청 처리
-│   │   ├── service            # (Application) 유즈케이스 구현
-│   │   └── entity             # (Domain) User 엔티티
-│   │
-│   ├── 📂 groupbuy            # [분철 모집] 도메인 컨텍스트
-│   │   ├── controller
-│   │   ├── service            # 상태 변경 로직 오케스트레이션
-│   │   ├── repository         # (Infrastructure) 데이터 접근
-│   │   └── entity             # GroupBuyPost(Root), GroupBuyOption
-│   │
-│   ├── 📂 order               # [주문] 도메인 컨텍스트
-│   │   ├── service            # 입금 확인 로직
-│   │   └── entity             # Order(Root), OrderItem
-│   │
-│   ├── 📂 delivery            # [배송] 도메인 컨텍스트
-│   │   └── entity             # Delivery
-│   │
+│   ├── 📂 auth                # [인증] 도메인 컨텍스트 (Kakao·Google·Apple OAuth)
 │   ├── 📂 artist              # [아티스트] 도메인 컨텍스트
-│   │   └── entity             # Artist, Member
-│   │
-│   └── 📂 auth                # [인증] 도메인 컨텍스트
-│       ├── controller
-│       └── service
+│   ├── 📂 groupbuy            # [분철 모집] 도메인 컨텍스트
+│   ├── 📂 order               # [주문] 도메인 컨텍스트
+│   ├── 📂 delivery            # [배송] 도메인 컨텍스트
+│   ├── 📂 participation       # [참여] 도메인 컨텍스트
+│   ├── 📂 payment             # [결제] 도메인 컨텍스트
+│   ├── 📂 notification        # [알림] 도메인 컨텍스트
+│   ├── 📂 fcmtoken            # [FCM 토큰] 도메인 컨텍스트
+│   ├── 📂 item                # [굿즈 아이템] 도메인 컨텍스트
+│   ├── 📂 feed                # [피드] 도메인 컨텍스트
+│   ├── 📂 home                # [홈] 도메인 컨텍스트
+│   ├── 📂 search              # [검색] 도메인 컨텍스트
+│   ├── 📂 review              # [리뷰] 도메인 컨텍스트
+│   ├── 📂 banner              # [배너] 도메인 컨텍스트
+│   ├── 📂 image               # [이미지] 도메인 컨텍스트
+│   └── 📂 admin               # [관리] 도메인 컨텍스트
 │
 └── PotiApplication.java       
 ```
